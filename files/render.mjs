@@ -103,7 +103,7 @@ export function ogSvg(c) {
   <text x="104" y="${208 + top + size}" font-family="sans-serif" font-size="46" font-weight="bold" fill="#17123A">${esc(cut(c.unit.label, 38))}</text>
   <rect x="104" y="${242 + top + size}" width="${Math.min(940, 420 + c.per.length * 22)}" height="72" rx="20" fill="#0FBF95"/>
   <text x="130" y="${290 + top + size}" font-family="sans-serif" font-size="32" font-weight="600" fill="#FFFFFF">Sinun osuutesi: ${esc(c.per)}</text>
-  <text x="104" y="544" font-family="sans-serif" font-size="26" font-weight="600" fill="#17123A" opacity="0.5">sillasais.fi · laskutoimitus ja lähteet sivulla</text>
+  <text x="104" y="544" font-family="sans-serif" font-size="26" font-weight="600" fill="#17123A" opacity="0.5">paljonkose.fi · laskutoimitus ja lähteet sivulla</text>
 </svg>`;
 }
 
@@ -123,7 +123,7 @@ export function pageHtml(c, data, { site, also = [], ogUrl = null }) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(c.title)} — Mitä sillä sais?</title>
+<title>${esc(c.title)} — Paljonko se on?</title>
 <meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${url}">
 <meta property="og:type" content="article">
@@ -182,7 +182,7 @@ ${JSON.stringify({
 </head>
 <body>
 <div class="wrap">
-  <a class="back" href="${site}/">← Mitä sillä sais?</a>
+  <a class="back" href="${site}/">← Paljonko se on?</a>
 
   <div class="card">
     <p class="amount">${esc(eur(c.item.amount))} — ${esc(c.item.label)} on</p>
@@ -295,7 +295,7 @@ export function shell({ title, desc, site, body, path = "/" }) {
   return `<!DOCTYPE html>
 <html lang="fi"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(title)} — Mitä sillä sais?</title>
+<title>${esc(title)} — Paljonko se on?</title>
 <meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${site}${path}">
 <meta property="og:title" content="${esc(title)}">
@@ -340,7 +340,7 @@ export function shell({ title, desc, site, body, path = "/" }) {
  .bar i{display:block;height:100%;background:var(--pop)}
 </style></head>
 <body><div class="wrap">
-<a class="back" href="/">← Mitä sillä sais?</a>
+<a class="back" href="/">← Paljonko se on?</a>
 ${body}
 </div></body></html>`;
 }
@@ -474,7 +474,7 @@ Jakolasku ei ole päätös. Yksikköhinnat ovat keskiarvoja, ja oikeassa hankkee
 hinta riippuu paikasta, laajuudesta ja ajankohdasta. Raha ei myöskään ole vapaasti
 siirrettävissä menokohteesta toiseen.</p>`;
 
-  return shell({ title: s ? `Mitä ${fmt(s)} eurolla sais?` : "Mitä sillä sais?",
+  return shell({ title: s ? `Mitä ${fmt(s)} eurolla sais?` : "Paljonko se on?",
     path: s ? `/summa/${s}/` : "/summa/", site, body,
     desc: s ? `${fmt(s)} € muutettuna arkisiksi yksiköiksi.` : "Syötä summa." });
 }
