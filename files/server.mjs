@@ -18,18 +18,25 @@
 import express from "express";
 import fs from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 import { combo, ogSvg, pageHtml, fmt, eur , ylityksetHtml, kuittiHtml, summaHtml } from "./render.mjs";
+
+/* Passenger ei takaa työhakemistoa, joten kaikki polut lasketaan tämän
+   tiedoston sijainnista. Suhteellinen polku toimii kehityksessä ja
+   hajoaa tuotannossa — hiljaa, koska cwd voi olla mikä tahansa. */
+const ROOT = path.dirname(fileURLToPath(import.meta.url));
+const P = (...xs) => path.join(ROOT, ...xs);
 
 const PORT  = process.env.PORT || 3000;
 const SITE  = (process.env.SITE_URL || `http://localhost:${PORT}`).replace(/\/$/, "");
 const STATS = process.env.STATS_FILE || "./stats.json";
 
 /* ── data, uudelleenladattava ilman uudelleenkäynnistystä ─────────────── */
-let DATA = JSON.parse(await fs.readFile("data.json", "utf8"));
+let DATA = JSON.parse(await fs.readFile(P("data.json"), "utf8"));
 async function reload() {
-  DATA = JSON.parse(await fs.readFile("data.json", "utf8"));
+  DATA = JSON.parse(await fs.readFile(P("data.json"), "utf8"));
   ogCache.clear();
   console.log("data.json ladattu uudelleen:", DATA.generated);
 }
@@ -206,9 +213,10 @@ app.get("/summa/:summa/", (req, res) => summa(req.params.summa, res));
 app.get("/healthz", (req, res) => res.json({ ok: true, generated: DATA.generated }));
 
 // staattinen etusivu ja muut tiedostot
-app.use(express.static("public", { extensions: ["html"], maxAge: "1h" }));
+app.use(express.static(P("public"), { extensions: ["html"], maxAge: "1h" }));
 
 app.listen(PORT, () => {
   console.log(`Käynnissä: ${SITE} (portti ${PORT})`);
+  console.log(`Juuri: ${ROOT}`);
   console.log(`Data: ${DATA.items.length} menoerää × ${DATA.units.length} yksikköä`);
 });

@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "data": "node fetch-data.mjs",
+    "data":  "node fetch-data.mjs",
     "pages": "node build-pages.mjs",
     "build": "npm run data && npm run pages",
     "start": "node server.mjs",
-    "dev": "PORT=3000 SITE_URL=http://localhost:3000 node server.mjs"
+    "dev":   "PORT=3000 SITE_URL=http://localhost:3000 node server.mjs"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
