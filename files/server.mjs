@@ -12,7 +12,7 @@
  *
  *   npm install
  *   node fetch-data.mjs
- *   PORT=3000 SITE_URL=https://sillasais.fi node server.mjs
+ *   PORT=3000 SITE_URL=https://paljonkose.fi node server.mjs
  */
 
 import express from "express";

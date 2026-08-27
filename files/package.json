@@ -1,0 +1,15 @@
+{
+  "name": "paljonkose",
+  "type": "module",
+  "scripts": {
+    "data": "node fetch-data.mjs",
+    "pages": "node build-pages.mjs",
+    "build": "npm run data && npm run pages",
+    "start": "node server.mjs",
+    "dev": "PORT=3000 SITE_URL=http://localhost:3000 node server.mjs"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "express": "^5.1.0"
+  }
+}
