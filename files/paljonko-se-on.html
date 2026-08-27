@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mitä sillä sais?</title>
+<meta name="description" content="Valtion isot rahat arjen mitoissa. Vaihda summa, vaihda mittari, ota kuvakaappaus.">
+<link rel="canonical" href="https://sillasais.fi/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://sillasais.fi/">
+<meta property="og:site_name" content="sillasais.fi">
+<meta property="og:title" content="Mitä sillä sais?">
+<meta property="og:description" content="Miljardi euroa ei tarkoita mitään. Tässä se tarkoittaa jotain.">
+<meta property="og:image" content="https://sillasais.fi/p/pma-hoit/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://sillasais.fi/p/pma-hoit/og.png">
+<meta name="theme-color" content="#FFD84D">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400;12..96,75..100,800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFD84D;
+    --ink:#17123A;
+    --pop:#FF4A6E;
+    --mint:#0FBF95;
+    --card:#FFFFFF;
+    --soft:rgba(23,18,58,.55);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:"Instrument Sans",system-ui,sans-serif;font-size:17px;line-height:1.45;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:22px 18px 60px}
+
+  .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+  .day{
+    background:var(--ink);color:var(--bg);border-radius:100px;
+    padding:6px 14px;font-weight:600;font-size:13px;
+  }
+  .tag{font-weight:600;font-size:13px;color:var(--soft)}
+
+  h1{
+    font-family:"Bricolage Grotesque",sans-serif;font-weight:800;
+    font-variation-settings:"wdth" 88;
+    font-size:clamp(42px,13vw,68px);line-height:.92;letter-spacing:-.03em;
+    margin:0 0 10px;text-transform:uppercase;
+  }
+  .sub{font-size:16px;color:var(--soft);margin:0 0 24px;max-width:34ch}
+
+  .scopes{display:flex;gap:7px;overflow-x:auto;margin:0 -18px 16px;padding:0 18px 4px;scrollbar-width:none}
+  .scopes::-webkit-scrollbar{display:none}
+  .scope{
+    flex:0 0 auto;font:inherit;font-size:14px;font-weight:600;
+    background:rgba(23,18,58,.09);color:var(--ink);border:0;border-radius:100px;
+    padding:9px 16px;cursor:pointer;white-space:nowrap;
+  }
+  .scope[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+  .scope:focus-visible{outline:3px solid var(--pop);outline-offset:2px}
+
+  /* the card you screenshot */
+  .card{
+    background:var(--card);border-radius:26px;padding:24px 22px 26px;
+    box-shadow:0 10px 0 rgba(23,18,58,.12);
+  }
+  .kicker{
+    font-family:"Bricolage Grotesque",sans-serif;font-weight:800;
+    font-size:19px;line-height:1.2;margin:0 0 6px;
+  }
+  .blurb{font-size:14.5px;color:var(--soft);margin:0 0 20px}
+
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+  .pill{position:relative}
+  .pill select{
+    appearance:none;-webkit-appearance:none;font:inherit;font-weight:600;font-size:14px;
+    background:var(--bg);color:var(--ink);border:0;border-radius:100px;
+    padding:9px 32px 9px 15px;cursor:pointer;max-width:100%;
+  }
+  .pill::after{
+    content:"";position:absolute;right:14px;top:17px;pointer-events:none;
+    border-left:4.5px solid transparent;border-right:4.5px solid transparent;
+    border-top:6px solid var(--ink);
+  }
+  .pill select:focus-visible{outline:3px solid var(--pop);outline-offset:2px}
+
+  .amount{font-weight:600;font-size:15px;color:var(--soft);margin:0 0 2px}
+  .count{
+    font-family:"Bricolage Grotesque",sans-serif;font-weight:800;
+    font-variation-settings:"wdth" 88;
+    font-size:clamp(52px,17vw,86px);line-height:.88;letter-spacing:-.045em;
+    font-variant-numeric:tabular-nums;margin:0;color:var(--pop);
+  }
+  .what{
+    font-family:"Bricolage Grotesque",sans-serif;font-weight:800;
+    font-size:clamp(17px,4.8vw,23px);line-height:1.15;margin:8px 0 0;
+  }
+  .extra{margin-top:14px}
+  .xlabel{font-family:"Bricolage Grotesque",serif;font-weight:700;font-size:17px;margin:0 0 3px}
+  .xhint{font-size:13px;color:#6B6B6B;margin:0 0 11px;line-height:1.45}
+  .xrow{display:flex;gap:8px;flex-wrap:wrap}
+  .xrow input{font:inherit;padding:10px 12px;border:2px solid #141414;border-radius:11px;
+    flex:1;min-width:130px;font-variant-numeric:tabular-nums}
+  .xrow button{font:inherit;font-weight:600;padding:10px 17px;border:0;border-radius:11px;
+    background:#141414;color:#fff;cursor:pointer}
+  .tick{font-family:"Bricolage Grotesque",serif;font-weight:800;color:#FF4A6E;
+    font-size:clamp(26px,7vw,40px);margin:0 0 7px;font-variant-numeric:tabular-nums;
+    letter-spacing:-.02em}
+  .links{display:flex;gap:16px;flex-wrap:wrap;margin:18px 2px 0;font-size:15px;font-weight:600}
+  .rival{background:#F0F4FF;border-left:4px solid #3B5BDB;border-radius:12px;
+    padding:12px 14px;font-size:14px;margin:14px 0 0;line-height:1.5}
+  .rival strong{display:block;margin-bottom:3px}
+  .share-line{
+    background:var(--mint);color:#fff;border-radius:14px;
+    padding:11px 14px;font-weight:600;font-size:15px;margin:18px 0 0;
+  }
+
+  .dots{display:flex;flex-wrap:wrap;gap:4px;margin:18px 0 0;max-height:96px;overflow:hidden}
+  .dot{
+    width:9px;height:9px;border-radius:50%;background:var(--pop);opacity:.75;flex:0 0 auto;
+    animation:pop .2s ease-out both;
+  }
+  @keyframes pop{from{opacity:0;transform:scale(.4)}to{opacity:.75;transform:none}}
+  .rest{font-size:13px;color:var(--soft);margin:8px 0 0}
+
+  .cost{font-size:13px;color:var(--soft);margin:16px 0 0}
+  .cost input{
+    font:inherit;font-size:13px;font-weight:600;width:8ch;background:transparent;color:var(--ink);
+    border:0;border-bottom:2px solid var(--bg);padding:2px 0;text-align:right;
+  }
+  .cost input:focus{outline:none;border-bottom-color:var(--pop)}
+
+  .go{
+    display:block;width:100%;font:inherit;font-weight:700;font-size:17px;
+    background:var(--ink);color:#fff;border:0;border-radius:100px;
+    padding:16px;margin:22px 0 0;cursor:pointer;
+  }
+  .go:active{transform:translateY(2px)}
+  .go:focus-visible{outline:3px solid var(--pop);outline-offset:3px}
+
+  /* archive strip */
+  .strip{display:flex;gap:8px;overflow-x:auto;margin:26px -18px 0;padding:0 18px 6px;scrollbar-width:none}
+  .strip::-webkit-scrollbar{display:none}
+  .chip{
+    flex:0 0 auto;background:rgba(23,18,58,.08);color:var(--ink);text-decoration:none;
+    border-radius:100px;padding:9px 15px;font-size:13.5px;font-weight:600;white-space:nowrap;
+  }
+  .chip:hover{background:var(--ink);color:var(--bg)}
+
+  .calc{margin:18px 0 0;font-size:14px}
+  .calc summary{
+    font-weight:600;cursor:pointer;list-style:none;color:var(--ink);
+    background:rgba(23,18,58,.06);border-radius:100px;padding:8px 15px;display:inline-block;
+  }
+  .calc summary::-webkit-details-marker{display:none}
+  .calc summary::after{content:" ⌄"}
+  .calc[open] summary::after{content:" ⌃"}
+  .calcbody{margin-top:14px}
+  .sum{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:13.5px;line-height:1.75;
+    background:rgba(23,18,58,.05);border-radius:14px;padding:14px 15px;
+    overflow-x:auto;white-space:pre;
+  }
+  .sum .op{color:var(--pop);font-weight:700}
+  .sum .res{color:var(--ink);font-weight:700}
+  .sum .from{color:var(--soft)}
+  .calcnote{font-size:13.5px;color:var(--soft);margin:12px 0 0}
+  .calcnote strong{color:var(--ink)}
+  .prov{
+    font-size:12.5px;color:var(--soft);margin:10px 0 0;line-height:1.5;
+    border-top:1px dashed rgba(23,18,58,.15);padding-top:10px;
+  }
+  .prov b{color:var(--ink)}
+  .prov a{color:var(--ink)}
+  .badge{
+    display:inline-block;border-radius:100px;padding:2px 9px;font-size:11px;font-weight:700;
+    color:#fff;margin-right:6px;vertical-align:1px;
+  }
+  .b-rajapinta{background:var(--mint)}
+  .b-kasin{background:#7A6FB0}
+  .b-arvio{background:#C99A00}
+  .b-varaluku{background:var(--pop)}
+  .srctable{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+  .srctable td{padding:8px 4px;border-bottom:1px solid rgba(23,18,58,.1);vertical-align:top}
+  .srctable td:first-child{font-weight:600;white-space:nowrap;padding-right:10px}
+  .stamp{font-size:12.5px;color:var(--soft);margin:14px 0 0}
+  details{margin:26px 0 0;font-size:14.5px}
+  summary{font-weight:600;cursor:pointer;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:" ⌄"}
+  details[open] summary::after{content:" ⌃"}
+  details p{color:var(--soft);margin:12px 0 0}
+  details a{color:var(--ink)}
+  @media (prefers-reduced-motion:reduce){.dot{animation:none;opacity:.75}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <span class="day" id="entryDate"></span>
+    <span class="tag">uusi joka päivä</span>
+  </div>
+
+  <h1>Mitä sillä sais?</h1>
+  <p class="sub">Miljardi euroa ei tarkoita kenellekään mitään. Vaihda mittari niin se tarkoittaa.</p>
+
+  <div class="scopes" id="scopes" role="group" aria-label="Valitse alue"></div>
+
+  <div class="card" id="card">
+    <h2 class="kicker" id="entryKicker"></h2>
+    <p class="blurb" id="entryBody"></p>
+
+    <div class="pills">
+      <span class="pill"><select id="itemSel" aria-label="Valitse menoerä"></select></span>
+      <span class="pill"><select id="unitSel" aria-label="Valitse mittari"></select></span>
+    </div>
+
+    <p class="amount" id="amountText"></p>
+    <p class="count" id="count">—</p>
+    <p class="what" id="countLabel"></p>
+
+    <p class="share-line" id="percap"></p>
+
+    <div class="dots" id="field" aria-hidden="true"></div>
+    <p class="rest" id="overflow"></p>
+
+    <details class="calc">
+      <summary>Näytä laskutoimitus</summary>
+      <div class="calcbody" id="calc"></div>
+    </details>
+
+    <p class="cost">
+      Hinta-arvio: <input id="unitCost" type="number" min="1" step="100" inputmode="numeric" aria-label="Yksikköhinta euroina"> €
+      <span id="unitNote"></span> — muuta jos tiedät paremmin
+    </p>
+
+    <p class="prov" id="prov"></p>
+
+    <button class="go" id="copyBtn">Kopioi ja jaa</button>
+  </div>
+
+  <div class="card extra">
+    <p class="xlabel">Oma summa</p>
+    <p class="xhint">Uutisessa vilahti luku? Syötä se tähän.</p>
+    <div class="xrow">
+      <input id="omaSumma" inputmode="numeric" placeholder="340000000" aria-label="Summa euroina">
+      <button id="omaBtn">Mitä sillä sais?</button>
+    </div>
+  </div>
+
+  <div class="card extra">
+    <p class="xlabel">Valtion budjetti kuluu juuri nyt</p>
+    <p class="tick" id="tick">—</p>
+    <p class="xhint">Tasainen jako 91,3 mrd € / vuosi. Todellisuudessa meno ei
+      jakaudu tasaisesti pitkin vuotta.</p>
+  </div>
+
+  <p class="links">
+    <a href="/ylitykset/">Arvio vs. toteutunut →</a>
+    <a href="/kuitti/">Verokuitti →</a>
+  </p>
+
+  <div class="strip" id="archive"></div>
+
+  <details>
+    <summary>Mistä luvut tulevat</summary>
+    <p>Jokainen luku kantaa oman alkuperänsä. Alla näkyy jokaisesta: mistä se on haettu, milloin, ja onko se virallinen luku vai arvio. Vihreä tarkoittaa suoraan rajapinnasta haettua.</p>
+    <table class="srctable" id="srctable"></table>
+    <p class="stamp" id="stamp"></p>
+    <p>Koodi ja hakuskripti ovat avoimet — voit tarkistaa jokaisen kutsun itse.</p>
+  </details>
+
+  <details>
+    <summary>Pieni printti</summary>
+    <p><strong>Rahat eivät oikeasti liiku näin.</strong> Hoitajat ja päiväkodit maksetaan hyvinvointialueiden ja kuntien pussista, eivät valtion puolustusmomenteilta. Luku kertoo mittasuhteen, ei toteutettavaa vaihtoehtoa.</p>
+    <p><strong>Ukraina-apu ei ole kassasta maksettua rahaa.</strong> Iso osa on Puolustusvoimien varastoista luovutettua tavaraa, jolle on laskettu arvo. Osa palautuu Euroopan rauhanrahastosta — vuoden 2026 budjetissa 208 M€.</p>
+    <p><strong>Kertymä ei ole sama kuin vuosi.</strong> Ukraina-luvut ovat vuodesta 2022 kertyneitä, budjettiluvut yhden vuoden summia.</p>
+    <p>Lähteet: puolustusministeriö, ulkoministeriö, valtiovarainministeriön talousarvioesitys 2026, budjetti.vm.fi (CC BY 4.0). Yksikköhinnat ovat suuruusluokka-arvioita, eivät virallisia lukuja. Asukasluku 5,6 milj.</p>
+  </details>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// PÄIVÄN MERKINTÄ — lisää uusin ylimmäksi. Yksi objekti per päivä.
+//   date / item / unit / kicker / body   (cost = valinnainen ohitus)
+// ─────────────────────────────────────────────────────────────
+const ENTRIES = [
+  { date:"2026-08-26", item:"pma", unit:"hoit",
+    kicker:"33 apupakettia, 3,4 miljardia",
+    body:"Puolustusministeriö kertoi toukokuussa Suomen 33. puolustustarvikeapupaketista." },
+  { date:"2026-08-25", item:"vaje", unit:"oodi",
+    kicker:"Alijäämä kirjastoina",
+    body:"Vuoden 2026 budjetin alijäämä on 10,8 mrd €. Se on velkaa, ei menoerä — mutta mittakaava kannattaa tietää." },
+  { date:"2026-08-24", item:"f35", unit:"koulu",
+    kicker:"Hävittäjät, yksi vuosi",
+    body:"Monitoimihävittäjiin on varattu 1,4 mrd € vuodelle 2026." }
+];
+
+// Varalista: käytetään vain jos data.json ei lataudu (esim. tiedosto auki
+// suoraan levyltä). Pidä synkassa fetch-data.mjs:n PLAN-listan kanssa.
+const SCOPES_FALLBACK = {
+  valtio: { id:"valtio", label:"Valtio", vakiluku:5600000 },
+  helsinki: { id:"helsinki", label:"Helsinki", vakiluku:680000 },
+  tampere: { id:"tampere", label:"Tampere", vakiluku:260000 },
+  turku: { id:"turku", label:"Turku", vakiluku:200000 },
+  oulu: { id:"oulu", label:"Oulu", vakiluku:215000 },
+  tuleva: { id:"tuleva", label:"Suunnitteilla", vakiluku:5600000 },
+  arki: { id:"arki", label:"Arkiostokset", vakiluku:5600000 }
+};
+
+const V = 5_600_000, HKI = 680_000, TRE = 260_000, TKU = 200_000, OUL = 215_000;
+
+const ITEMS_FALLBACK = [
+  { id:"pma", scope:"valtio", vakiluku:5600000, label:"Ukraina: aseapu", amount:3400000000, note:"kertymä 2022–5/2026, 33 pakettia" },
+  { id:"hum", scope:"valtio", vakiluku:5600000, label:"Ukraina: siviiliapu", amount:1200000000, note:"kertymä, sis. vastaanottokuluja" },
+  { id:"f35", scope:"valtio", vakiluku:5600000, label:"hävittäjät", amount:1400000000, note:"talousarvio 2026" },
+  { id:"pmh", scope:"valtio", vakiluku:5600000, label:"puolustushankinnat", amount:1500000000, note:"talousarvio 2026" },
+  { id:"pvtm", scope:"valtio", vakiluku:5600000, label:"Puolustusvoimat", amount:2600000000, note:"toimintamenot 2026" },
+  { id:"koko", scope:"valtio", vakiluku:5600000, label:"koko valtion budjetti", amount:91300000000, note:"talousarvio 2026" },
+  { id:"hki-budjetti", scope:"helsinki", vakiluku:680000, label:"Helsingin budjetti", amount:6000000000, note:"käyttötalous — TARKISTA vuosi ja luku" },
+  { id:"hki-lansimetro", scope:"helsinki", vakiluku:680000, label:"Länsimetro, 1. vaihe", amount:1186000000, note:"Ruoholahti–Matinkylä; valtuustojen hyväksymä arvio 2008 oli 714 M€" },
+  { id:"hki-kruunusillat", scope:"helsinki", vakiluku:680000, label:"Kruunusillat", amount:800000000, note:"raitiotieyhteys Laajasaloon; hinta kaksinkertaistui 2021" },
+  { id:"hki-jokeri", scope:"helsinki", vakiluku:680000, label:"Raide-Jokeri", amount:386000000, note:"Helsinki 268 M€ + Espoo 118 M€; arvio 2016 oli 275 M€" },
+  { id:"hki-stadion", scope:"helsinki", vakiluku:680000, label:"Olympiastadionin remontti", amount:337000000, note:"lopullinen hinta 337 M€, VTV:n mukaan arvio oli 197 M€" },
+  { id:"hki-oodi", scope:"helsinki", vakiluku:680000, label:"Oodi", amount:98000000, note:"keskustakirjasto, valmistui 2018 — TARKISTA" },
+  { id:"tre-budjetti", scope:"tampere", vakiluku:260000, label:"Tampereen budjetti", amount:1500000000, note:"käyttötalous — TARKISTA vuosi ja luku" },
+  { id:"tre-ratikka", scope:"tampere", vakiluku:260000, label:"Ratikka, osa 1", amount:240000000, note:"Hervanta–keskusta–Tays; valtion osuus 71 M€" },
+  { id:"tre-ratikka2", scope:"tampere", vakiluku:260000, label:"Ratikka, osa 2", amount:44000000, note:"keskusta–Hiedanranta–Lentävänniemi, arvio 2016" },
+  { id:"tre-vaunut", scope:"tampere", vakiluku:260000, label:"Ratikkavaunut", amount:81000000, note:"kalustohankinta, arvio 2016" },
+  { id:"tre-tunneli", scope:"tampere", vakiluku:260000, label:"Rantatunneli", amount:176000000, note:"Suomen pisin maantietunneli; tavoitekustannus ALITTUI 4,1 M€:lla" },
+  { id:"tre-areena", scope:"tampere", vakiluku:260000, label:"Kansi ja Areena", amount:550000000, note:"koko hanke, kaupungin osuus pienempi — TARKISTA" },
+  { id:"tku-budjetti", scope:"turku", vakiluku:200000, label:"Turun budjetti", amount:1200000000, note:"käyttötalous — TARKISTA vuosi ja luku" },
+  { id:"tku-ratikka", scope:"turku", vakiluku:200000, label:"Turun raitiotie", amount:300000000, note:"hankearvio — TARKISTA" },
+  { id:"oul-budjetti", scope:"oulu", vakiluku:215000, label:"Oulun budjetti", amount:1300000000, note:"käyttötalous — TARKISTA vuosi ja luku" },
+  { id:"lansirata", scope:"tuleva", vakiluku:5600000, label:"Länsirata (Turun tunnin juna)", amount:3400000000, note:"alustava arvio, v. 2022 hintataso; nimellisarvo 4,82 mrd €; hyöty-kustannussuhde 0,44", tuleva:true },
+  { id:"lentorata", scope:"tuleva", vakiluku:5600000, label:"Lentorata", amount:2700000000, note:"30 km rataa, josta 28 km tunnelissa; Pasila–lentoasema–Kerava", tuleva:true },
+  { id:"itarata", scope:"tuleva", vakiluku:5600000, label:"Itärata", amount:1800000000, note:"Helsinki–Porvoo–Kouvola; nimellisarvo 3,48 mrd €; esisuunnittelu kesken", tuleva:true },
+  { id:"suomirata", scope:"tuleva", vakiluku:5600000, label:"Suomi-rata (suurnopeusvaihtoehto)", amount:5500000000, note:"lentorata + uusi suurnopeusrata; halvempi vaihtoehto 4,0 mrd €; suunnittelu keskeytetty", tuleva:true },
+  { id:"ark-burgeri", scope:"arki", vakiluku:5600000, label:"Hampurilaisateria", amount:12, note:"pikaruokala, ateria juomineen", arki:true },
+  { id:"ark-latte", scope:"arki", vakiluku:5600000, label:"Erikoiskahvi kahvilassa", amount:5, note:"latte tai vastaava", arki:true },
+  { id:"ark-lounas", scope:"arki", vakiluku:5600000, label:"Lounas ravintolassa", amount:13, note:"arkilounas", arki:true },
+  { id:"ark-suoratoisto", scope:"arki", vakiluku:5600000, label:"Suoratoistopalvelu vuodeksi", amount:168, note:"n. 14 €/kk", arki:true },
+  { id:"ark-liittyma", scope:"arki", vakiluku:5600000, label:"Puhelinliittymä vuodeksi", amount:300, note:"n. 25 €/kk", arki:true },
+  { id:"ark-puhelin", scope:"arki", vakiluku:5600000, label:"Uusi puhelin", amount:900, note:"keskihintainen älypuhelin", arki:true },
+  { id:"ark-renkaat", scope:"arki", vakiluku:5600000, label:"Talvirenkaat", amount:600, note:"rengassarja asennettuna", arki:true },
+  { id:"ark-lomamatka", scope:"arki", vakiluku:5600000, label:"Viikon etelänmatka", amount:800, note:"yksi henkilö, valmismatka", arki:true },
+  { id:"hki-lansimetro-ylitys", scope:"helsinki", vakiluku:680000, label:"Länsimetro, 1. vaihe: ylitys", amount:472000000, note:"toteutunut 1186 M€, arvio oli 714 M€" },
+  { id:"hki-kruunusillat-ylitys", scope:"helsinki", vakiluku:680000, label:"Kruunusillat: ylitys", amount:420000000, note:"toteutunut 800 M€, arvio oli 380 M€" },
+  { id:"hki-jokeri-ylitys", scope:"helsinki", vakiluku:680000, label:"Raide-Jokeri: ylitys", amount:111000000, note:"toteutunut 386 M€, arvio oli 275 M€" },
+  { id:"hki-stadion-ylitys", scope:"helsinki", vakiluku:680000, label:"Olympiastadionin remontti: ylitys", amount:140000000, note:"toteutunut 337 M€, arvio oli 197 M€" },
+  { id:"tre-tunneli-ylitys", scope:"tampere", vakiluku:260000, label:"Rantatunneli: alitus", amount:4000000, note:"arvio oli 180 M€, toteutunut 176 M€ — hanke alitti budjettinsa" }
+];
+
+const UNITS_FALLBACK = [
+  { id:"pork", label:"kiloa porkkanoita", cost:1.5, note:"kaupan kilohinta", arki:true },
+  { id:"maito", label:"litraa maitoa", cost:1.2, note:"kevytmaito", arki:true },
+  { id:"leipa", label:"leipää", cost:2.5, note:"tavallinen ruokaleipä", arki:true },
+  { id:"bussi", label:"bussilippua", cost:3.2, note:"kertalippu, kaupunkiliikenne", arki:true },
+  { id:"leffa", label:"elokuvalippua", cost:14, note:"aikuinen, ilta", arki:true },
+  { id:"kirja", label:"kirjaa", cost:25, note:"uusi kovakantinen", arki:true },
+  { id:"ruoka", label:"viikon ruokaostosta", cost:150, note:"perhe, viikko" },
+  { id:"lapsi", label:"lapsilisää vuodeksi", cost:1500, note:"yksi lapsi" },
+  { id:"palkka", label:"kuukauden palkkaa", cost:3600, note:"mediaaniansio, brutto" },
+  { id:"opp", label:"oppilasvuotta peruskoulussa", cost:10000, note:"per oppilas" },
+  { id:"hoit", label:"hoitajan vuosipalkkaa", cost:48000, note:"palkka + työnantajakulut" },
+  { id:"tie", label:"kilometriä tienkorjausta", cost:400000, note:"päällystetty tie" },
+  { id:"pk", label:"uutta päiväkotia", cost:6000000, note:"n. 100 paikkaa" },
+  { id:"oodi", label:"Oodia", cost:98000000, note:"toteutunut rakennuskustannus" }
+];
+
+let ITEMS = ITEMS_FALLBACK, UNITS = UNITS_FALLBACK;
+let VAKILUKU = 5600000;
+let DATA = null;
+const fmt = n => new Intl.NumberFormat("fi-FI").format(n);
+const eur = a => a >= 1e9
+  ? (a/1e9).toLocaleString("fi-FI",{maximumFractionDigits:1}) + " mrd €"
+  : (a/1e6).toLocaleString("fi-FI",{maximumFractionDigits:0}) + " M€";
+const $ = id => document.getElementById(id);
+const state = { item:0, unit:0, cost:UNITS[0].cost, entry:null, scope:"kaikki" };
+
+const SCOPE_ORDER = ["valtio","helsinki","tampere","turku","oulu","tuleva","arki"];
+
+function scopesPresent(){
+  return SCOPE_ORDER.filter(sc => ITEMS.some(it => (it.scope||"valtio") === sc));
+}
+
+function inScope(it){
+  if (it && it.id === "oma") return true;   // lukijan oma summa näkyy aina
+  return state.scope === "kaikki" || (it.scope||"valtio") === state.scope;
+}
+
+function drawScopes(){
+  const meta = (DATA && DATA.scopes) || SCOPES_FALLBACK;
+  const list = ["kaikki", ...scopesPresent()];
+  $("scopes").innerHTML = list.map(sc => {
+    const label = sc === "kaikki" ? "Kaikki" : ((meta[sc] && meta[sc].label) || sc);
+    return `<button class="scope" data-scope="${sc}" aria-pressed="${sc === state.scope}">${label}</button>`;
+  }).join("");
+}
+
+function setScope(sc){
+  state.scope = sc;
+  // jos nykyinen menoerä ei kuulu alueeseen, siirry alueen ensimmäiseen
+  if(!inScope(ITEMS[state.item])){
+    const i = ITEMS.findIndex(inScope);
+    if(i > -1) state.item = i;
+  }
+  drawScopes();
+  buildSelects();
+  $("itemSel").value = state.item;
+  $("unitSel").value = state.unit;
+  render();
+  try {
+    const u = new URL(location.href);
+    if(sc === "kaikki") u.searchParams.delete("alue"); else u.searchParams.set("alue", sc);
+    history.replaceState(null, "", u);
+  } catch(e) {}
+}
+
+function buildSelects(){
+  const SCOPES = (DATA && DATA.scopes) || SCOPES_FALLBACK;
+  const order = ["valtio","helsinki","tampere","turku","oulu","tuleva","arki"];
+  const groups = order
+    .filter(sc => ITEMS.some(it => (it.scope||"valtio") === sc && inScope(it)))
+    .map(sc => {
+      const opts = ITEMS
+        .map((it,i) => ({it,i}))
+        .filter(x => (x.it.scope||"valtio") === sc && inScope(x.it))
+        .map(x => `<option value="${x.i}">${x.it.label}</option>`).join("");
+      return `<optgroup label="${(SCOPES[sc]&&SCOPES[sc].label)||sc}">${opts}</optgroup>`;
+    }).join("");
+  $("itemSel").innerHTML = groups;
+  const cur = ITEMS[state.item] || ITEMS[0];
+  $("unitSel").innerHTML = UNITS.map((u,i)=>({u,i}))
+    .filter(({u}) => !!u.arki === !!(cur && cur.arki))
+    .map(({u,i})=>`<option value="${i}">${u.label}</option>`).join("");
+  if (UNITS[state.unit] && !!UNITS[state.unit].arki !== !!(cur && cur.arki)) {
+    state.unit = UNITS.findIndex(u => !!u.arki === !!(cur && cur.arki));
+  }
+}
+
+function drawField(n){
+  const field = $("field"), shown = Math.min(n, 320);
+  field.innerHTML = "";
+  const frag = document.createDocumentFragment();
+  for(let i=0;i<shown;i++){
+    const d = document.createElement("span");
+    d.className = "dot";
+    d.style.animationDelay = Math.min(i*2.5, 600) + "ms";
+    frag.appendChild(d);
+  }
+  field.appendChild(frag);
+  $("overflow").textContent = n > shown ? `…ja ${fmt(n - shown)} muuta` : "";
+}
+
+function render(){
+  const item = ITEMS[state.item], unit = UNITS[state.unit];
+  const n = Math.max(0, Math.floor(item.amount / state.cost));
+  $("amountText").textContent = eur(item.amount) + " on";
+  $("count").textContent = fmt(n);
+  $("countLabel").textContent = unit.label;
+  const ASUKAS = { valtio:"suomalaista", helsinki:"helsinkiläistä",
+                   tampere:"tamperelaista", turku:"turkulaista", oulu:"oululaista" };
+  const vak  = item.vakiluku || VAKILUKU;
+  const who  = ASUKAS[item.scope || "valtio"] || "asukasta";
+  $("percap").textContent = "Sinun osuutesi: "
+    + (item.amount/vak).toLocaleString("fi-FI",{maximumFractionDigits:0})
+    + " € — jokaista " + who + " kohden";
+  $("unitNote").textContent = "(" + unit.note + ")";
+  $("unitCost").value = state.cost;
+  drawField(n);
+  renderProv();
+  renderCalc();
+  try { history.replaceState(null, "", "#" + (state.entry ? state.entry.date : "")); }
+  catch(e) { /* sandboxed frame: permalinkkiä ei voi päivittää */ }
+}
+
+function currentHash(){
+  try { return location.hash.replace("#",""); } catch(e) { return ""; }
+}
+
+function pickEntry(){
+  const want = currentHash();
+  const byDate = ENTRIES.find(e => e.date === want);
+  if(byDate) return byDate;
+  const today = new Date().toISOString().slice(0,10);
+  return ENTRIES.find(e => e.date <= today) || ENTRIES[0];
+}
+
+function loadEntry(entry){
+  state.entry = entry;
+  const ei = ITEMS.findIndex(x => x.id === entry.item);
+  if(ei > -1 && !inScope(ITEMS[ei])) { state.scope = "kaikki"; drawScopes(); buildSelects(); }
+  const i = ITEMS.findIndex(x => x.id === entry.item);
+  const u = UNITS.findIndex(x => x.id === entry.unit);
+  if(i > -1) state.item = i;
+  if(u > -1){ state.unit = u; state.cost = entry.cost || UNITS[u].cost; }
+  const d = new Date(entry.date + "T00:00:00");
+  $("entryDate").textContent = d.toLocaleDateString("fi-FI",{day:"numeric",month:"numeric"});
+  $("entryKicker").textContent = entry.kicker;
+  $("entryBody").textContent = entry.body;
+  $("itemSel").value = state.item;
+  $("unitSel").value = state.unit;
+}
+
+function drawArchive(){
+  $("archive").innerHTML = ENTRIES.map(e => {
+    const d = new Date(e.date + "T00:00:00");
+    return `<a class="chip" href="#${e.date}">${d.toLocaleDateString("fi-FI",{day:"numeric",month:"numeric"})} · ${e.kicker}</a>`;
+  }).join("");
+}
+
+const STATUS_TEXT = {
+  rajapinta: "haettu rajapinnasta",
+  kasin:     "kirjattu käsin tiedotteesta",
+  arvio:     "oma suuruusluokka-arvio",
+  varaluku:  "rajapinta ei vastannut, käytössä varaluku"
+};
+
+function provLine(x){
+  if(!x || !x.source) return "";
+  const st = x.status || "kasin";
+  const src = x.source.docs
+    ? `<a href="${x.source.docs}" target="_blank" rel="noopener">${x.source.name}</a>`
+    : x.source.name;
+  const when = x.source.retrieved
+    ? " · " + new Date(x.source.retrieved).toLocaleDateString("fi-FI")
+    : "";
+  return `<span class="badge b-${st}">${STATUS_TEXT[st]}</span>${src}${when}`;
+}
+
+function srcShort(id, kind){
+  if(!DATA) return "";
+  const x = (kind === "item" ? DATA.items : DATA.units).find(o => o.id === id);
+  if(!x) return "";
+  return x.source ? x.source.name : "";
+}
+
+function renderCalc(){
+  const item = ITEMS[state.item], unit = UNITS[state.unit];
+  const n    = Math.floor(item.amount / state.cost);
+  const jaa  = item.amount - (n * state.cost);
+  const vakA = item.vakiluku || VAKILUKU;
+  const per  = item.amount / vakA;
+  const pad  = s => String(s).padStart(18, " ");
+
+  const sum =
+    `${pad(fmt(item.amount) + " €")}   <span class="from">${item.label}</span>\n` +
+    `<span class="op">÷</span>${pad(fmt(state.cost) + " €")}  <span class="from">${unit.label} (yksikköhinta)</span>\n` +
+    `${"─".repeat(20)}\n` +
+    `<span class="res">= ${fmt(n)}</span>   <span class="from">${unit.label}</span>\n` +
+    (jaa > 0 ? `<span class="from">jää yli ${fmt(Math.round(jaa))} €</span>\n` : "") +
+    `\n` +
+    `${pad(fmt(item.amount) + " €")}   <span class="from">sama summa</span>\n` +
+    `<span class="op">÷</span>${pad(fmt(vakA))}    <span class="from">asukasta (${item.scope === "valtio" ? "koko maa" : item.scope})</span>\n` +
+    `${"─".repeat(20)}\n` +
+    `<span class="res">= ${per.toLocaleString("fi-FI",{maximumFractionDigits:0})} €</span>   <span class="from">jokaista asukasta kohden</span>`;
+
+  const sItem = srcShort(item.id, "item");
+  const sUnit = srcShort(unit.id, "unit");
+  const edited = Math.abs(state.cost - unit.cost) > 0.001;
+
+  const note =
+    `<p class="calcnote"><strong>Mitä tässä tehdään.</strong> Summa jaetaan yhden yksikön hinnalla. ` +
+    `Siinä kaikki — ei painotuksia, ei inflaatiokorjausta, ei diskonttausta.</p>` +
+    `<p class="calcnote"><strong>Osoittaja:</strong> ${fmt(item.amount)} € — ${item.note}` +
+    (sItem ? `, lähde: ${sItem}` : "") + `.</p>` +
+    `<p class="calcnote"><strong>Nimittäjä:</strong> ${fmt(state.cost)} € — ${unit.note}` +
+    (edited ? `. <em>Olet muuttanut tätä lukua itse.</em>` : (sUnit ? `, lähde: ${sUnit}.` : "."))
+    + `</p>` +
+    `<p class="calcnote"><strong>Mitä tämä ei kerro.</strong> Jakolasku olettaa että euro on euro. ` +
+    `Oikeasti raha on sidottu momenttiin, hallinnonalaan ja usein monivuotiseen sopimukseen, ` +
+    `eikä ${unit.label.replace(/^(uutta |kilometriä )/, "")} makseta samasta pussista. ` +
+    `Luku kertoo mittasuhteen, ei toteutettavaa vaihtoehtoa.</p>`;
+
+  $("calc").innerHTML = `<div class="sum">${sum}</div>` + note;
+}
+
+function renderProv(){
+  const item = DATA ? DATA.items.find(i => i.id === ITEMS[state.item].id) : null;
+  const unit = DATA ? DATA.units.find(u => u.id === UNITS[state.unit].id) : null;
+  const edited = Math.abs(state.cost - UNITS[state.unit].cost) > 0.001;
+  const parts = [];
+  if(item) parts.push("<b>Summa:</b> " + provLine(item));
+  if(unit) parts.push("<b>Hinta-arvio:</b> " + (edited
+    ? `<span class="badge b-varaluku">itse muokattu</span>alkuperäinen: ${unit.source.name}`
+    : provLine(unit)));
+  $("prov").innerHTML = parts.join("<br>") ||
+    "<b>Lähteet:</b> puolustusministeriö, ulkoministeriö, Valtiokonttori, Tilastokeskus.";
+}
+
+function renderSourceTable(){
+  if(!DATA) return;
+  const rows = [...DATA.items, ...DATA.units].map(x =>
+    `<tr><td>${x.label}</td><td>${provLine(x)}${x.note ? "<br>" + x.note : ""}</td></tr>`
+  ).join("");
+  $("srctable").innerHTML = rows;
+  $("stamp").textContent = "Data päivitetty " +
+    new Date(DATA.generated).toLocaleString("fi-FI") +
+    " · lisenssi CC BY 4.0 siltä osin kuin luvut tulevat Valtiokonttorin ja Tilastokeskuksen rajapinnoista.";
+}
+
+async function loadData(){
+  try {
+    const res = await fetch("data.json", { cache: "no-store" });
+    if(!res.ok) throw new Error(res.status);
+    const d = await res.json();
+    if(!d.items?.length || !d.units?.length) throw new Error("tyhjä data");
+    DATA = d;
+    VAKILUKU = d.vakiluku || VAKILUKU;
+    ITEMS = d.items.map(i => ({ id:i.id, label:i.label, amount:i.amount, note:i.note,
+                                scope:i.scope || "valtio", vakiluku:i.vakiluku }));
+    UNITS = d.units.map(u => ({ id:u.id, label:u.label, cost:u.cost,   note:u.note, arki:!!u.arki }));
+  } catch(e) {
+    console.warn("data.json ei latautunut, käytetään sisäänrakennettuja lukuja:", e.message);
+  }
+}
+
+function boot(){
+  try {
+    const q = new URL(location.href).searchParams.get("alue");
+    if(q && (q === "kaikki" || scopesPresent().includes(q))) state.scope = q;
+  } catch(e) {}
+
+  drawScopes();
+  $("scopes").addEventListener("click", e => {
+    const b = e.target.closest("[data-scope]");
+    if(b) setScope(b.dataset.scope);
+  });
+
+  buildSelects();
+  drawArchive();
+  loadEntry(pickEntry());
+  render();
+  renderSourceTable();
+}
+
+loadData().then(boot);
+
+window.addEventListener("hashchange", () => {
+  const e = ENTRIES.find(x => x.date === currentHash());
+  if(e){ loadEntry(e); render(); }
+});
+$("itemSel").addEventListener("change", e => {
+  state.item = +e.target.value;
+  // kertaluokka voi vaihtua (arki <-> miljardit), joten yksikkölista ja
+  // yksikköhinta on rakennettava uudelleen
+  const cur = ITEMS[state.item];
+  if (!UNITS[state.unit] || !!UNITS[state.unit].arki !== !!(cur && cur.arki)) {
+    const j = UNITS.findIndex(u => !!u.arki === !!(cur && cur.arki));
+    if (j >= 0) { state.unit = j; state.cost = UNITS[j].cost; }
+  }
+  buildSelects();
+  $("itemSel").value = state.item;
+  $("unitSel").value = state.unit;
+  render();
+});
+/* Oma summa. Lasketaan heti samaan korttiin — ei sivunlatausta, joten
+   tämä toimii myös ilman palvelinta. Osoiteriville jää jaettava linkki. */
+function omaSumma(){
+  const raaka = $("omaSumma").value.replace(/[^\d]/g, "");
+  const n = parseInt(raaka, 10);
+  if (!Number.isFinite(n) || n <= 0) { $("omaSumma").focus(); return; }
+
+  const arki = n < 10000;
+  const oma = {
+    id: "oma", scope: arki ? "arki" : "valtio",
+    vakiluku: (((DATA && DATA.scopes) || SCOPES_FALLBACK).valtio || {}).vakiluku || 5600000,
+    label: "Oma summa", amount: n, note: "lukijan syöttämä luku", arki
+  };
+
+  ITEMS = ITEMS.filter(i => i.id !== "oma").concat([oma]);
+  state.item = ITEMS.length - 1;
+  if (!UNITS[state.unit] || !!UNITS[state.unit].arki !== arki) {
+    const j = UNITS.findIndex(u => !!u.arki === arki);
+    if (j >= 0) state.unit = j;
+  }
+  // yksikköhinta seuraa yksikköä, muuten edellinen jää voimaan ja tulos on 0
+  state.cost = UNITS[state.unit].cost;
+  buildSelects();
+  $("itemSel").value = state.item;
+  $("unitSel").value = state.unit;
+  render();
+  try {
+    const u = new URL(location.href);
+    u.searchParams.set("summa", n);
+    history.replaceState(null, "", u);
+  } catch(e){}
+  const card = document.getElementById("card");
+  if (card && card.scrollIntoView) card.scrollIntoView({ behavior:"smooth", block:"start" });
+}
+$("omaBtn").addEventListener("click", omaSumma);
+$("omaSumma").addEventListener("keydown", e => { if (e.key === "Enter") omaSumma(); });
+
+/* Budjetin kulutusvauhti. Tasainen jako — sanottu ääneen laatikossa. */
+(function tick(){
+  const koko = (ITEMS.find(i => i.id === "koko") || {}).amount || 91_300_000_000;
+  const perSek = koko / (365.25 * 24 * 3600);
+  const alku = Date.now();
+  const el = $("tick");
+  if (!el) return;
+  setInterval(() => {
+    const kulunut = (Date.now() - alku) / 1000;
+    el.textContent = Math.round(kulunut * perSek).toLocaleString("fi-FI") + " €";
+  }, 100);
+})();
+
+$("unitSel").addEventListener("change", e => {
+  state.unit = +e.target.value; state.cost = UNITS[state.unit].cost; render();
+});
+$("unitCost").addEventListener("input", e => {
+  const v = parseFloat(e.target.value); if(v > 0){ state.cost = v; render(); }
+});
+$("copyBtn").addEventListener("click", async () => {
+  const item = ITEMS[state.item], unit = UNITS[state.unit];
+  const n = Math.floor(item.amount / state.cost);
+  const per = (item.amount/(item.vakiluku||VAKILUKU)).toLocaleString("fi-FI",{maximumFractionDigits:0});
+  let url = ""; try { url = location.href; } catch(e) {}
+  const text = `${eur(item.amount)} = ${fmt(n)} ${unit.label}. Sinun osuutesi ${per} €. ${url}`;
+  const btn = $("copyBtn");
+  try { await navigator.clipboard.writeText(text); btn.textContent = "Kopioitu ✓"; }
+  catch { btn.textContent = "Kopiointi ei onnistunut"; }
+  setTimeout(()=>{ btn.textContent = "Kopioi ja jaa"; }, 2000);
+});
+</script>
+</body>
+</html>

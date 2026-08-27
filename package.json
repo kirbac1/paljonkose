@@ -1,0 +1,23 @@
+{
+  "name": "paljonkose",
+  "version": "1.0.0",
+  "description": "Automatic deployment with GitHub Actions and Node.js",
+  "type": "module",
+  "main": "files/server.mjs",
+  "scripts": {
+    "start": "node files/server.mjs",
+    "dev": "PORT=3000 SITE_URL=http://localhost:3000 node files/server.mjs",
+    "build": "echo 'No build needed for this static site setup'",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18"
+  }
+}

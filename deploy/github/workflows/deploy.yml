@@ -65,16 +65,15 @@ jobs:
           SSH_USER: ${{ secrets.DEPLOY_USER }}
         run: |
           set -euo pipefail
-          APP_ROOT=/srv/sillasais
-          RELEASE="$APP_ROOT/releases/$(date -u +%Y%m%d-%H%M%S)-${GITHUB_SHA::7}"
+          APP_ROOT="~"
+          RELEASE="$APP_ROOT/paljonkose/releases/$(date -u +%Y%m%d-%H%M%S)-${GITHUB_SHA::7}"
 
-          # Same release-dir + atomic-symlink model the server hook uses,
-          # so rollback.sh keeps working either way.
-          ssh "$SSH_USER@$SSH_HOST" "mkdir -p '$RELEASE/dist'"
+          # Create release directory and copy files
+          ssh "$SSH_USER@$SSH_HOST" "mkdir -p '$RELEASE'"
 
           rsync -az --delete \
             -e "ssh -o BatchMode=yes" \
-            dist/ "$SSH_USER@$SSH_HOST:$RELEASE/dist/"
+            . "$SSH_USER@$SSH_HOST:$RELEASE/"
 
           # Pass values as remote env vars and feed the script on stdin,
           # rather than interpolating into a nested quoted string. Quoting
@@ -83,19 +82,19 @@ jobs:
             APP_ROOT="$APP_ROOT" RELEASE="$RELEASE" KEEP=5 \
             bash -s <<'REMOTE'
           set -euo pipefail
-          ln -sfn "$RELEASE/dist" "$APP_ROOT/current.tmp"
-          mv -Tf "$APP_ROOT/current.tmp" "$APP_ROOT/current"
+          ln -sfn "$RELEASE" "$APP_ROOT/paljonkose/current.tmp"
+          mv -Tf "$APP_ROOT/paljonkose/current.tmp" "$APP_ROOT/paljonkose/current"
 
           # Prune by NAME, not mtime: release dirs are YYYYmmdd-HHMMSS-sha,
           # so reverse lexicographic order is reverse chronological order,
           # and two releases made in the same second still sort correctly.
           # mtime sorting ties arbitrarily and can pick the wrong victim.
-          cd "$APP_ROOT/releases"
-          live="$(readlink -f "$APP_ROOT/current")"
+          cd "$APP_ROOT/paljonkose/releases"
+          live="$(readlink -f "$APP_ROOT/paljonkose/current")"
           ls -1d -- */ | sort -r | tail -n +$((KEEP + 1)) | while read -r d; do
             # Never delete whatever is currently being served, whatever
             # the sort says.
-            if [ "$(readlink -f "${d}dist")" = "$live" ]; then continue; fi
+            if [ "$(readlink -f "$d")" = "$live" ]; then continue; fi
             rm -rf -- "$d"
           done
           REMOTE

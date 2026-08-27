@@ -1,0 +1,1195 @@
+{
+  "generated": "2026-08-26T11:56:51.719Z",
+  "ylityshistoria": {
+    "mediaani": 1.6610644257703082,
+    "otos": 5,
+    "hankkeet": [
+      {
+        "label": "Rantatunneli",
+        "suhde": 0.978
+      },
+      {
+        "label": "Raide-Jokeri",
+        "suhde": 1.404
+      },
+      {
+        "label": "Länsimetro, 1. vaihe",
+        "suhde": 1.661
+      },
+      {
+        "label": "Olympiastadionin remontti",
+        "suhde": 1.711
+      },
+      {
+        "label": "Kruunusillat",
+        "suhde": 2.105
+      }
+    ]
+  },
+  "vakiluku": 5600000,
+  "vakilukuSource": {
+    "name": "Tilastokeskus — StatFin (PxWeb API)",
+    "api": "https://pxdata.stat.fi/PxWeb/api/v1/fi/StatFin",
+    "docs": "https://stat.fi/fi/palvelut/tilastodatapalvelut/avoin-data-ja-rajapinnat/tietokantojen-rajapintakaytto",
+    "licence": "CC BY 4.0",
+    "kind": "api",
+    "retrieved": null
+  },
+  "scopes": {
+    "valtio": {
+      "id": "valtio",
+      "label": "Valtio",
+      "vakiluku": 5600000
+    },
+    "helsinki": {
+      "id": "helsinki",
+      "label": "Helsinki",
+      "vakiluku": 680000
+    },
+    "tampere": {
+      "id": "tampere",
+      "label": "Tampere",
+      "vakiluku": 260000
+    },
+    "turku": {
+      "id": "turku",
+      "label": "Turku",
+      "vakiluku": 200000
+    },
+    "oulu": {
+      "id": "oulu",
+      "label": "Oulu",
+      "vakiluku": 215000
+    },
+    "tuleva": {
+      "id": "tuleva",
+      "label": "Suunnitteilla",
+      "vakiluku": 5600000
+    },
+    "arki": {
+      "id": "arki",
+      "label": "Arkiostokset",
+      "vakiluku": 5600000,
+      "arki": true
+    }
+  },
+  "vakilukuLahde": {
+    "name": "Tilastokeskus — Kuntien avainluvut",
+    "api": "https://pxdata.stat.fi/PxWeb/api/v1/fi/Kuntien_avainluvut",
+    "docs": "https://stat.fi/fi/palvelut/tilastodatapalvelut/tilastotietokannat/kuntien-avainluvut",
+    "licence": "CC BY 4.0",
+    "kind": "api"
+  },
+  "items": [
+    {
+      "id": "pma",
+      "scope": "valtio",
+      "label": "Ukraina: aseapu",
+      "amount": 3400000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 5600000,
+      "note": "kertymä 2022–5/2026, 33 pakettia",
+      "status": "kasin",
+      "source": {
+        "name": "Puolustusministeriö — tiedotteet puolustustarvikeavusta",
+        "api": null,
+        "docs": "https://www.defmin.fi/",
+        "licence": "julkinen tiedote",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hum",
+      "scope": "valtio",
+      "label": "Ukraina: siviiliapu",
+      "amount": 1200000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 5600000,
+      "note": "kertymä, sis. vastaanottokuluja",
+      "status": "kasin",
+      "source": {
+        "name": "Ulkoministeriö — Ukrainan tukitilastot",
+        "api": null,
+        "docs": "https://um.fi/",
+        "licence": "julkinen tiedote",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "f35",
+      "scope": "valtio",
+      "label": "hävittäjät",
+      "amount": 1400000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 5600000,
+      "note": "talousarvio 2026",
+      "status": "varaluku",
+      "source": {
+        "name": "Valtiokonttori — Valtion talous -API",
+        "api": "https://api.tutkihallintoa.fi/talous/v1/luvut",
+        "docs": "https://avoindata.tutkihallintoa.fi/apis",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "pmh",
+      "scope": "valtio",
+      "label": "puolustushankinnat",
+      "amount": 1500000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 5600000,
+      "note": "talousarvio 2026",
+      "status": "varaluku",
+      "source": {
+        "name": "Valtiokonttori — Valtion talous -API",
+        "api": "https://api.tutkihallintoa.fi/talous/v1/luvut",
+        "docs": "https://avoindata.tutkihallintoa.fi/apis",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "pvtm",
+      "scope": "valtio",
+      "label": "Puolustusvoimat",
+      "amount": 2600000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 5600000,
+      "note": "toimintamenot 2026",
+      "status": "varaluku",
+      "source": {
+        "name": "Valtiokonttori — Valtion talous -API",
+        "api": "https://api.tutkihallintoa.fi/talous/v1/luvut",
+        "docs": "https://avoindata.tutkihallintoa.fi/apis",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "koko",
+      "scope": "valtio",
+      "label": "koko valtion budjetti",
+      "amount": 91300000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 5600000,
+      "note": "talousarvio 2026",
+      "status": "kasin",
+      "source": {
+        "name": "Valtiokonttori — Valtion talous -API",
+        "api": "https://api.tutkihallintoa.fi/talous/v1/luvut",
+        "docs": "https://avoindata.tutkihallintoa.fi/apis",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-budjetti",
+      "scope": "helsinki",
+      "label": "Helsingin budjetti",
+      "amount": 6000000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 680000,
+      "note": "käyttötalous — TARKISTA vuosi ja luku",
+      "status": "kasin",
+      "source": {
+        "name": "Tilastokeskus — Kuntien ja kuntayhtymien raportoimat taloustiedot",
+        "api": "https://pxdata.stat.fi/PxWeb/api/v1/fi/Kuntien_talous",
+        "docs": "https://pxdata.stat.fi/PXWeb/pxweb/fi/",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-lansimetro",
+      "scope": "helsinki",
+      "label": "Länsimetro, 1. vaihe",
+      "amount": 1186000000,
+      "arvio": 714000000,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 680000,
+      "note": "Ruoholahti–Matinkylä; valtuustojen hyväksymä arvio 2008 oli 714 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-kruunusillat",
+      "scope": "helsinki",
+      "label": "Kruunusillat",
+      "amount": 800000000,
+      "arvio": 380000000,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 680000,
+      "note": "raitiotieyhteys Laajasaloon; hinta kaksinkertaistui 2021",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-jokeri",
+      "scope": "helsinki",
+      "label": "Raide-Jokeri",
+      "amount": 386000000,
+      "arvio": 275000000,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 680000,
+      "note": "Helsinki 268 M€ + Espoo 118 M€; arvio 2016 oli 275 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-stadion",
+      "scope": "helsinki",
+      "label": "Olympiastadionin remontti",
+      "amount": 337000000,
+      "arvio": 197000000,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 680000,
+      "note": "lopullinen hinta 337 M€, VTV:n mukaan arvio oli 197 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-oodi",
+      "scope": "helsinki",
+      "label": "Oodi",
+      "amount": 98000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 680000,
+      "note": "keskustakirjasto, valmistui 2018 — TARKISTA",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tre-budjetti",
+      "scope": "tampere",
+      "label": "Tampereen budjetti",
+      "amount": 1500000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 260000,
+      "note": "käyttötalous — TARKISTA vuosi ja luku",
+      "status": "kasin",
+      "source": {
+        "name": "Tilastokeskus — Kuntien ja kuntayhtymien raportoimat taloustiedot",
+        "api": "https://pxdata.stat.fi/PxWeb/api/v1/fi/Kuntien_talous",
+        "docs": "https://pxdata.stat.fi/PXWeb/pxweb/fi/",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tre-ratikka",
+      "scope": "tampere",
+      "label": "Ratikka, osa 1",
+      "amount": 240000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 260000,
+      "note": "Hervanta–keskusta–Tays; valtion osuus 71 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tre-ratikka2",
+      "scope": "tampere",
+      "label": "Ratikka, osa 2",
+      "amount": 44000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 260000,
+      "note": "keskusta–Hiedanranta–Lentävänniemi, arvio 2016",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tre-vaunut",
+      "scope": "tampere",
+      "label": "Ratikkavaunut",
+      "amount": 81000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 260000,
+      "note": "kalustohankinta, arvio 2016",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tre-tunneli",
+      "scope": "tampere",
+      "label": "Rantatunneli",
+      "amount": 176000000,
+      "arvio": 180000000,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 260000,
+      "note": "Suomen pisin maantietunneli; tavoitekustannus ALITTUI 4,1 M€:lla",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tre-areena",
+      "scope": "tampere",
+      "label": "Kansi ja Areena",
+      "amount": 550000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 260000,
+      "note": "koko hanke, kaupungin osuus pienempi — TARKISTA",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tku-budjetti",
+      "scope": "turku",
+      "label": "Turun budjetti",
+      "amount": 1200000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 200000,
+      "note": "käyttötalous — TARKISTA vuosi ja luku",
+      "status": "kasin",
+      "source": {
+        "name": "Tilastokeskus — Kuntien ja kuntayhtymien raportoimat taloustiedot",
+        "api": "https://pxdata.stat.fi/PxWeb/api/v1/fi/Kuntien_talous",
+        "docs": "https://pxdata.stat.fi/PXWeb/pxweb/fi/",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tku-ratikka",
+      "scope": "turku",
+      "label": "Turun raitiotie",
+      "amount": 300000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 200000,
+      "note": "hankearvio — TARKISTA",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "oul-budjetti",
+      "scope": "oulu",
+      "label": "Oulun budjetti",
+      "amount": 1300000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 215000,
+      "note": "käyttötalous — TARKISTA vuosi ja luku",
+      "status": "kasin",
+      "source": {
+        "name": "Tilastokeskus — Kuntien ja kuntayhtymien raportoimat taloustiedot",
+        "api": "https://pxdata.stat.fi/PxWeb/api/v1/fi/Kuntien_talous",
+        "docs": "https://pxdata.stat.fi/PXWeb/pxweb/fi/",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "lansirata",
+      "scope": "tuleva",
+      "label": "Länsirata (Turun tunnin juna)",
+      "amount": 3400000000,
+      "arvio": null,
+      "tuleva": true,
+      "arki": false,
+      "paatos": "ratahankkeet",
+      "vakiluku": 5600000,
+      "note": "alustava arvio, v. 2022 hintataso; nimellisarvo 4,82 mrd €; hyöty-kustannussuhde 0,44",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "lentorata",
+      "scope": "tuleva",
+      "label": "Lentorata",
+      "amount": 2700000000,
+      "arvio": null,
+      "tuleva": true,
+      "arki": false,
+      "paatos": "ratahankkeet",
+      "vakiluku": 5600000,
+      "note": "30 km rataa, josta 28 km tunnelissa; Pasila–lentoasema–Kerava",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "itarata",
+      "scope": "tuleva",
+      "label": "Itärata",
+      "amount": 1800000000,
+      "arvio": null,
+      "tuleva": true,
+      "arki": false,
+      "paatos": "ratahankkeet",
+      "vakiluku": 5600000,
+      "note": "Helsinki–Porvoo–Kouvola; nimellisarvo 3,48 mrd €; esisuunnittelu kesken",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "suomirata",
+      "scope": "tuleva",
+      "label": "Suomi-rata (suurnopeusvaihtoehto)",
+      "amount": 5500000000,
+      "arvio": null,
+      "tuleva": true,
+      "arki": false,
+      "paatos": "ratahankkeet",
+      "vakiluku": 5600000,
+      "note": "lentorata + uusi suurnopeusrata; halvempi vaihtoehto 4,0 mrd €; suunnittelu keskeytetty",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "ark-burgeri",
+      "scope": "arki",
+      "label": "Hampurilaisateria",
+      "amount": 12,
+      "arvio": null,
+      "tuleva": false,
+      "arki": true,
+      "paatos": null,
+      "vakiluku": 5600000,
+      "note": "pikaruokala, ateria juomineen",
+      "status": "arvio",
+      "source": {
+        "name": "Kuluttajahinta — karkea keskiarvo",
+        "docs": "https://www.stat.fi/tilasto/khi",
+        "licence": "—",
+        "kind": "estimate",
+        "note": "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse.",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "ark-latte",
+      "scope": "arki",
+      "label": "Erikoiskahvi kahvilassa",
+      "amount": 5,
+      "arvio": null,
+      "tuleva": false,
+      "arki": true,
+      "paatos": null,
+      "vakiluku": 5600000,
+      "note": "latte tai vastaava",
+      "status": "arvio",
+      "source": {
+        "name": "Kuluttajahinta — karkea keskiarvo",
+        "docs": "https://www.stat.fi/tilasto/khi",
+        "licence": "—",
+        "kind": "estimate",
+        "note": "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse.",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "ark-lounas",
+      "scope": "arki",
+      "label": "Lounas ravintolassa",
+      "amount": 13,
+      "arvio": null,
+      "tuleva": false,
+      "arki": true,
+      "paatos": null,
+      "vakiluku": 5600000,
+      "note": "arkilounas",
+      "status": "arvio",
+      "source": {
+        "name": "Kuluttajahinta — karkea keskiarvo",
+        "docs": "https://www.stat.fi/tilasto/khi",
+        "licence": "—",
+        "kind": "estimate",
+        "note": "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse.",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "ark-suoratoisto",
+      "scope": "arki",
+      "label": "Suoratoistopalvelu vuodeksi",
+      "amount": 168,
+      "arvio": null,
+      "tuleva": false,
+      "arki": true,
+      "paatos": null,
+      "vakiluku": 5600000,
+      "note": "n. 14 €/kk",
+      "status": "arvio",
+      "source": {
+        "name": "Kuluttajahinta — karkea keskiarvo",
+        "docs": "https://www.stat.fi/tilasto/khi",
+        "licence": "—",
+        "kind": "estimate",
+        "note": "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse.",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "ark-liittyma",
+      "scope": "arki",
+      "label": "Puhelinliittymä vuodeksi",
+      "amount": 300,
+      "arvio": null,
+      "tuleva": false,
+      "arki": true,
+      "paatos": null,
+      "vakiluku": 5600000,
+      "note": "n. 25 €/kk",
+      "status": "arvio",
+      "source": {
+        "name": "Kuluttajahinta — karkea keskiarvo",
+        "docs": "https://www.stat.fi/tilasto/khi",
+        "licence": "—",
+        "kind": "estimate",
+        "note": "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse.",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "ark-puhelin",
+      "scope": "arki",
+      "label": "Uusi puhelin",
+      "amount": 900,
+      "arvio": null,
+      "tuleva": false,
+      "arki": true,
+      "paatos": null,
+      "vakiluku": 5600000,
+      "note": "keskihintainen älypuhelin",
+      "status": "arvio",
+      "source": {
+        "name": "Kuluttajahinta — karkea keskiarvo",
+        "docs": "https://www.stat.fi/tilasto/khi",
+        "licence": "—",
+        "kind": "estimate",
+        "note": "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse.",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "ark-renkaat",
+      "scope": "arki",
+      "label": "Talvirenkaat",
+      "amount": 600,
+      "arvio": null,
+      "tuleva": false,
+      "arki": true,
+      "paatos": null,
+      "vakiluku": 5600000,
+      "note": "rengassarja asennettuna",
+      "status": "arvio",
+      "source": {
+        "name": "Kuluttajahinta — karkea keskiarvo",
+        "docs": "https://www.stat.fi/tilasto/khi",
+        "licence": "—",
+        "kind": "estimate",
+        "note": "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse.",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "ark-lomamatka",
+      "scope": "arki",
+      "label": "Viikon etelänmatka",
+      "amount": 800,
+      "arvio": null,
+      "tuleva": false,
+      "arki": true,
+      "paatos": null,
+      "vakiluku": 5600000,
+      "note": "yksi henkilö, valmismatka",
+      "status": "arvio",
+      "source": {
+        "name": "Kuluttajahinta — karkea keskiarvo",
+        "docs": "https://www.stat.fi/tilasto/khi",
+        "licence": "—",
+        "kind": "estimate",
+        "note": "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse.",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-lansimetro-ylitys",
+      "scope": "helsinki",
+      "label": "Länsimetro, 1. vaihe: ylitys",
+      "amount": 472000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 680000,
+      "note": "toteutunut 1186 M€, arvio oli 714 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-kruunusillat-ylitys",
+      "scope": "helsinki",
+      "label": "Kruunusillat: ylitys",
+      "amount": 420000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 680000,
+      "note": "toteutunut 800 M€, arvio oli 380 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-jokeri-ylitys",
+      "scope": "helsinki",
+      "label": "Raide-Jokeri: ylitys",
+      "amount": 111000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 680000,
+      "note": "toteutunut 386 M€, arvio oli 275 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-stadion-ylitys",
+      "scope": "helsinki",
+      "label": "Olympiastadionin remontti: ylitys",
+      "amount": 140000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 680000,
+      "note": "toteutunut 337 M€, arvio oli 197 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tre-tunneli-ylitys",
+      "scope": "tampere",
+      "label": "Rantatunneli: alitus",
+      "amount": 4000000,
+      "arvio": null,
+      "tuleva": false,
+      "arki": false,
+      "paatos": null,
+      "vakiluku": 260000,
+      "note": "arvio oli 180 M€, toteutunut 176 M€ — hanke alitti budjettinsa",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    }
+  ],
+  "paaluokat": [
+    {
+      "id": "33",
+      "label": "Sosiaali- ja terveysministeriö",
+      "amount": 30000000000,
+      "note": "sis. hyvinvointialueiden rahoituksen",
+      "status": "kasin"
+    },
+    {
+      "id": "28",
+      "label": "Valtiovarainministeriö",
+      "amount": 22500000000,
+      "note": "sis. kuntien valtionosuudet ja EU-maksut",
+      "status": "kasin"
+    },
+    {
+      "id": "29",
+      "label": "Opetus- ja kulttuuriministeriö",
+      "amount": 8200000000,
+      "note": "",
+      "status": "kasin"
+    },
+    {
+      "id": "27",
+      "label": "Puolustusministeriö",
+      "amount": 6400000000,
+      "note": "",
+      "status": "kasin"
+    },
+    {
+      "id": "32",
+      "label": "Työ- ja elinkeinoministeriö",
+      "amount": 3600000000,
+      "note": "",
+      "status": "kasin"
+    },
+    {
+      "id": "31",
+      "label": "Liikenne- ja viestintäministeriö",
+      "amount": 3500000000,
+      "note": "",
+      "status": "kasin"
+    },
+    {
+      "id": "36",
+      "label": "Valtionvelan korot",
+      "amount": 3500000000,
+      "note": "",
+      "status": "kasin"
+    },
+    {
+      "id": "30",
+      "label": "Maa- ja metsätalousministeriö",
+      "amount": 2700000000,
+      "note": "",
+      "status": "kasin"
+    },
+    {
+      "id": "26",
+      "label": "Sisäministeriö",
+      "amount": 1900000000,
+      "note": "",
+      "status": "kasin"
+    },
+    {
+      "id": "24",
+      "label": "Ulkoministeriö",
+      "amount": 1400000000,
+      "note": "sis. kehitysyhteistyön",
+      "status": "kasin"
+    },
+    {
+      "id": "25",
+      "label": "Oikeusministeriö",
+      "amount": 1100000000,
+      "note": "",
+      "status": "kasin"
+    },
+    {
+      "id": "muu",
+      "label": "Muut pääluokat",
+      "amount": 6500000000,
+      "note": "",
+      "status": "kasin"
+    }
+  ],
+  "units": [
+    {
+      "id": "pork",
+      "label": "kiloa porkkanoita",
+      "cost": 1.5,
+      "note": "kaupan kilohinta",
+      "status": "arvio",
+      "source": {
+        "name": "Kuluttajahinta — karkea keskiarvo",
+        "docs": "https://www.stat.fi/tilasto/khi",
+        "licence": "—",
+        "kind": "estimate",
+        "note": "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse.",
+        "retrieved": null
+      },
+      "arki": true
+    },
+    {
+      "id": "maito",
+      "label": "litraa maitoa",
+      "cost": 1.2,
+      "note": "kevytmaito",
+      "status": "arvio",
+      "source": {
+        "name": "Kuluttajahinta — karkea keskiarvo",
+        "docs": "https://www.stat.fi/tilasto/khi",
+        "licence": "—",
+        "kind": "estimate",
+        "note": "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse.",
+        "retrieved": null
+      },
+      "arki": true
+    },
+    {
+      "id": "leipa",
+      "label": "leipää",
+      "cost": 2.5,
+      "note": "tavallinen ruokaleipä",
+      "status": "arvio",
+      "source": {
+        "name": "Kuluttajahinta — karkea keskiarvo",
+        "docs": "https://www.stat.fi/tilasto/khi",
+        "licence": "—",
+        "kind": "estimate",
+        "note": "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse.",
+        "retrieved": null
+      },
+      "arki": true
+    },
+    {
+      "id": "bussi",
+      "label": "bussilippua",
+      "cost": 3.2,
+      "note": "kertalippu, kaupunkiliikenne",
+      "status": "arvio",
+      "source": {
+        "name": "Kuluttajahinta — karkea keskiarvo",
+        "docs": "https://www.stat.fi/tilasto/khi",
+        "licence": "—",
+        "kind": "estimate",
+        "note": "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse.",
+        "retrieved": null
+      },
+      "arki": true
+    },
+    {
+      "id": "leffa",
+      "label": "elokuvalippua",
+      "cost": 14,
+      "note": "aikuinen, ilta",
+      "status": "arvio",
+      "source": {
+        "name": "Kuluttajahinta — karkea keskiarvo",
+        "docs": "https://www.stat.fi/tilasto/khi",
+        "licence": "—",
+        "kind": "estimate",
+        "note": "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse.",
+        "retrieved": null
+      },
+      "arki": true
+    },
+    {
+      "id": "kirja",
+      "label": "kirjaa",
+      "cost": 25,
+      "note": "uusi kovakantinen",
+      "status": "arvio",
+      "source": {
+        "name": "Kuluttajahinta — karkea keskiarvo",
+        "docs": "https://www.stat.fi/tilasto/khi",
+        "licence": "—",
+        "kind": "estimate",
+        "note": "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse.",
+        "retrieved": null
+      },
+      "arki": true
+    },
+    {
+      "id": "ruoka",
+      "label": "viikon ruokaostosta",
+      "cost": 150,
+      "note": "perhe, viikko",
+      "status": "arvio",
+      "source": {
+        "name": "Oma laskelma julkisista tilastoista",
+        "api": null,
+        "docs": null,
+        "licence": "suuruusluokka-arvio",
+        "kind": "estimate",
+        "retrieved": null
+      },
+      "arki": false
+    },
+    {
+      "id": "lapsi",
+      "label": "lapsilisää vuodeksi",
+      "cost": 1500,
+      "note": "yksi lapsi",
+      "status": "arvio",
+      "source": {
+        "name": "Oma laskelma julkisista tilastoista",
+        "api": null,
+        "docs": null,
+        "licence": "suuruusluokka-arvio",
+        "kind": "estimate",
+        "retrieved": null
+      },
+      "arki": false
+    },
+    {
+      "id": "palkka",
+      "label": "kuukauden palkkaa",
+      "cost": 3600,
+      "note": "mediaaniansio, brutto",
+      "status": "varaluku",
+      "source": {
+        "name": "Tilastokeskus — StatFin (PxWeb API)",
+        "api": "https://pxdata.stat.fi/PxWeb/api/v1/fi/StatFin",
+        "docs": "https://stat.fi/fi/palvelut/tilastodatapalvelut/avoin-data-ja-rajapinnat/tietokantojen-rajapintakaytto",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      },
+      "arki": false
+    },
+    {
+      "id": "opp",
+      "label": "oppilasvuotta peruskoulussa",
+      "cost": 10000,
+      "note": "per oppilas",
+      "status": "arvio",
+      "source": {
+        "name": "Oma laskelma julkisista tilastoista",
+        "api": null,
+        "docs": null,
+        "licence": "suuruusluokka-arvio",
+        "kind": "estimate",
+        "retrieved": null
+      },
+      "arki": false
+    },
+    {
+      "id": "hoit",
+      "label": "hoitajan vuosipalkkaa",
+      "cost": 48000,
+      "note": "palkka + työnantajakulut",
+      "status": "arvio",
+      "source": {
+        "name": "Oma laskelma julkisista tilastoista",
+        "api": null,
+        "docs": null,
+        "licence": "suuruusluokka-arvio",
+        "kind": "estimate",
+        "retrieved": null
+      },
+      "arki": false
+    },
+    {
+      "id": "tie",
+      "label": "kilometriä tienkorjausta",
+      "cost": 400000,
+      "note": "päällystetty tie",
+      "status": "arvio",
+      "source": {
+        "name": "Oma laskelma julkisista tilastoista",
+        "api": null,
+        "docs": null,
+        "licence": "suuruusluokka-arvio",
+        "kind": "estimate",
+        "retrieved": null
+      },
+      "arki": false
+    },
+    {
+      "id": "pk",
+      "label": "uutta päiväkotia",
+      "cost": 6000000,
+      "note": "n. 100 paikkaa",
+      "status": "arvio",
+      "source": {
+        "name": "Oma laskelma julkisista tilastoista",
+        "api": null,
+        "docs": null,
+        "licence": "suuruusluokka-arvio",
+        "kind": "estimate",
+        "retrieved": null
+      },
+      "arki": false
+    },
+    {
+      "id": "oodi",
+      "label": "Oodia",
+      "cost": 98000000,
+      "note": "toteutunut rakennuskustannus",
+      "status": "arvio",
+      "source": {
+        "name": "Oma laskelma julkisista tilastoista",
+        "api": null,
+        "docs": null,
+        "licence": "suuruusluokka-arvio",
+        "kind": "estimate",
+        "retrieved": null
+      },
+      "arki": false
+    }
+  ]
+}
