@@ -1,0 +1,216 @@
+#!/usr/bin/env bash
+#
+# post-receive — build and publish on every push.
+#
+# Lives at: /srv/<APP_NAME>/repo/hooks/post-receive  (on the server)
+# Triggered by: git push production main             (from your Mac)
+#
+# What it does, per push:
+#   1. Exports the pushed commit into a fresh release directory
+#   2. Runs the build there
+#   3. Only if the build succeeded, atomically points `current` at it
+#   4. Prunes old releases
+#
+# A failed build leaves the live site untouched and makes the push report
+# an error. That is the whole point: you cannot take the site down with a
+# bad commit, only fail to update it.
+
+set -euo pipefail
+
+# ---------------------------------------------------------------- config ---
+
+APP_NAME="${APP_NAME:-sillasais}"
+APP_ROOT="${APP_ROOT:-/srv/${APP_NAME}}"
+
+REPO_DIR="${APP_ROOT}/repo"
+RELEASES_DIR="${APP_ROOT}/releases"
+CURRENT_LINK="${APP_ROOT}/current"
+
+# Only pushes to this branch deploy. Anything else is accepted and ignored.
+DEPLOY_BRANCH="main"
+
+# Directory your build emits, relative to the project root.
+BUILD_OUTPUT="dist"
+
+# How many old releases to keep for rollback.
+KEEP_RELEASES=5
+
+# Absolute URL the built pages use in og:/canonical tags. Change this one
+# value when the domain is settled, then push anything to rebuild.
+export SITE_URL="${SITE_URL:-http://localhost}"
+
+# ------------------------------------------------------------- utilities ---
+
+# Git sets these for hooks; they confuse any git command aimed elsewhere.
+unset GIT_DIR GIT_WORK_TREE GIT_QUARANTINE_PATH
+
+say()  { printf '\033[0;36m→ %s\033[0m\n' "$*" >&2; }
+ok()   { printf '\033[0;32m✓ %s\033[0m\n' "$*" >&2; }
+fail() { printf '\033[0;31m✗ %s\033[0m\n' "$*" >&2; }
+
+# Git hooks run with a stripped environment — no login shell, so no nvm,
+# no fnm, no asdf. This is the single most common reason a hook that works
+# by hand fails on push. Load the usual suspects before giving up.
+load_node() {
+  if command -v node >/dev/null 2>&1; then return 0; fi
+
+  # nvm.sh and friends reference unset variables freely and blow up under
+  # `set -u`, so relax it just for the sourcing.
+  set +u
+  # shellcheck disable=SC1090,SC1091
+  for candidate in \
+    "${NVM_DIR:-$HOME/.nvm}/nvm.sh" \
+    "$HOME/.fnm/fnm.sh" \
+    "$HOME/.asdf/asdf.sh"
+  do
+    if [ -s "$candidate" ]; then
+      . "$candidate" >/dev/null 2>&1 || true
+    fi
+    if command -v node >/dev/null 2>&1; then
+      set -u
+      return 0
+    fi
+  done
+  set -u
+
+  for dir in /usr/local/bin /usr/bin /opt/homebrew/bin /snap/bin; do
+    if [ -x "$dir/node" ]; then
+      PATH="$dir:$PATH"
+      export PATH
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+# ---------------------------------------------------------------- deploy ---
+
+deploy_ref() {
+  local newrev="$1"
+  local short release
+
+  short="$(git --git-dir="$REPO_DIR" rev-parse --short "$newrev")"
+  release="${RELEASES_DIR}/$(date -u +%Y%m%d-%H%M%S)-${short}"
+
+  say "Deploying ${short} → ${release##*/}"
+
+  mkdir -p "$release"
+
+  # git archive gives a clean tree with no .git and no stale files, which
+  # is safer than checking out over a previous release.
+  #
+  # Every fallible step below is checked explicitly rather than left to
+  # `set -e`. This function is called from an `if`, and bash suppresses
+  # errexit inside a condition — so a failing build would otherwise sail
+  # straight through to the symlink swap and publish a broken site.
+  if ! git --git-dir="$REPO_DIR" archive "$newrev" | tar -x -C "$release"; then
+    fail "Could not export ${short} from the repo."
+    rm -rf "$release"
+    return 1
+  fi
+
+  cd "$release"
+
+  if [ ! -f package.json ]; then
+    fail "No package.json in the pushed tree — nothing to build."
+    rm -rf "$release"
+    return 1
+  fi
+
+  if ! load_node; then
+    fail "node not found in the hook's PATH."
+    fail "Install Node system-wide on the server, or set PATH at the top of this hook."
+    rm -rf "$release"
+    return 1
+  fi
+
+  say "node $(node -v), npm $(npm -v)"
+
+  # npm ci is reproducible but requires a lockfile in the pushed tree.
+  if [ -f package-lock.json ]; then
+    if ! npm ci --no-audit --no-fund; then
+      fail "npm ci failed — not publishing."
+      rm -rf "$release"
+      return 1
+    fi
+  else
+    say "No package-lock.json — falling back to npm install (commit your lockfile)."
+    if ! npm install --no-audit --no-fund; then
+      fail "npm install failed — not publishing."
+      rm -rf "$release"
+      return 1
+    fi
+  fi
+
+  if ! npm run build; then
+    fail "Build failed — not publishing."
+    rm -rf "$release"
+    return 1
+  fi
+
+  if [ ! -d "$BUILD_OUTPUT" ] || [ -z "$(ls -A "$BUILD_OUTPUT" 2>/dev/null)" ]; then
+    fail "Build finished but ${BUILD_OUTPUT}/ is missing or empty — not publishing."
+    rm -rf "$release"
+    return 1
+  fi
+
+  # node_modules is large and useless once the build is done. Dropping it
+  # keeps five releases cheap enough to be worth keeping.
+  rm -rf node_modules
+
+  # Atomic swap: create the new link beside the old one, then rename over
+  # it. `mv -T` on a symlink is a single rename(2), so no request ever
+  # sees a missing or half-written document root.
+  ln -sfn "${release}/${BUILD_OUTPUT}" "${CURRENT_LINK}.tmp"
+  mv -Tf "${CURRENT_LINK}.tmp" "$CURRENT_LINK"
+
+  ok "Live: ${release##*/}"
+}
+
+prune_releases() {
+  local doomed live
+
+  # Prune by NAME, not mtime. Release dirs are YYYYmmdd-HHMMSS-sha, so
+  # reverse lexicographic order is reverse chronological order. Sorting by
+  # mtime breaks ties arbitrarily when two releases land in the same
+  # second, which can pick the wrong directory to delete.
+  cd "$RELEASES_DIR" || return 0
+  live="$(readlink -f "$CURRENT_LINK" 2>/dev/null || echo "")"
+
+  doomed="$(ls -1d -- */ 2>/dev/null | sort -r | tail -n +$((KEEP_RELEASES + 1)) || true)"
+  [ -z "$doomed" ] && return 0
+
+  echo "$doomed" | while read -r dir; do
+    # Never remove whatever `current` points at, whatever the sort says.
+    if [ "$(readlink -f "${dir}${BUILD_OUTPUT}")" = "$live" ]; then
+      continue
+    fi
+    rm -rf -- "$dir"
+  done
+  say "Pruned to the last ${KEEP_RELEASES} releases."
+}
+
+# ------------------------------------------------------------------ main ---
+
+mkdir -p "$RELEASES_DIR"
+
+while read -r _oldrev newrev ref; do
+  if [ "$ref" != "refs/heads/${DEPLOY_BRANCH}" ]; then
+    say "Ignoring ${ref} (only ${DEPLOY_BRANCH} deploys)."
+    continue
+  fi
+
+  # All-zeroes newrev means the branch was deleted. Leave the site alone.
+  if [ "$newrev" = "0000000000000000000000000000000000000000" ]; then
+    say "Branch deleted — leaving the current release live."
+    continue
+  fi
+
+  if deploy_ref "$newrev"; then
+    prune_releases
+  else
+    fail "Deploy failed. The previous release is still live."
+    exit 1
+  fi
+done

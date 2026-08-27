@@ -1,0 +1,60 @@
+name: build
+
+# Runs on every push and PR. This does NOT deploy — the server's
+# post-receive hook does that. This is the safety net in front of it:
+# if the build is broken, you find out from GitHub rather than from a
+# rejected push at the moment you were trying to publish today's entry.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+# A newer push makes an in-flight run pointless.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          # Only works with a lockfile; the `if` below keeps it from
+          # failing the run when there is not one yet.
+          cache: ${{ hashFiles('package-lock.json') != '' && 'npm' || '' }}
+
+      - name: Install
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund
+          else
+            echo "::warning::No package-lock.json — builds are not reproducible. Commit one."
+            npm install --no-audit --no-fund
+          fi
+
+      - name: Build
+        env:
+          # Must match the SITE_URL in the server hook, or the og: check
+          # below passes in CI and then the real build emits different
+          # URLs. Set this as a repository variable once the domain is
+          # settled: Settings → Secrets and variables → Actions → Variables.
+          SITE_URL: ${{ vars.SITE_URL || 'https://sillasais.fi' }}
+        run: npm run build
+
+      - name: Check the build is publishable
+        run: node scripts/check-build.mjs dist
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.sha }}
+          path: dist/
+          retention-days: 7
+          if-no-files-found: error
