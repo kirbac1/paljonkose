@@ -1,6 +1,7 @@
 {
   "name": "paljonkose",
-  "type": "module",
+  "version": "1.0.0",
+  "main": "app.js",
   "scripts": {
     "data": "node fetch-data.mjs",
     "pages": "node build-pages.mjs",
