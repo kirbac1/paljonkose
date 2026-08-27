@@ -1,14 +1,13 @@
 # Asennus Pleskiin (Passenger)
 
-Sovelluksen juuri palvelimella on `.../current/files`, joten kaikki tämän
-paketin tiedostot menevät repon `files/`-hakemistoon.
+Sovelluksen juuri: `.../paljonkose/current/files`
 
 ## Plesk-asetukset
 
 - **Application Root**: `.../paljonkose/current/files`
 - **Application Startup File**: `app.js`
 - **Application Mode**: production
-- **Node.js version**: 20 tai uudempi
+- **Node.js**: 20 tai uudempi
 
 ## Ympäristömuuttujat
 
@@ -16,54 +15,72 @@ paketin tiedostot menevät repon `files/`-hakemistoon.
 |---|---|---|
 | `SITE_URL` | `https://paljonkose.fi` | **Kyllä** |
 | `PORT` | — | Ei, Passenger antaa |
-| `RELOAD_TOKEN` | satunnainen merkkijono | Vain jos käytät `/api/reload` |
+| `RELOAD_TOKEN` | satunnainen merkkijono | Vain `/api/reload`-reitille |
 
-**`SITE_URL` on pakollinen.** Ilman sitä canonical-osoitteet ja jakokuvien
-URL:t osoittavat localhostiin. Sivu toimii, mutta jaot ja hakukonenäkyvyys
-rikkoutuvat hiljaa ilman virheilmoitusta.
+## Kaksi sääntöä, jotka rikkovat sovelluksen jos unohtuvat
 
-## Miksi app.js on olemassa
+**1. `package.json`:iin ei saa lisätä `"type": "module"`.**
+Passenger lataa käynnistystiedoston `require()`-kutsulla. `app.js` on
+CommonJS-kääre, joka lataa ESM-palvelimen dynaamisella `import()`-kutsulla.
+`"type": "module"` tekisi `app.js`:stä ESM:n ja `require()` kaatuisi.
+Muut tiedostot ovat `.mjs`, joten ne ovat ES-moduuleja ilman asetusta.
 
-Passenger lataa käynnistystiedoston `require()`-kutsulla, mutta `server.mjs`
-on ES-moduuli. `app.js` on CommonJS-kääre, joka lataa sen dynaamisella
-`import()`-kutsulla.
+**2. Polut lasketaan `server.mjs`:n sijainnista, ei työhakemistosta.**
+Passenger ei takaa työhakemistoa. `data.json` ja `public/` luetaan
+absoluuttisina polkuina `import.meta.url`:n kautta. Älä muuta niitä
+suhteellisiksi — se toimii kehityksessä ja hajoaa tuotannossa hiljaa.
 
-Tästä seuraa yksi sääntö: **`package.json`:iin ei saa lisätä
-`"type": "module"`.** Se tekisi `app.js`:stä ESM:n ja Passengerin `require()`
-kaatuisi. Muut tiedostot ovat `.mjs`-päätteisiä, joten ne ovat ES-moduuleja
-joka tapauksessa — asetusta ei tarvita mihinkään.
+## 301-silmukan selvitys
+
+Jos selain valittaa liiallisista uudelleenohjauksista, sovellus ei ole syy —
+se ei tee yhtään redirectiä. Paikanna se näin:
+
+```bash
+curl -sIL https://paljonkose.fi/ | grep -i "^HTTP\|^location"
+```
+
+Yleisimmät syyt Pleskissä:
+
+- **HTTP→HTTPS-uudelleenohjaus päällä kahdesti** — sekä Pleskin
+  "Permanent SEO-safe 301 redirect" että oma direktiivi nginxissä
+- **www ↔ ei-www kiertää kehää** — molemmat ohjaavat toisiinsa
+- **Hosting-asetusten redirect osoittaa itseensä**
+
+Tarkista Plesk → Hosting Settings → onko HTTPS-redirect päällä, ja
+Apache & nginx Settings → onko lisädirektiiveissä toinen redirect.
+Vain toinen saa olla.
+
+Testaa aina `curl`illa, älä selaimella: selain välimuistittaa 301:n
+pysyvästi, joten korjaus ei näy ennen kuin tyhjennät välimuistin.
 
 ## Asennuksen jälkeen
 
 ```bash
 npm install --production
-touch tmp/restart.txt      # Passenger lataa sovelluksen uudelleen
+mkdir -p tmp && touch tmp/restart.txt
 ```
 
-Tarkista:
+Tarkista järjestyksessä:
 
 ```
-https://paljonkose.fi/healthz     → {"ok":true,"generated":"..."}
-https://paljonkose.fi/            → etusivu
-https://paljonkose.fi/ylitykset/  → arvio vs. toteutunut
-https://paljonkose.fi/kuitti/45000/
-https://paljonkose.fi/summa/340000000/
-https://paljonkose.fi/p/lansirata-pk/og.png   → PNG-kuva
+/healthz                    → {"ok":true,...}   palvelin elää
+/                           → etusivu           staattiset toimivat
+/ylitykset/                 → taulukko          reitit toimivat
+/p/lansirata-pk/og.png      → PNG               natiivimoduuli toimii
 ```
 
 Jos `/healthz` vastaa mutta `og.png` ei, `@resvg/resvg-js` ei kääntynyt
-palvelimen arkkitehtuurille. Se on natiivimoduuli — aja `npm rebuild
-@resvg/resvg-js` palvelimella, älä kopioi `node_modules`ia koneeltasi.
+palvelimen arkkitehtuurille. Aja `npm rebuild @resvg/resvg-js`
+palvelimella — älä kopioi `node_modules`ia koneeltasi.
+
+Käynnistyslokiin tulostuu `Juuri: <polku>`. Jos se ei ole
+`.../current/files`, polut osoittavat väärään paikkaan.
 
 ## Lukujen päivitys
-
-`data.json` on repossa, joten sivu toimii ilman rajapintoja. Päivitys:
 
 ```bash
 npm run data
 ```
 
-Aja tämä kerran käsin palvelimella ja **lue tuloste**. Se on ainoa paikka,
-josta näet tulivatko luvut oikeasti rajapinnasta vai jäivätkö varaluvut
-voimaan. Sen jälkeen voit ajastaa sen cronilla tai jättää GitHub Actionsin
-hoidettavaksi.
+Aja kerran käsin ja **lue tuloste** — se on ainoa paikka, josta näet
+tulivatko luvut rajapinnasta vai jäivätkö varaluvut voimaan.
