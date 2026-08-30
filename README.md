@@ -59,6 +59,15 @@ PR:llä. `main`-haaraan pushatessa `deploy.yml` rakentaa `web/`:n
 palvelimelle, asentaa riippuvuudet siellä ja käynnistää sovelluksen
 uudelleen Passengerin kautta.
 
+> **Miksi palvelimella ei näy `web/`-hakemistoa.** `web/` käännetään
+> GitHub Actionsin ajourassa (`npm run build` kirjoittaa
+> `files/public/`-hakemistoon), ja vain `files/` rsynkataan palvelimelle
+> — `web/`:n lähdekoodi, sen `node_modules` ja TypeScript-tiedostot eivät
+> koskaan päädy sinne. Palvelin ei tarvitse Node/npm/Vite-työkaluja
+> Reactin kääntämiseen, se vain tarjoilee jo käännetyt tiedostot
+> osoitteesta `files/public/` (`index.html` + `assets/*.js/css`).
+> Tarkista: `ls ~/paljonkose/current/files/public/` palvelimella.
+
 ## Tuotantoon
 
 Automaattinen: push `main`-haaraan, katso `Actions`-välilehti. Manuaalinen
