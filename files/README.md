@@ -6,6 +6,11 @@ lukijan muokattavissa, varaukset esillä eikä piilotettuna.
 
 Tuotanto: **paljonkose.fi**
 
+> `public/index.html` ja `paljonko-se-on.html` ovat vanhaa vanilla JS
+> -etusivua — legacy, korvautumassa [`../web/`](../web/README.md):llä.
+> Tämän hakemiston Express-palvelin (`server.mjs`, `render.mjs`,
+> `/api/data`) pysyy käytössä molemmille toteutuksille.
+
 ---
 
 ## Pikakäynnistys

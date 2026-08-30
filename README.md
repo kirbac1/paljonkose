@@ -10,12 +10,16 @@ Tuotanto: **paljonkose.fi**
 
 ## Rakenne
 
-- [`files/`](files/README.md) — tuotannossa ajettava Express-palvelin ja
-  etusivu (vanilla JS, suomi + englanti). Tämä on se, mikä on oikeasti
-  julkaistu.
-- [`web/`](web/README.md) — React + TypeScript -uudelleentoteutus
-  etusivusta samaa `/api/data`-rajapintaa vasten. Prototyyppi, ei vielä
-  kytketty julkaisuun.
+- [`files/`](files/README.md) — Express-palvelin: `/api/data`, jaettavat
+  `/p/…`-sivut, `/ylitykset/`, `/kuitti/`, `/summa/`. Tätä tarvitaan
+  taustalla molemmille etusivuille. Sisältää myös **vanhan vanilla JS
+  -etusivun** (`public/index.html`), joka on nyt legacy-toteutus —
+  korvautumassa `web/`:llä.
+- [`web/`](web/README.md) — React + TypeScript, **etusivun uusi ja
+  tuleva tuotantototeutus**. Käyttää samaa `files/`-backendia
+  `/api/data`:n ja jaettavien sivujen kautta. Ei vielä kytketty
+  julkaisuputkeen (`npm run build` kirjoittaa `files/public/`-hakemistoon,
+  mutta deploy ei vielä aja sitä).
 - [`deploy/`](deploy/) — GitHub Actionsin deploy-workflow.
 - [`DEPLOYMENT.md`](DEPLOYMENT.md), [`READY-TO-DEPLOY.md`](READY-TO-DEPLOY.md) —
   SSH-pohjaisen automaattikäyttöönoton pystytys ja tila.

@@ -1,8 +1,10 @@
 # Paljonko se on? — käyttöliittymä
 
-React + TypeScript -toteutus laskimesta. Palvelin (`server.mjs`) pysyy
-ennallaan ja tarjoaa datan osoitteessa `/api/data` sekä jaettavat
-sivut osoitteissa `/p/…`, `/ylitykset/`, `/kuitti/` ja `/nostot/`.
+React + TypeScript -toteutus laskimesta — **etusivun uusi ja tuleva
+tuotantototeutus**, joka korvaa `../files/public/index.html`:n
+vanilla JS -legacy-version. Palvelin (`server.mjs`) pysyy ennallaan ja
+tarjoaa datan osoitteessa `/api/data` sekä jaettavat sivut osoitteissa
+`/p/…`, `/ylitykset/`, `/kuitti/` ja `/nostot/`.
 
 ## Komennot
 
