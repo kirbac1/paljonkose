@@ -3,15 +3,13 @@ import type { Item } from "./types";
 import { UI, label } from "./i18n";
 import { useData } from "./hooks/useData";
 import { useLang } from "./hooks/useLang";
-import { bestUnitFor, calculate, comparableItems } from "./lib/calc";
+import { OWN_ID, bestUnitFor, calculate, comboPath, comparableItems } from "./lib/calc";
 import { eur } from "./lib/format";
 import { Calculator } from "./components/Calculator";
 import { ScopeChips } from "./components/ScopeChips";
 import { OwnSum } from "./components/OwnSum";
 import { BudgetTicker } from "./components/BudgetTicker";
 import { SiteLinks } from "./components/SiteLinks";
-
-const OWN_ID = "__oma";
 
 export default function App() {
   const [lang, toggleLang] = useLang();
@@ -75,8 +73,13 @@ export default function App() {
 
   const share = useCallback(async () => {
     if (!calc) return;
+    // Jokaisella oikealla laskutoimituksella on oma, palvelimen renderöimä
+    // sivu (samat luvut, oikea og:image) — jaetaan se, ei etusivun
+    // yleistä osoitetta, joka ei kertoisi mitä lukija juuri katsoi.
+    const path = comboPath(calc, lang);
+    const url = path ? `${window.location.origin}${path}` : window.location.href;
     const text = `${eur(calc.item.amount, lang)} = ${calc.count} ${
-      label(calc.unit, lang)} — ${window.location.href}`;
+      label(calc.unit, lang)} — ${url}`;
     try {
       await navigator.clipboard.writeText(text);
       setShareLabel(t.copied);

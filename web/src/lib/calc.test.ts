@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bestUnitFor, calculate, comparableItems, rivals } from "./calc";
+import { OWN_ID, bestUnitFor, calculate, comboPath, comparableItems, rivals } from "./calc";
 import type { Dataset, Item, Unit } from "../types";
 
 const item = (over: Partial<Item> = {}): Item => ({
@@ -64,6 +64,34 @@ describe("bestUnitFor", () => {
 
   it("valitsee halvimman kun mikään ei riitä", () => {
     expect(bestUnitFor(12, units)?.id).toBe("halpa");
+  });
+});
+
+describe("comboPath", () => {
+  it("rakentaa saman slug-kaavan kuin server.mjs:n combo()", () => {
+    const c = calculate(item({ id: "pma" }), unit({ id: "hoit", cost: 1000 }));
+    expect(comboPath(c, "fi")).toBe("/p/pma-hoit/");
+  });
+
+  it("lisää muokatun hinnan slugiin, kuten palvelinkin tekee", () => {
+    const c = calculate(item({ id: "pma" }), unit({ id: "hoit", cost: 1000 }), 2500);
+    expect(comboPath(c, "fi")).toBe("/p/pma-hoit-2500/");
+  });
+
+  it("käyttää /en/-etuliitettä englanniksi", () => {
+    const c = calculate(item({ id: "pma" }), unit({ id: "hoit", cost: 1000 }));
+    expect(comboPath(c, "en")).toBe("/en/p/pma-hoit/");
+  });
+
+  it("palauttaa null lukijan omalle summalle — sillä ei ole sivua", () => {
+    const c = calculate(item({ id: OWN_ID, amount: 500 }), unit({ cost: 100 }));
+    expect(comboPath(c, "fi")).toBeNull();
+  });
+
+  it("palauttaa null kun summa jää yksikköä pienemmäksi", () => {
+    const c = calculate(item({ amount: 12 }), unit({ cost: 150 }));
+    expect(c.count).toBe(0);
+    expect(comboPath(c, "fi")).toBeNull();
   });
 });
 

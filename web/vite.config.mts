@@ -3,7 +3,11 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  build: { outDir: "../files/public", emptyOutDir: false },
+  // outDir is outside web/'s own root, so Vite won't empty it unless told
+  // to. Without this, every rebuild leaves the previous run's hashed
+  // bundle behind — and since the build output is committed to git and
+  // shipped on every deploy, those would accumulate forever.
+  build: { outDir: "../files/public", emptyOutDir: true },
   server: {
     // Kehityksessä data ja sivut tulevat olemassa olevalta Express-palvelimelta.
     proxy: {

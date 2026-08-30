@@ -1,4 +1,7 @@
-import type { Calculation, Dataset, Item, Unit } from "../types";
+import type { Calculation, Dataset, Item, Lang, Unit } from "../types";
+
+/** Lukijan oman summan synteettinen erä-id. Ei koskaan omaa /p/-sivua. */
+export const OWN_ID = "__oma";
 
 /**
  * Laskutoimitus. Puhdas funktio ilman React-riippuvuuksia, jotta se on
@@ -39,6 +42,19 @@ export function bestUnitFor(amount: number, units: Unit[]): Unit | undefined {
   }
   return units.reduce<Unit | undefined>(
     (a, b) => (!a || b.cost < a.cost ? b : a), undefined);
+}
+
+/**
+ * Polku laskutoimituksen omalle jaettavalle sivulle (sama slug-kaava kuin
+ * server.mjs:n combo()), tai null jos sellaista ei ole: lukijan oma summa
+ * ei koskaan saa sivua, eikä yksikköä pienempi summa (server ei tee
+ * sivua kun count < 1 — se näyttäisi tyhjän tai nollan).
+ */
+export function comboPath(calc: Calculation, lang: Lang): string | null {
+  if (calc.item.id === OWN_ID || calc.count < 1) return null;
+  const slug = `${calc.item.id}-${calc.unit.id}` +
+    (calc.edited ? `-${Math.round(calc.cost)}` : "");
+  return lang === "en" ? `/en/p/${slug}/` : `/p/${slug}/`;
 }
 
 /**

@@ -8,6 +8,9 @@ dist/
 playwright-report/
 test-results/
 
+# runtime data — written by server.mjs, not source
+stats.json
+
 # local env / secrets
 .env
 .env.local
