@@ -52,7 +52,16 @@ Tarkemmat kuvaukset kummankin testijoukon kattavuudesta:
 
 ---
 
+## CI/CD
+
+[`.github/workflows/`](.github/workflows/) ajaa testit (`test.yml`,
+kutsuttuna sekä `ci.yml`:stä että `deploy.yml`:stä) jokaisella pushilla ja
+PR:llä. `main`-haaraan pushatessa `deploy.yml` rsynkkaa `files/`-hakemiston
+Plesk-palvelimelle, asentaa riippuvuudet siellä ja käynnistää sovelluksen
+uudelleen Passengerin kautta. `web/` ei ole vielä osa julkaisuputkea.
+
 ## Tuotantoon
 
-Katso [`DEPLOYMENT.md`](DEPLOYMENT.md) GitHub Actions -käyttöönotolle tai
-[`files/README.md`](files/README.md#tuotantoon) Docker-pohjaiselle ajolle.
+Automaattinen: push `main`-haaraan, katso `Actions`-välilehti. Manuaalinen
+vaihtoehto ja pystytysohjeet: [`DEPLOYMENT.md`](DEPLOYMENT.md). Docker-
+pohjaiselle ajolle: [`files/README.md`](files/README.md#tuotantoon).

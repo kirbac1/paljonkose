@@ -1,0 +1,133 @@
+name: Deploy to production
+
+# Ships files/ (the live vanilla-JS app) to the Plesk server on every push
+# to main. web/ is a local prototype and is not part of the release.
+#
+# Server facts below were confirmed by SSHing in on 2026-08-30 — re-check
+# them if the deploy step starts failing after server-side changes:
+#   - Passenger's app root is ~/paljonkose/current/files (`ps` shows
+#     `Passenger NodeApp: .../paljonkose/current/files`)
+#   - Passenger restarts the app when files/tmp/restart.txt's mtime changes
+#   - node comes from nodenv; it resolves the version from a .node-version
+#     file at the release root (sibling of files/, not inside it) — "22"
+#     is what the current release uses
+#   - paljonkose.fi did not resolve from the server yet; the address that
+#     actually answers is https://paljonkose.kirbac.fi — set a `SITE_URL`
+#     repo variable (Settings → Secrets and variables → Actions →
+#     Variables) once the apex domain's DNS is confirmed live, to point
+#     the health check there instead
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Never let two deploys race — cancelling mid-rsync would leave a
+# half-written release, and two npm ci's on the same release would stomp
+# on each other.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
+  deploy:
+    name: Ship files/ and restart Passenger
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    env:
+      HEALTH_URL: ${{ vars.SITE_URL || 'https://paljonkose.kirbac.fi' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          # Pin the host key instead of accepting whatever answers, so a
+          # DNS or routing surprise cannot silently redirect the deploy.
+          if [ -n "${{ secrets.DEPLOY_KNOWN_HOSTS }}" ]; then
+            printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          else
+            echo "::warning::DEPLOY_KNOWN_HOSTS not set — falling back to ssh-keyscan (trust on first use)."
+            ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          fi
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Ship the release and restart Passenger
+        env:
+          SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          RELEASE="paljonkose/releases/$(date -u +%Y%m%d-%H%M%S)-${GITHUB_SHA::7}"
+
+          ssh -o BatchMode=yes "$SSH_USER@$SSH_HOST" "mkdir -p '$RELEASE/files'"
+
+          # Only files/ is deployed. node_modules is reinstalled on the
+          # server (resvg-js ships a native binary — safer to install it
+          # where it'll actually run than to copy a binary built on the
+          # Actions runner's architecture). tests/ and Playwright's own
+          # output have no business in a release either.
+          rsync -az -e "ssh -o BatchMode=yes" \
+            --exclude node_modules \
+            --exclude tests \
+            --exclude playwright-report \
+            --exclude test-results \
+            files/ "$SSH_USER@$SSH_HOST:$RELEASE/files/"
+
+          # Env vars in, not interpolated into a nested quoted string —
+          # quoting through ssh is the classic place this kind of script
+          # breaks.
+          ssh -o BatchMode=yes "$SSH_USER@$SSH_HOST" \
+            RELEASE="$RELEASE" KEEP=5 bash -s <<'REMOTE'
+          set -euo pipefail
+          cd "$HOME/$RELEASE"
+
+          # Matches the version the currently-live release runs under.
+          echo "22" > .node-version
+          export PATH="$HOME/.nodenv/shims:$PATH"
+
+          cd files
+          npm ci --omit=dev --no-audit --no-fund
+
+          ln -sfn "$HOME/$RELEASE" "$HOME/paljonkose/current.tmp"
+          mv -Tf "$HOME/paljonkose/current.tmp" "$HOME/paljonkose/current"
+
+          # Passenger restarts the app once this file's mtime changes.
+          mkdir -p "$HOME/paljonkose/current/files/tmp"
+          touch "$HOME/paljonkose/current/files/tmp/restart.txt"
+
+          # Prune by name, not mtime: release dirs are YYYYmmdd-HHMMSS-sha,
+          # so reverse lexicographic order is reverse chronological order,
+          # and two releases made in the same second still sort correctly.
+          cd "$HOME/paljonkose/releases"
+          live="$(readlink -f "$HOME/paljonkose/current")"
+          ls -1d -- */ | sort -r | tail -n +$((KEEP + 1)) | while read -r d; do
+            # Never delete whatever is currently live, whatever the sort says.
+            if [ "$(readlink -f "$d")" = "$live" ]; then continue; fi
+            rm -rf -- "$d"
+          done
+          REMOTE
+
+          echo "Deployed ${GITHUB_SHA::7} to $RELEASE"
+
+      - name: Verify the site responds
+        run: |
+          # A deploy that "succeeded" but serves an error page is not a
+          # success. Passenger needs a moment to restart, hence the retries.
+          for i in 1 2 3 4 5; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 "$HEALTH_URL/healthz" || echo 000)
+            [ "$code" = "200" ] && { echo "✓ $HEALTH_URL/healthz returned 200"; exit 0; }
+            echo "attempt $i: got $code, retrying…"
+            sleep 6
+          done
+          echo "::error::$HEALTH_URL/healthz did not return 200 after the deploy."
+          exit 1

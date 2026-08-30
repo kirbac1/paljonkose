@@ -1,5 +1,13 @@
 # GitHub Actions Deployment Setup
 
+> **This is now live.** [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
+> runs the test suite, then rsyncs `files/` to the server, runs `npm ci`
+> there, flips the `current` symlink, and touches `files/tmp/restart.txt`
+> to make Passenger pick up the new code — on every push to `main`. The
+> rest of this document is the original manual setup guide; it's still
+> useful for understanding the release layout and for troubleshooting,
+> but you no longer need to run these steps by hand.
+
 This project uses GitHub Actions to automatically deploy to your production server on every push to `main`.
 
 **Deployment Directory:** `~/paljonkose/` (in your home directory - no sudo needed!)

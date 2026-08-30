@@ -1,0 +1,17 @@
+name: CI
+
+# The safety net in front of every push and PR — if a change breaks
+# render.mjs, the calculator UI, or the React prototype, this is where
+# it shows up, rather than at deploy time.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
