@@ -14,6 +14,7 @@
  */
 
 import fs from "node:fs/promises";
+import { ITEMS_EN, UNITS_EN, SCOPES_EN, PAALUOKAT_EN } from "./i18n-data.mjs";
 
 const OUT = "data.json";
 const now = new Date().toISOString();
@@ -52,13 +53,6 @@ const SOURCES = {
     docs: "https://pxdata.stat.fi/PXWeb/pxweb/fi/",
     licence: "CC BY 4.0",
     kind: "api"
-  },
-  hinta: {
-    name: "Kuluttajahinta — karkea keskiarvo",
-    docs: "https://www.stat.fi/tilasto/khi",
-    licence: "—",
-    kind: "estimate",
-    note: "Vaihtelee paikkakunnittain ja liikkeittäin. Muokkaa hintaa itse."
   },
   hanke: {
     name: "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
@@ -193,7 +187,7 @@ const SCOPES = {
   turku:    { id:"turku",    label:"Turku",     vakiluku:   200_000 },
   oulu:     { id:"oulu",     label:"Oulu",      vakiluku:   215_000 },
   tuleva:   { id:"tuleva",   label:"Suunnitteilla", vakiluku: 5_600_000 },
-  arki:     { id:"arki",     label:"Arkiostokset",  vakiluku: 5_600_000, arki:true }
+  uusimaa:  { id:"uusimaa",  label:"Uusimaa",       vakiluku: 1_750_000 }
 };
 
 const PLAN = {
@@ -260,6 +254,26 @@ const PLAN = {
     { id:"oul-budjetti", scope:"oulu", label:"Oulun budjetti", source:"vk_kunta",
       fallback: 1_300_000_000, note:"käyttötalous — TARKISTA vuosi ja luku" },
 
+    /* Apotti — HUSin ja Uudenmaan kuntien potilastietojärjestelmä.
+       Luvut vaihtelevat sen mukaan mitä lasketaan mukaan. Käytetään
+       HUSin tarkastuslautakunnan lukua (625,6 M€, 229,5 M€ yli arvion),
+       koska se on tilintarkastuksen luku ja Apotti itse päätyy samaan
+       58 %:n kasvuun. */
+    { id:"apotti", scope:"uusimaa", label:"Apotti", source:"hanke",
+      fallback: 626_000_000, arvio: 396_000_000,
+      note:"HUSin tarkastuslautakunta 2022: 625,6 M€, 229,5 M€ yli alkuperäisen arvion; " +
+           "suurin syy oli 41 % arvioitua suurempi käyttäjämäärä" },
+
+    /* Rekisterissä vain vertailukohtana: EI valtion tai kunnan rahaa,
+       vaan TVO:n ja sen omistajien investointi. Siksi vainRekisteri —
+       tämä ei kuulu budjettivertailuihin eikä per capita -laskuun. */
+    { id:"ol3", scope:"tuleva", vainRekisteri: true,
+      label:"Olkiluoto 3", source:"hanke",
+      fallback: 5_800_000_000, arvio: 3_200_000_000,
+      note:"TVO:n investointi 5,8 mrd €; sopimushinta 2002 oli 3,2 mrd €. " +
+           "Kokonaiskustannus laitostoimittajan tappiot mukaan lukien on arvioitu " +
+           "n. 11 mrd €:ksi. EI julkista rahaa — mukana vain vertailukohtana" },
+
     /* ── Suunnitteilla ──────────────────────────────────────────────
        Nämä ovat arvioita, eivät toteutuneita kustannuksia. Suunnittelu
        on eri vaiheissa ja luvut tarkentuvat — merkitty tuleva: true. */
@@ -276,30 +290,6 @@ const PLAN = {
     { id:"suomirata", scope:"tuleva", tuleva:true, paatos:"ratahankkeet", label:"Suomi-rata (suurnopeusvaihtoehto)", source:"hanke",
       fallback: 5_500_000_000,
       note:"lentorata + uusi suurnopeusrata; halvempi vaihtoehto 4,0 mrd €; suunnittelu keskeytetty" },
-
-    /* ── Arkiostokset ───────────────────────────────────────────────
-       Kertaluokka on toinen, laskutoimitus sama. Hinnat ovat karkeita
-       keskiarvoja ja vaihtelevat paikkakunnittain — siksi jokainen on
-       lukijan muokattavissa, kuten muutkin yksikköhinnat.
-       Sävysääntö: ei paheita, ei syyllistämistä. Vertailu on
-       kokoluokan havainnollistus, ei talousneuvo. */
-
-    { id:"ark-burgeri",  scope:"arki", arki:true, source:"hinta", fallback: 12,
-      label:"Hampurilaisateria",        note:"pikaruokala, ateria juomineen" },
-    { id:"ark-latte",    scope:"arki", arki:true, source:"hinta", fallback: 5,
-      label:"Erikoiskahvi kahvilassa",  note:"latte tai vastaava" },
-    { id:"ark-lounas",   scope:"arki", arki:true, source:"hinta", fallback: 13,
-      label:"Lounas ravintolassa",      note:"arkilounas" },
-    { id:"ark-suoratoisto", scope:"arki", arki:true, source:"hinta", fallback: 168,
-      label:"Suoratoistopalvelu vuodeksi", note:"n. 14 €/kk" },
-    { id:"ark-liittyma", scope:"arki", arki:true, source:"hinta", fallback: 300,
-      label:"Puhelinliittymä vuodeksi", note:"n. 25 €/kk" },
-    { id:"ark-puhelin",  scope:"arki", arki:true, source:"hinta", fallback: 900,
-      label:"Uusi puhelin",             note:"keskihintainen älypuhelin" },
-    { id:"ark-renkaat",  scope:"arki", arki:true, source:"hinta", fallback: 600,
-      label:"Talvirenkaat",             note:"rengassarja asennettuna" },
-    { id:"ark-lomamatka", scope:"arki", arki:true, source:"hinta", fallback: 800,
-      label:"Viikon etelänmatka",       note:"yksi henkilö, valmismatka" }
   ],
   /* Valtion budjetin pääluokat. Verokuitti jakaa maksetun valtionveron
      näiden osuuksien suhteessa. Luvut ovat vuoden 2026 talousarviosta ja
@@ -324,15 +314,6 @@ const PLAN = {
   ],
 
   units: [
-    /* Arkiyksiköt — pieni kertaluokka. Merkitty arki:true, jotta
-       miljardeja ei tarjota porkkanakiloina eikä toisin päin. */
-    { id:"pork",  arki:true, label:"kiloa porkkanoita", source:"hinta", fallback:1.5, note:"kaupan kilohinta" },
-    { id:"maito", arki:true, label:"litraa maitoa",     source:"hinta", fallback:1.2, note:"kevytmaito" },
-    { id:"leipa", arki:true, label:"leipää",            source:"hinta", fallback:2.5, note:"tavallinen ruokaleipä" },
-    { id:"bussi", arki:true, label:"bussilippua",       source:"hinta", fallback:3.2, note:"kertalippu, kaupunkiliikenne" },
-    { id:"leffa", arki:true, label:"elokuvalippua",     source:"hinta", fallback:14,  note:"aikuinen, ilta" },
-    { id:"kirja", arki:true, label:"kirjaa",            source:"hinta", fallback:25,  note:"uusi kovakantinen" },
-
     { id:"ruoka",  label:"viikon ruokaostosta",         source:"arvio",   fallback:150,     note:"perhe, viikko" },
     { id:"lapsi",  label:"lapsilisää vuodeksi",         source:"arvio",   fallback:1500,    note:"yksi lapsi" },
     { id:"palkka", label:"kuukauden palkkaa",           source:"statfin",
@@ -362,9 +343,8 @@ async function resolve(entry) {
     scope: entry.scope || "valtio",
     arvio: entry.arvio || null,
     tuleva: !!entry.tuleva,
-    arki: !!entry.arki,
     paatos: entry.paatos || null,
-    arkiYksikko: !!entry.arki,
+    vainRekisteri: !!entry.vainRekisteri,
     label: entry.label,
     note: entry.note,
     source: { ...src, retrieved: null }
@@ -410,7 +390,7 @@ for (const e of PLAN.items) items.push(await resolve(e));
 // Budjetin ylitys omaksi menoeräkseen. Alitus merkitään erikseen.
 const johdetut = [];
 for (const it of items) {
-  if (!it.arvio || it.tuleva) continue;
+  if (!it.arvio || it.tuleva || it.vainRekisteri) continue;
   const ero = it.value - it.arvio;
   if (Math.abs(ero) < 1_000_000) continue;
   johdetut.push({
@@ -463,17 +443,24 @@ const out = {
   } : null,
   vakiluku: vak.value,
   vakilukuSource: vak.source,
-  scopes: SCOPES,
+  scopes: Object.fromEntries(Object.entries(SCOPES).map(([k, v]) =>
+    [k, { ...v, label_en: SCOPES_EN[k] || v.label }])),
   vakilukuLahde: SOURCES.kuntien_avainluvut,
   items: items.map(i => ({
-    id:i.id, scope:i.scope, label:i.label, amount:i.value, arvio:i.arvio || null, tuleva:!!i.tuleva, arki:!!i.arki, paatos:i.paatos||null,
+    id:i.id, scope:i.scope, label:i.label, amount:i.value, arvio:i.arvio || null, tuleva:!!i.tuleva, paatos:i.paatos||null, vainRekisteri:!!i.vainRekisteri,
+    label_en: (ITEMS_EN[i.id] || [])[0] || i.label,
+    note_en:  (ITEMS_EN[i.id] || [])[1] ?? i.note,
     vakiluku: SCOPES[i.scope]?.vakiluku ?? vak.value,
     note:i.note, status:i.status, source:i.source
   })),
   paaluokat: PLAN.paaluokat.map(p => ({
-    id:p.id, label:p.label, amount:p.fallback, note:p.note || "", status:"kasin"
+    id:p.id, label:p.label, amount:p.fallback, note:p.note || "", status:"kasin",
+    label_en: (PAALUOKAT_EN[p.id] || [])[0] || p.label,
+    note_en:  (PAALUOKAT_EN[p.id] || [])[1] ?? (p.note || "")
   })),
-  units: units.map(u => ({ id:u.id, label:u.label, cost:u.value,  note:u.note, status:u.status, source:u.source, arki:!!u.arki }))
+  units: units.map(u => ({ id:u.id, label:u.label, cost:u.value,  note:u.note, status:u.status, source:u.source,
+    label_en: (UNITS_EN[u.id] || [])[0] || u.label,
+    note_en:  (UNITS_EN[u.id] || [])[1] ?? u.note }))
 };
 
 await fs.writeFile(OUT, JSON.stringify(out, null, 2), "utf8");

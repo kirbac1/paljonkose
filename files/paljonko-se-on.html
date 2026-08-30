@@ -38,11 +38,18 @@
   }
   .wrap{max-width:560px;margin:0 auto;padding:22px 18px 60px}
 
-  .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+  .top{display:flex;justify-content:space-between;align-items:center;
+    gap:10px;flex-wrap:wrap;margin-bottom:20px}
+  .topleft{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .day{
     background:var(--ink);color:var(--bg);border-radius:100px;
     padding:6px 14px;font-weight:600;font-size:13px;
   }
+  .langsw{flex:none;font-size:13px;font-weight:700;background:#fff;
+    padding:7px 14px;border-radius:99px;text-decoration:none;color:var(--ink);
+    border:2px solid var(--ink);line-height:1;white-space:nowrap;
+    transition:background .15s,color .15s}
+  .langsw:hover,.langsw:focus{background:var(--ink);color:#fff}
   .tag{font-weight:600;font-size:13px;color:var(--soft)}
 
   h1{
@@ -203,12 +210,15 @@
 <div class="wrap">
 
   <div class="top">
-    <span class="day" id="entryDate"></span>
-    <span class="tag">uusi joka päivä</span>
+    <div class="topleft">
+      <span class="day" id="entryDate"></span>
+      <span class="tag" data-i18n="tag">uusi joka päivä</span>
+    </div>
+    <a class="langsw" id="langsw" href="/en/" hreflang="en">In English</a>
   </div>
 
-  <h1>Paljonko se on?</h1>
-  <p class="sub">Miljardi euroa ei tarkoita kenellekään mitään. Vaihda mittari niin se tarkoittaa.</p>
+  <h1 data-i18n="h1">Paljonko se on?</h1>
+  <p class="sub" data-i18n="sub">Miljardi euroa ei tarkoita kenellekään mitään. Vaihda mittari niin se tarkoittaa.</p>
 
   <div class="scopes" id="scopes" role="group" aria-label="Valitse alue"></div>
 
@@ -231,23 +241,23 @@
     <p class="rest" id="overflow"></p>
 
     <details class="calc">
-      <summary>Näytä laskutoimitus</summary>
+      <summary data-i18n="showCalc">Näytä laskutoimitus</summary>
       <div class="calcbody" id="calc"></div>
     </details>
 
     <p class="cost">
-      Hinta-arvio: <input id="unitCost" type="number" min="1" step="100" inputmode="numeric" aria-label="Yksikköhinta euroina"> €
-      <span id="unitNote"></span> — muuta jos tiedät paremmin
+      <span data-i18n="priceEst">Hinta-arvio:</span> <input id="unitCost" type="number" min="1" step="100" inputmode="numeric" aria-label="Yksikköhinta euroina"> €
+      <span id="unitNote"></span> <span data-i18n="changeIt">— muuta jos tiedät paremmin</span>
     </p>
 
     <p class="prov" id="prov"></p>
 
-    <button class="go" id="copyBtn">Kopioi ja jaa</button>
+    <button class="go" id="copyBtn" data-i18n="share">Kopioi ja jaa</button>
   </div>
 
   <div class="card extra">
-    <p class="xlabel">Oma summa</p>
-    <p class="xhint">Uutisessa vilahti luku? Syötä se tähän.</p>
+    <p class="xlabel" data-i18n="ownSum">Oma summa</p>
+    <p class="xhint" data-i18n="ownSumHint">Uutisessa vilahti luku? Syötä se tähän.</p>
     <div class="xrow">
       <input id="omaSumma" inputmode="numeric" placeholder="340000000" aria-label="Summa euroina">
       <button id="omaBtn">Paljonko se on?</button>
@@ -255,21 +265,21 @@
   </div>
 
   <div class="card extra">
-    <p class="xlabel">Valtion budjetti kuluu juuri nyt</p>
+    <p class="xlabel" data-i18n="ticker">Valtion budjetti kuluu juuri nyt</p>
     <p class="tick" id="tick">—</p>
-    <p class="xhint">Tasainen jako 91,3 mrd € / vuosi. Todellisuudessa meno ei
+    <p class="xhint" data-i18n="tickerNote">Tasainen jako 91,3 mrd € / vuosi. Todellisuudessa meno ei
       jakaudu tasaisesti pitkin vuotta.</p>
   </div>
 
   <p class="links">
-    <a href="/ylitykset/">Arvio vs. toteutunut →</a>
-    <a href="/kuitti/">Verokuitti →</a>
+    <a href="/ylitykset/" id="lnkOverruns" data-i18n="lnkOverruns">Arvio vs. toteutunut →</a>
+    <a href="/kuitti/" id="lnkReceipt" data-i18n="lnkReceipt">Verokuitti →</a>
   </p>
 
   <div class="strip" id="archive"></div>
 
   <details>
-    <summary>Mistä luvut tulevat</summary>
+    <summary data-i18n="sources">Mistä luvut tulevat</summary>
     <p>Jokainen luku kantaa oman alkuperänsä. Alla näkyy jokaisesta: mistä se on haettu, milloin, ja onko se virallinen luku vai arvio. Vihreä tarkoittaa suoraan rajapinnasta haettua.</p>
     <table class="srctable" id="srctable"></table>
     <p class="stamp" id="stamp"></p>
@@ -277,7 +287,7 @@
   </details>
 
   <details>
-    <summary>Pieni printti</summary>
+    <summary data-i18n="fineprint">Pieni printti</summary>
     <p><strong>Rahat eivät oikeasti liiku näin.</strong> Hoitajat ja päiväkodit maksetaan hyvinvointialueiden ja kuntien pussista, eivät valtion puolustusmomenteilta. Luku kertoo mittasuhteen, ei toteutettavaa vaihtoehtoa.</p>
     <p><strong>Ukraina-apu ei ole kassasta maksettua rahaa.</strong> Iso osa on Puolustusvoimien varastoista luovutettua tavaraa, jolle on laskettu arvo. Osa palautuu Euroopan rauhanrahastosta — vuoden 2026 budjetissa 208 M€.</p>
     <p><strong>Kertymä ei ole sama kuin vuosi.</strong> Ukraina-luvut ovat vuodesta 2022 kertyneitä, budjettiluvut yhden vuoden summia.</p>
@@ -306,73 +316,62 @@ const ENTRIES = [
 // Varalista: käytetään vain jos data.json ei lataudu (esim. tiedosto auki
 // suoraan levyltä). Pidä synkassa fetch-data.mjs:n PLAN-listan kanssa.
 const SCOPES_FALLBACK = {
-  valtio: { id:"valtio", label:"Valtio", vakiluku:5600000 },
-  helsinki: { id:"helsinki", label:"Helsinki", vakiluku:680000 },
-  tampere: { id:"tampere", label:"Tampere", vakiluku:260000 },
-  turku: { id:"turku", label:"Turku", vakiluku:200000 },
-  oulu: { id:"oulu", label:"Oulu", vakiluku:215000 },
-  tuleva: { id:"tuleva", label:"Suunnitteilla", vakiluku:5600000 },
-  arki: { id:"arki", label:"Arkiostokset", vakiluku:5600000 }
+  valtio: { id:"valtio", label:"Valtio", label_en:"State", vakiluku:5600000 },
+  helsinki: { id:"helsinki", label:"Helsinki", label_en:"Helsinki", vakiluku:680000 },
+  tampere: { id:"tampere", label:"Tampere", label_en:"Tampere", vakiluku:260000 },
+  turku: { id:"turku", label:"Turku", label_en:"Turku", vakiluku:200000 },
+  oulu: { id:"oulu", label:"Oulu", label_en:"Oulu", vakiluku:215000 },
+  tuleva: { id:"tuleva", label:"Suunnitteilla", label_en:"Planned", vakiluku:5600000 },
+  uusimaa: { id:"uusimaa", label:"Uusimaa", label_en:"Uusimaa", vakiluku:1750000 }
 };
 
 const V = 5_600_000, HKI = 680_000, TRE = 260_000, TKU = 200_000, OUL = 215_000;
 
 const ITEMS_FALLBACK = [
-  { id:"pma", scope:"valtio", vakiluku:5600000, label:"Ukraina: aseapu", amount:3400000000, note:"kertymä 2022–5/2026, 33 pakettia" },
-  { id:"hum", scope:"valtio", vakiluku:5600000, label:"Ukraina: siviiliapu", amount:1200000000, note:"kertymä, sis. vastaanottokuluja" },
-  { id:"f35", scope:"valtio", vakiluku:5600000, label:"hävittäjät", amount:1400000000, note:"talousarvio 2026" },
-  { id:"pmh", scope:"valtio", vakiluku:5600000, label:"puolustushankinnat", amount:1500000000, note:"talousarvio 2026" },
-  { id:"pvtm", scope:"valtio", vakiluku:5600000, label:"Puolustusvoimat", amount:2600000000, note:"toimintamenot 2026" },
-  { id:"koko", scope:"valtio", vakiluku:5600000, label:"koko valtion budjetti", amount:91300000000, note:"talousarvio 2026" },
-  { id:"hki-budjetti", scope:"helsinki", vakiluku:680000, label:"Helsingin budjetti", amount:6000000000, note:"käyttötalous — TARKISTA vuosi ja luku" },
-  { id:"hki-lansimetro", scope:"helsinki", vakiluku:680000, label:"Länsimetro, 1. vaihe", amount:1186000000, note:"Ruoholahti–Matinkylä; valtuustojen hyväksymä arvio 2008 oli 714 M€" },
-  { id:"hki-kruunusillat", scope:"helsinki", vakiluku:680000, label:"Kruunusillat", amount:800000000, note:"raitiotieyhteys Laajasaloon; hinta kaksinkertaistui 2021" },
-  { id:"hki-jokeri", scope:"helsinki", vakiluku:680000, label:"Raide-Jokeri", amount:386000000, note:"Helsinki 268 M€ + Espoo 118 M€; arvio 2016 oli 275 M€" },
-  { id:"hki-stadion", scope:"helsinki", vakiluku:680000, label:"Olympiastadionin remontti", amount:337000000, note:"lopullinen hinta 337 M€, VTV:n mukaan arvio oli 197 M€" },
-  { id:"hki-oodi", scope:"helsinki", vakiluku:680000, label:"Oodi", amount:98000000, note:"keskustakirjasto, valmistui 2018 — TARKISTA" },
-  { id:"tre-budjetti", scope:"tampere", vakiluku:260000, label:"Tampereen budjetti", amount:1500000000, note:"käyttötalous — TARKISTA vuosi ja luku" },
-  { id:"tre-ratikka", scope:"tampere", vakiluku:260000, label:"Ratikka, osa 1", amount:240000000, note:"Hervanta–keskusta–Tays; valtion osuus 71 M€" },
-  { id:"tre-ratikka2", scope:"tampere", vakiluku:260000, label:"Ratikka, osa 2", amount:44000000, note:"keskusta–Hiedanranta–Lentävänniemi, arvio 2016" },
-  { id:"tre-vaunut", scope:"tampere", vakiluku:260000, label:"Ratikkavaunut", amount:81000000, note:"kalustohankinta, arvio 2016" },
-  { id:"tre-tunneli", scope:"tampere", vakiluku:260000, label:"Rantatunneli", amount:176000000, note:"Suomen pisin maantietunneli; tavoitekustannus ALITTUI 4,1 M€:lla" },
-  { id:"tre-areena", scope:"tampere", vakiluku:260000, label:"Kansi ja Areena", amount:550000000, note:"koko hanke, kaupungin osuus pienempi — TARKISTA" },
-  { id:"tku-budjetti", scope:"turku", vakiluku:200000, label:"Turun budjetti", amount:1200000000, note:"käyttötalous — TARKISTA vuosi ja luku" },
-  { id:"tku-ratikka", scope:"turku", vakiluku:200000, label:"Turun raitiotie", amount:300000000, note:"hankearvio — TARKISTA" },
-  { id:"oul-budjetti", scope:"oulu", vakiluku:215000, label:"Oulun budjetti", amount:1300000000, note:"käyttötalous — TARKISTA vuosi ja luku" },
-  { id:"lansirata", scope:"tuleva", vakiluku:5600000, label:"Länsirata (Turun tunnin juna)", amount:3400000000, note:"alustava arvio, v. 2022 hintataso; nimellisarvo 4,82 mrd €; hyöty-kustannussuhde 0,44", tuleva:true },
-  { id:"lentorata", scope:"tuleva", vakiluku:5600000, label:"Lentorata", amount:2700000000, note:"30 km rataa, josta 28 km tunnelissa; Pasila–lentoasema–Kerava", tuleva:true },
-  { id:"itarata", scope:"tuleva", vakiluku:5600000, label:"Itärata", amount:1800000000, note:"Helsinki–Porvoo–Kouvola; nimellisarvo 3,48 mrd €; esisuunnittelu kesken", tuleva:true },
-  { id:"suomirata", scope:"tuleva", vakiluku:5600000, label:"Suomi-rata (suurnopeusvaihtoehto)", amount:5500000000, note:"lentorata + uusi suurnopeusrata; halvempi vaihtoehto 4,0 mrd €; suunnittelu keskeytetty", tuleva:true },
-  { id:"ark-burgeri", scope:"arki", vakiluku:5600000, label:"Hampurilaisateria", amount:12, note:"pikaruokala, ateria juomineen", arki:true },
-  { id:"ark-latte", scope:"arki", vakiluku:5600000, label:"Erikoiskahvi kahvilassa", amount:5, note:"latte tai vastaava", arki:true },
-  { id:"ark-lounas", scope:"arki", vakiluku:5600000, label:"Lounas ravintolassa", amount:13, note:"arkilounas", arki:true },
-  { id:"ark-suoratoisto", scope:"arki", vakiluku:5600000, label:"Suoratoistopalvelu vuodeksi", amount:168, note:"n. 14 €/kk", arki:true },
-  { id:"ark-liittyma", scope:"arki", vakiluku:5600000, label:"Puhelinliittymä vuodeksi", amount:300, note:"n. 25 €/kk", arki:true },
-  { id:"ark-puhelin", scope:"arki", vakiluku:5600000, label:"Uusi puhelin", amount:900, note:"keskihintainen älypuhelin", arki:true },
-  { id:"ark-renkaat", scope:"arki", vakiluku:5600000, label:"Talvirenkaat", amount:600, note:"rengassarja asennettuna", arki:true },
-  { id:"ark-lomamatka", scope:"arki", vakiluku:5600000, label:"Viikon etelänmatka", amount:800, note:"yksi henkilö, valmismatka", arki:true },
-  { id:"hki-lansimetro-ylitys", scope:"helsinki", vakiluku:680000, label:"Länsimetro, 1. vaihe: ylitys", amount:472000000, note:"toteutunut 1186 M€, arvio oli 714 M€" },
-  { id:"hki-kruunusillat-ylitys", scope:"helsinki", vakiluku:680000, label:"Kruunusillat: ylitys", amount:420000000, note:"toteutunut 800 M€, arvio oli 380 M€" },
-  { id:"hki-jokeri-ylitys", scope:"helsinki", vakiluku:680000, label:"Raide-Jokeri: ylitys", amount:111000000, note:"toteutunut 386 M€, arvio oli 275 M€" },
-  { id:"hki-stadion-ylitys", scope:"helsinki", vakiluku:680000, label:"Olympiastadionin remontti: ylitys", amount:140000000, note:"toteutunut 337 M€, arvio oli 197 M€" },
-  { id:"tre-tunneli-ylitys", scope:"tampere", vakiluku:260000, label:"Rantatunneli: alitus", amount:4000000, note:"arvio oli 180 M€, toteutunut 176 M€ — hanke alitti budjettinsa" }
+  { id:"pma", scope:"valtio", vakiluku:5600000, label:"Ukraina: aseapu", label_en:"Ukraine: military aid", amount:3400000000, note:"kertymä 2022–5/2026, 33 pakettia", note_en:"cumulative 2022–5/2026, 33 packages" },
+  { id:"hum", scope:"valtio", vakiluku:5600000, label:"Ukraina: siviiliapu", label_en:"Ukraine: civilian aid", amount:1200000000, note:"kertymä, sis. vastaanottokuluja", note_en:"cumulative, incl. reception costs" },
+  { id:"f35", scope:"valtio", vakiluku:5600000, label:"hävittäjät", label_en:"fighter jets", amount:1400000000, note:"talousarvio 2026", note_en:"2026 budget" },
+  { id:"pmh", scope:"valtio", vakiluku:5600000, label:"puolustushankinnat", label_en:"defence procurement", amount:1500000000, note:"talousarvio 2026", note_en:"2026 budget" },
+  { id:"pvtm", scope:"valtio", vakiluku:5600000, label:"Puolustusvoimat", label_en:"Defence Forces", amount:2600000000, note:"toimintamenot 2026", note_en:"operating expenses 2026" },
+  { id:"koko", scope:"valtio", vakiluku:5600000, label:"koko valtion budjetti", label_en:"the entire state budget", amount:91300000000, note:"talousarvio 2026", note_en:"2026 budget" },
+  { id:"hki-budjetti", scope:"helsinki", vakiluku:680000, label:"Helsingin budjetti", label_en:"Helsinki city budget", amount:6000000000, note:"käyttötalous — TARKISTA vuosi ja luku", note_en:"operating budget — VERIFY year and figure" },
+  { id:"hki-lansimetro", scope:"helsinki", vakiluku:680000, label:"Länsimetro, 1. vaihe", label_en:"West Metro, phase 1", amount:1186000000, note:"Ruoholahti–Matinkylä; valtuustojen hyväksymä arvio 2008 oli 714 M€", note_en:"Ruoholahti–Matinkylä; the 2008 estimate approved by the councils was 714 M€" },
+  { id:"hki-kruunusillat", scope:"helsinki", vakiluku:680000, label:"Kruunusillat", label_en:"Crown Bridges", amount:800000000, note:"raitiotieyhteys Laajasaloon; hinta kaksinkertaistui 2021", note_en:"tram link to Laajasalo; cost doubled in 2021" },
+  { id:"hki-jokeri", scope:"helsinki", vakiluku:680000, label:"Raide-Jokeri", label_en:"Jokeri Light Rail", amount:386000000, note:"Helsinki 268 M€ + Espoo 118 M€; arvio 2016 oli 275 M€", note_en:"Helsinki 268 M€ + Espoo 118 M€; 2016 estimate was 275 M€" },
+  { id:"hki-stadion", scope:"helsinki", vakiluku:680000, label:"Olympiastadionin remontti", label_en:"Olympic Stadium renovation", amount:337000000, note:"lopullinen hinta 337 M€, VTV:n mukaan arvio oli 197 M€", note_en:"final cost 337 M€; according to the National Audit Office the estimate was 197 M€" },
+  { id:"hki-oodi", scope:"helsinki", vakiluku:680000, label:"Oodi", label_en:"Oodi", amount:98000000, note:"keskustakirjasto, valmistui 2018 — TARKISTA", note_en:"central library, completed 2018 — VERIFY" },
+  { id:"tre-budjetti", scope:"tampere", vakiluku:260000, label:"Tampereen budjetti", label_en:"Tampere city budget", amount:1500000000, note:"käyttötalous — TARKISTA vuosi ja luku", note_en:"operating budget — VERIFY year and figure" },
+  { id:"tre-ratikka", scope:"tampere", vakiluku:260000, label:"Ratikka, osa 1", label_en:"Tram, part 1", amount:240000000, note:"Hervanta–keskusta–Tays; valtion osuus 71 M€", note_en:"Hervanta–centre–Tays; state share 71 M€" },
+  { id:"tre-ratikka2", scope:"tampere", vakiluku:260000, label:"Ratikka, osa 2", label_en:"Tram, part 2", amount:44000000, note:"keskusta–Hiedanranta–Lentävänniemi, arvio 2016", note_en:"centre–Hiedanranta–Lentävänniemi, 2016 estimate" },
+  { id:"tre-vaunut", scope:"tampere", vakiluku:260000, label:"Ratikkavaunut", label_en:"Tram vehicles", amount:81000000, note:"kalustohankinta, arvio 2016", note_en:"rolling stock, 2016 estimate" },
+  { id:"tre-tunneli", scope:"tampere", vakiluku:260000, label:"Rantatunneli", label_en:"Rantatunneli", amount:176000000, note:"Suomen pisin maantietunneli; tavoitekustannus ALITTUI 4,1 M€:lla", note_en:"Finland's longest road tunnel; came in 4.1 M€ UNDER its target cost" },
+  { id:"tre-areena", scope:"tampere", vakiluku:260000, label:"Kansi ja Areena", label_en:"Deck and Arena", amount:550000000, note:"koko hanke, kaupungin osuus pienempi — TARKISTA", note_en:"whole project; the city's share is smaller — VERIFY" },
+  { id:"tku-budjetti", scope:"turku", vakiluku:200000, label:"Turun budjetti", label_en:"Turku city budget", amount:1200000000, note:"käyttötalous — TARKISTA vuosi ja luku", note_en:"operating budget — VERIFY year and figure" },
+  { id:"tku-ratikka", scope:"turku", vakiluku:200000, label:"Turun raitiotie", label_en:"Turku tram", amount:300000000, note:"hankearvio — TARKISTA", note_en:"project estimate — VERIFY" },
+  { id:"oul-budjetti", scope:"oulu", vakiluku:215000, label:"Oulun budjetti", label_en:"Oulu city budget", amount:1300000000, note:"käyttötalous — TARKISTA vuosi ja luku", note_en:"operating budget — VERIFY year and figure" },
+  { id:"apotti", scope:"uusimaa", vakiluku:1750000, label:"Apotti", label_en:"Apotti", amount:626000000, note:"HUSin tarkastuslautakunta 2022: 625,6 M€, 229,5 M€ yli alkuperäisen arvion; suurin syy oli 41 % arvioitua suurempi käyttäjämäärä", note_en:"HUS audit committee 2022: 625.6 M€, 229.5 M€ above the original estimate; the main cause was a user count 41 % higher than forecast" },
+  { id:"ol3", scope:"tuleva", vakiluku:5600000, label:"Olkiluoto 3", label_en:"Olkiluoto 3", amount:5800000000, note:"TVO:n investointi 5,8 mrd €; sopimushinta 2002 oli 3,2 mrd €. Kokonaiskustannus laitostoimittajan tappiot mukaan lukien on arvioitu n. 11 mrd €:ksi. EI julkista rahaa — mukana vain vertailukohtana", note_en:"TVO's investment 5.8 bn €; the 2002 contract price was 3.2 bn €. Total cost including the supplier's losses has been estimated at about 11 bn €. NOT public money — included for comparison only" },
+  { id:"lansirata", scope:"tuleva", vakiluku:5600000, label:"Länsirata (Turun tunnin juna)", label_en:"Western Railway (Turku one-hour train)", amount:3400000000, note:"alustava arvio, v. 2022 hintataso; nimellisarvo 4,82 mrd €; hyöty-kustannussuhde 0,44", note_en:"preliminary estimate, 2022 price level; nominal value 4.82 bn €; benefit-cost ratio 0.44", tuleva:true },
+  { id:"lentorata", scope:"tuleva", vakiluku:5600000, label:"Lentorata", label_en:"Airport Rail Line", amount:2700000000, note:"30 km rataa, josta 28 km tunnelissa; Pasila–lentoasema–Kerava", note_en:"30 km of track, 28 km of it in tunnel; Pasila–airport–Kerava", tuleva:true },
+  { id:"itarata", scope:"tuleva", vakiluku:5600000, label:"Itärata", label_en:"Eastern Railway", amount:1800000000, note:"Helsinki–Porvoo–Kouvola; nimellisarvo 3,48 mrd €; esisuunnittelu kesken", note_en:"Helsinki–Porvoo–Kouvola; nominal value 3.48 bn €; preliminary planning under way", tuleva:true },
+  { id:"suomirata", scope:"tuleva", vakiluku:5600000, label:"Suomi-rata (suurnopeusvaihtoehto)", label_en:"Finland Line (high-speed option)", amount:5500000000, note:"lentorata + uusi suurnopeusrata; halvempi vaihtoehto 4,0 mrd €; suunnittelu keskeytetty", note_en:"airport line + new high-speed track; cheaper option 4.0 bn €; planning suspended", tuleva:true },
+  { id:"hki-lansimetro-ylitys", scope:"helsinki", vakiluku:680000, label:"Länsimetro, 1. vaihe: ylitys", label_en:"West Metro, phase 1: overrun", amount:472000000, note:"toteutunut 1186 M€, arvio oli 714 M€", note_en:"actual 1186 M€, estimate was 714 M€" },
+  { id:"hki-kruunusillat-ylitys", scope:"helsinki", vakiluku:680000, label:"Kruunusillat: ylitys", label_en:"Crown Bridges: overrun", amount:420000000, note:"toteutunut 800 M€, arvio oli 380 M€", note_en:"actual 800 M€, estimate was 380 M€" },
+  { id:"hki-jokeri-ylitys", scope:"helsinki", vakiluku:680000, label:"Raide-Jokeri: ylitys", label_en:"Jokeri Light Rail: overrun", amount:111000000, note:"toteutunut 386 M€, arvio oli 275 M€", note_en:"actual 386 M€, estimate was 275 M€" },
+  { id:"hki-stadion-ylitys", scope:"helsinki", vakiluku:680000, label:"Olympiastadionin remontti: ylitys", label_en:"Olympic Stadium renovation: overrun", amount:140000000, note:"toteutunut 337 M€, arvio oli 197 M€", note_en:"actual 337 M€, estimate was 197 M€" },
+  { id:"tre-tunneli-ylitys", scope:"tampere", vakiluku:260000, label:"Rantatunneli: alitus", label_en:"Rantatunneli: under budget", amount:4000000, note:"arvio oli 180 M€, toteutunut 176 M€ — hanke alitti budjettinsa", note_en:"estimate was 180 M€, actual 176 M€ — the project came in under budget" },
+  { id:"apotti-ylitys", scope:"uusimaa", vakiluku:1750000, label:"Apotti: ylitys", label_en:"Apotti: overrun", amount:230000000, note:"toteutunut 626 M€, arvio oli 396 M€", note_en:"actual 626 M€, estimate was 396 M€" }
 ];
 
 const UNITS_FALLBACK = [
-  { id:"pork", label:"kiloa porkkanoita", cost:1.5, note:"kaupan kilohinta", arki:true },
-  { id:"maito", label:"litraa maitoa", cost:1.2, note:"kevytmaito", arki:true },
-  { id:"leipa", label:"leipää", cost:2.5, note:"tavallinen ruokaleipä", arki:true },
-  { id:"bussi", label:"bussilippua", cost:3.2, note:"kertalippu, kaupunkiliikenne", arki:true },
-  { id:"leffa", label:"elokuvalippua", cost:14, note:"aikuinen, ilta", arki:true },
-  { id:"kirja", label:"kirjaa", cost:25, note:"uusi kovakantinen", arki:true },
-  { id:"ruoka", label:"viikon ruokaostosta", cost:150, note:"perhe, viikko" },
-  { id:"lapsi", label:"lapsilisää vuodeksi", cost:1500, note:"yksi lapsi" },
-  { id:"palkka", label:"kuukauden palkkaa", cost:3600, note:"mediaaniansio, brutto" },
-  { id:"opp", label:"oppilasvuotta peruskoulussa", cost:10000, note:"per oppilas" },
-  { id:"hoit", label:"hoitajan vuosipalkkaa", cost:48000, note:"palkka + työnantajakulut" },
-  { id:"tie", label:"kilometriä tienkorjausta", cost:400000, note:"päällystetty tie" },
-  { id:"pk", label:"uutta päiväkotia", cost:6000000, note:"n. 100 paikkaa" },
-  { id:"oodi", label:"Oodia", cost:98000000, note:"toteutunut rakennuskustannus" }
+  { id:"ruoka", label:"viikon ruokaostosta", label_en:"weekly grocery shops", cost:150, note:"perhe, viikko", note_en:"family, one week" },
+  { id:"lapsi", label:"lapsilisää vuodeksi", label_en:"years of child benefit", cost:1500, note:"yksi lapsi", note_en:"one child" },
+  { id:"palkka", label:"kuukauden palkkaa", label_en:"months of salary", cost:3600, note:"mediaaniansio, brutto", note_en:"median earnings, gross" },
+  { id:"opp", label:"oppilasvuotta peruskoulussa", label_en:"pupil-years of basic education", cost:10000, note:"per oppilas", note_en:"per pupil" },
+  { id:"hoit", label:"hoitajan vuosipalkkaa", label_en:"nurses' annual salaries", cost:48000, note:"palkka + työnantajakulut", note_en:"salary plus employer costs" },
+  { id:"tie", label:"kilometriä tienkorjausta", label_en:"kilometres of road repair", cost:400000, note:"päällystetty tie", note_en:"paved road" },
+  { id:"pk", label:"uutta päiväkotia", label_en:"new daycare centres", cost:6000000, note:"n. 100 paikkaa", note_en:"approx. 100 places" },
+  { id:"oodi", label:"Oodia", label_en:"Oodi libraries", cost:98000000, note:"toteutunut rakennuskustannus", note_en:"actual construction cost" }
 ];
 
 let ITEMS = ITEMS_FALLBACK, UNITS = UNITS_FALLBACK;
@@ -383,9 +382,108 @@ const eur = a => a >= 1e9
   ? (a/1e9).toLocaleString("fi-FI",{maximumFractionDigits:1}) + " mrd €"
   : (a/1e6).toLocaleString("fi-FI",{maximumFractionDigits:0}) + " M€";
 const $ = id => document.getElementById(id);
+
+/* ── Kieli ────────────────────────────────────────────────────────────
+   Yksi tiedosto palvelee molempia kieliä.
+
+   Kieli luetaan polusta (/en/) tai kyselyparametrista (?lang=en), ja
+   vaihto tapahtuu ilman sivunlatausta. Aiemmin nappi navigoi suoraan
+   osoitteeseen /en/, mikä toimi vain palvelimella — avatussa tiedostossa
+   tai staattisella isännällä päädyit 404-sivulle, jolloin nappi näytti
+   katoavan. Nyt sivu ei koskaan poistu alta.
+
+   Osoite päivitetään silti, jotta linkki on jaettavissa. */
+const FI = {};   // suomi on tiedostossa oletuksena, joten tyhjä riittää
+let LANG = (location.pathname.startsWith("/en") ||
+            new URLSearchParams(location.search).get("lang") === "en") ? "en" : "fi";
+const UI = {
+  h1:          "What would that buy?",
+  tag:         "new every day",
+  sub:         "A billion euros means nothing to anyone. Change the measure and it does.",
+  showCalc:    "Show the calculation",
+  share:       "Copy and share",
+  shared:      "Copied ✓",
+  ownSum:      "Your own figure",
+  ownSumHint:  "Spotted a number in the news? Put it in here.",
+  ownSumBtn:   "What would that buy?",
+  ticker:      "The state budget is being spent right now",
+  tickerNote:  "Divided evenly across 91.3 bn € / year. In reality spending is not spread evenly.",
+  sources:     "Where the figures come from",
+  fineprint:   "The small print",
+  lnkOverruns: "Estimate vs. actual →",
+  lnkReceipt:  "Tax receipt →",
+  priceEst:    "Price estimate:",
+  changeIt:    "— change it if you know better",
+  ownLabel:    "Your own figure",
+  ownNote:     "figure entered by the reader",
+  langHref:    "/",
+  langLabel:   "Suomeksi"
+};
+
+/* Suomenkieliset tekstit talteen ennen ensimmäistä vaihtoa, jotta
+   takaisin suomeen pääsee ilman sivunlatausta. */
+function stashFi(){
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    if (FI[el.dataset.i18n] === undefined) FI[el.dataset.i18n] = el.textContent;
+  });
+  if (FI.__title === undefined) FI.__title = document.title;
+}
+
+function applyLang(){
+  stashFi();
+  const en = LANG === "en";
+  document.documentElement.lang = en ? "en" : "fi";
+  document.title = en ? UI.h1 : FI.__title;
+
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const k = el.dataset.i18n;
+    const v = en ? UI[k] : FI[k];
+    if (v !== undefined) el.textContent = v;
+  });
+
+  const sw = document.getElementById("langsw");
+  if (sw) {
+    sw.textContent  = en ? "Suomeksi" : "In English";
+    sw.href         = en ? "/" : "/en/";
+    sw.hreflang     = en ? "fi" : "en";
+    sw.setAttribute("aria-label", en ? "Vaihda suomeksi" : "Switch to English");
+  }
+  const a = document.getElementById("lnkOverruns");
+  if (a) a.href = en ? "/en/overruns/" : "/ylitykset/";
+  const b = document.getElementById("lnkReceipt");
+  if (b) b.href = en ? "/en/tax-receipt/" : "/kuitti/";
+}
+
+/* Vaihto ilman sivunlatausta. Osoite päivitetään replaceStatella, jotta
+   linkin voi jakaa — mutta jos se ei onnistu (esim. avattu tiedosto),
+   kielenvaihto toimii silti. */
+function switchLang(e){
+  if (e) e.preventDefault();
+  LANG = LANG === "en" ? "fi" : "en";
+  applyLang();
+  try {
+    const u = new URL(location.href);
+    if (LANG === "en") u.searchParams.set("lang", "en");
+    else u.searchParams.delete("lang");
+    history.replaceState(null, "", u);
+  } catch (err) { /* osoitteen päivitys on koriste, ei toiminnallisuus */ }
+  if (typeof buildSelects === "function") {
+    buildSelects();
+    $("itemSel").value = state.item;
+    $("unitSel").value = state.unit;
+  }
+  if (typeof drawScopes === "function") drawScopes();
+  if (typeof render === "function") render();
+}
+
+/* Nimike kielen mukaan. Puuttuva käännös putoaa suomeen. */
+const LBL = o => (LANG === "en" && o && o.label_en) ? o.label_en : (o ? o.label : "");
+const NOTE = o => (LANG === "en" && o && o.note_en != null) ? o.note_en : ((o && o.note) || "");
+const LOC = () => LANG === "en" ? "en-GB" : "fi-FI";
+
 const state = { item:0, unit:0, cost:UNITS[0].cost, entry:null, scope:"kaikki" };
 
-const SCOPE_ORDER = ["valtio","helsinki","tampere","turku","oulu","tuleva","arki"];
+const SCOPE_ORDER = ["valtio","helsinki","tampere","turku","oulu","tuleva"];
 
 function scopesPresent(){
   return SCOPE_ORDER.filter(sc => ITEMS.some(it => (it.scope||"valtio") === sc));
@@ -400,7 +498,9 @@ function drawScopes(){
   const meta = (DATA && DATA.scopes) || SCOPES_FALLBACK;
   const list = ["kaikki", ...scopesPresent()];
   $("scopes").innerHTML = list.map(sc => {
-    const label = sc === "kaikki" ? "Kaikki" : ((meta[sc] && meta[sc].label) || sc);
+    const m = meta[sc] || {};
+    const label = sc === "kaikki" ? (LANG === "en" ? "All" : "Kaikki")
+      : ((LANG === "en" && m.label_en) ? m.label_en : (m.label || sc));
     return `<button class="scope" data-scope="${sc}" aria-pressed="${sc === state.scope}">${label}</button>`;
   }).join("");
 }
@@ -426,24 +526,20 @@ function setScope(sc){
 
 function buildSelects(){
   const SCOPES = (DATA && DATA.scopes) || SCOPES_FALLBACK;
-  const order = ["valtio","helsinki","tampere","turku","oulu","tuleva","arki"];
+  const order = ["valtio","helsinki","tampere","turku","oulu","tuleva"];
   const groups = order
     .filter(sc => ITEMS.some(it => (it.scope||"valtio") === sc && inScope(it)))
     .map(sc => {
       const opts = ITEMS
         .map((it,i) => ({it,i}))
         .filter(x => (x.it.scope||"valtio") === sc && inScope(x.it))
-        .map(x => `<option value="${x.i}">${x.it.label}</option>`).join("");
-      return `<optgroup label="${(SCOPES[sc]&&SCOPES[sc].label)||sc}">${opts}</optgroup>`;
+        .map(x => `<option value="${x.i}">${LBL(x.it)}</option>`).join("");
+      const sm = SCOPES[sc] || {}; const sl = (LANG === "en" && sm.label_en) ? sm.label_en : (sm.label || sc);
+      return `<optgroup label="${sl}">${opts}</optgroup>`;
     }).join("");
   $("itemSel").innerHTML = groups;
-  const cur = ITEMS[state.item] || ITEMS[0];
-  $("unitSel").innerHTML = UNITS.map((u,i)=>({u,i}))
-    .filter(({u}) => !!u.arki === !!(cur && cur.arki))
-    .map(({u,i})=>`<option value="${i}">${u.label}</option>`).join("");
-  if (UNITS[state.unit] && !!UNITS[state.unit].arki !== !!(cur && cur.arki)) {
-    state.unit = UNITS.findIndex(u => !!u.arki === !!(cur && cur.arki));
-  }
+  $("unitSel").innerHTML = UNITS
+    .map((u,i)=>`<option value="${i}">${LBL(u)}</option>`).join("");
 }
 
 function drawField(n){
@@ -464,8 +560,22 @@ function render(){
   const item = ITEMS[state.item], unit = UNITS[state.unit];
   const n = Math.max(0, Math.floor(item.amount / state.cost));
   $("amountText").textContent = eur(item.amount) + " on";
-  $("count").textContent = fmt(n);
-  $("countLabel").textContent = unit.label;
+
+  /* Summa voi olla yksikköä pienempi — etenkin lukijan omissa luvuissa.
+     "0 hoitajan vuosipalkkaa" on umpikuja, ja "0,00" yhtä lailla.
+     Näytetään osuus merkitsevillä numeroilla, jotta luku sanoo jotain. */
+  if (n < 1) {
+    const osuus = item.amount / state.cost;
+    $("count").textContent = osuus < 0.01
+      ? Number(osuus.toPrecision(2)).toLocaleString(LOC(), { maximumFractionDigits: 20 })
+      : osuus.toLocaleString(LOC(), { maximumFractionDigits: 2 });
+    $("countLabel").textContent = LANG === "en"
+      ? "of one: " + LBL(unit)
+      : "yhdestä: " + LBL(unit);
+  } else {
+    $("count").textContent = fmt(n);
+    $("countLabel").textContent = LBL(unit);
+  }
   const ASUKAS = { valtio:"suomalaista", helsinki:"helsinkiläistä",
                    tampere:"tamperelaista", turku:"turkulaista", oulu:"oululaista" };
   const vak  = item.vakiluku || VAKILUKU;
@@ -552,10 +662,10 @@ function renderCalc(){
   const pad  = s => String(s).padStart(18, " ");
 
   const sum =
-    `${pad(fmt(item.amount) + " €")}   <span class="from">${item.label}</span>\n` +
-    `<span class="op">÷</span>${pad(fmt(state.cost) + " €")}  <span class="from">${unit.label} (yksikköhinta)</span>\n` +
+    `${pad(fmt(item.amount) + " €")}   <span class="from">${LBL(item)}</span>\n` +
+    `<span class="op">÷</span>${pad(fmt(state.cost) + " €")}  <span class="from">${LBL(unit)} (${LANG === "en" ? "unit price" : "yksikköhinta"})</span>\n` +
     `${"─".repeat(20)}\n` +
-    `<span class="res">= ${fmt(n)}</span>   <span class="from">${unit.label}</span>\n` +
+    `<span class="res">= ${fmt(n)}</span>   <span class="from">${LBL(unit)}</span>\n` +
     (jaa > 0 ? `<span class="from">jää yli ${fmt(Math.round(jaa))} €</span>\n` : "") +
     `\n` +
     `${pad(fmt(item.amount) + " €")}   <span class="from">sama summa</span>\n` +
@@ -577,7 +687,7 @@ function renderCalc(){
     + `</p>` +
     `<p class="calcnote"><strong>Mitä tämä ei kerro.</strong> Jakolasku olettaa että euro on euro. ` +
     `Oikeasti raha on sidottu momenttiin, hallinnonalaan ja usein monivuotiseen sopimukseen, ` +
-    `eikä ${unit.label.replace(/^(uutta |kilometriä )/, "")} makseta samasta pussista. ` +
+    `eikä ${LBL(unit).replace(/^(uutta |kilometriä |new |kilometres of )/, "")} makseta samasta pussista. ` +
     `Luku kertoo mittasuhteen, ei toteutettavaa vaihtoehtoa.</p>`;
 
   $("calc").innerHTML = `<div class="sum">${sum}</div>` + note;
@@ -617,7 +727,7 @@ async function loadData(){
     VAKILUKU = d.vakiluku || VAKILUKU;
     ITEMS = d.items.map(i => ({ id:i.id, label:i.label, amount:i.amount, note:i.note,
                                 scope:i.scope || "valtio", vakiluku:i.vakiluku }));
-    UNITS = d.units.map(u => ({ id:u.id, label:u.label, cost:u.cost,   note:u.note, arki:!!u.arki }));
+    UNITS = d.units.map(u => ({ id:u.id, label:u.label, label_en:u.label_en, cost:u.cost, note:u.note, note_en:u.note_en }));
   } catch(e) {
     console.warn("data.json ei latautunut, käytetään sisäänrakennettuja lukuja:", e.message);
   }
@@ -642,6 +752,8 @@ function boot(){
   renderSourceTable();
 }
 
+applyLang();
+$("langsw").addEventListener("click", switchLang);
 loadData().then(boot);
 
 window.addEventListener("hashchange", () => {
@@ -650,16 +762,6 @@ window.addEventListener("hashchange", () => {
 });
 $("itemSel").addEventListener("change", e => {
   state.item = +e.target.value;
-  // kertaluokka voi vaihtua (arki <-> miljardit), joten yksikkölista ja
-  // yksikköhinta on rakennettava uudelleen
-  const cur = ITEMS[state.item];
-  if (!UNITS[state.unit] || !!UNITS[state.unit].arki !== !!(cur && cur.arki)) {
-    const j = UNITS.findIndex(u => !!u.arki === !!(cur && cur.arki));
-    if (j >= 0) { state.unit = j; state.cost = UNITS[j].cost; }
-  }
-  buildSelects();
-  $("itemSel").value = state.item;
-  $("unitSel").value = state.unit;
   render();
 });
 /* Oma summa. Lasketaan heti samaan korttiin — ei sivunlatausta, joten
@@ -669,21 +771,24 @@ function omaSumma(){
   const n = parseInt(raaka, 10);
   if (!Number.isFinite(n) || n <= 0) { $("omaSumma").focus(); return; }
 
-  const arki = n < 10000;
   const oma = {
-    id: "oma", scope: arki ? "arki" : "valtio",
+    id: "oma", scope: "valtio",
     vakiluku: (((DATA && DATA.scopes) || SCOPES_FALLBACK).valtio || {}).vakiluku || 5600000,
-    label: "Oma summa", amount: n, note: "lukijan syöttämä luku", arki
+    label: UI.ownLabel, label_en: UI.ownLabel, amount: n,
+    note: "lukijan syöttämä luku", note_en: UI.ownNote
   };
 
   ITEMS = ITEMS.filter(i => i.id !== "oma").concat([oma]);
   state.item = ITEMS.length - 1;
-  if (!UNITS[state.unit] || !!UNITS[state.unit].arki !== arki) {
-    const j = UNITS.findIndex(u => !!u.arki === arki);
-    if (j >= 0) state.unit = j;
+
+  /* Pieni summa ei mahdu kalliiseen yksikköön. Valitaan halvin, joka
+     antaa vähintään yhden — muuten lukija näkee pelkän nollan. */
+  if (n < UNITS[state.unit].cost) {
+    let best = state.unit, bestCost = Infinity;
+    UNITS.forEach((u, i) => { if (u.cost < bestCost) { bestCost = u.cost; best = i; } });
+    state.unit = best;
+    state.cost = UNITS[best].cost;
   }
-  // yksikköhinta seuraa yksikköä, muuten edellinen jää voimaan ja tulos on 0
-  state.cost = UNITS[state.unit].cost;
   buildSelects();
   $("itemSel").value = state.item;
   $("unitSel").value = state.unit;
@@ -723,11 +828,13 @@ $("copyBtn").addEventListener("click", async () => {
   const n = Math.floor(item.amount / state.cost);
   const per = (item.amount/(item.vakiluku||VAKILUKU)).toLocaleString("fi-FI",{maximumFractionDigits:0});
   let url = ""; try { url = location.href; } catch(e) {}
-  const text = `${eur(item.amount)} = ${fmt(n)} ${unit.label}. Sinun osuutesi ${per} €. ${url}`;
+  const text = LANG === "en"
+    ? `${eur(item.amount)} = ${fmt(n)} ${LBL(unit)}. Your share ${per} €. ${url}`
+    : `${eur(item.amount)} = ${fmt(n)} ${LBL(unit)}. Sinun osuutesi ${per} €. ${url}`;
   const btn = $("copyBtn");
   try { await navigator.clipboard.writeText(text); btn.textContent = "Kopioitu ✓"; }
   catch { btn.textContent = "Kopiointi ei onnistunut"; }
-  setTimeout(()=>{ btn.textContent = "Kopioi ja jaa"; }, 2000);
+  setTimeout(()=>{ btn.textContent = LANG === "en" ? UI.share : "Kopioi ja jaa"; }, 2000);
 });
 </script>
 </body>
