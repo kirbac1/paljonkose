@@ -4,6 +4,10 @@ node_modules/
 # build output — rebuilt on the server from source
 dist/
 
+# test artifacts
+playwright-report/
+test-results/
+
 # local env / secrets
 .env
 .env.local

@@ -1,3 +1,16 @@
+import { t as T, paths as P, DEFAULT_LANG } from "./i18n-ui.mjs";
+import { ASUKAS_EN } from "./i18n-data.mjs";
+
+/* Kielikohtainen nimike. Puuttuva käännös putoaa takaisin suomeen —
+   näkyvä suomenkielinen sana on parempi kuin tyhjä kohta. */
+const L  = (o, lang) => (lang === "en" && o.label_en) ? o.label_en : o.label;
+const N  = (o, lang) => (lang === "en" && o.note_en  != null) ? o.note_en : (o.note || "");
+const fmtL = (n, lang) => new Intl.NumberFormat(T(lang).locale).format(n);
+const eurL = (a, lang) => a >= 1e9
+  ? (a / 1e9).toLocaleString(T(lang).locale, { maximumFractionDigits: 1 }) + (lang === "en" ? " bn €" : " mrd €")
+  : (a / 1e6).toLocaleString(T(lang).locale, { maximumFractionDigits: 0 }) + (lang === "en" ? " M€" : " M€");
+const base = (lang) => P(lang).root;
+
 /**
  * render.mjs — yhteinen renderöinti.
  * Sekä build-pages.mjs (staattinen) että server.mjs (dynaaminen) käyttävät tätä,
@@ -30,10 +43,12 @@ const ASUKAS = {
   oulu:     "jokaista oululaista"
 };
 
-export function combo(data, itemId, unitId, cost = null) {
+export function combo(data, itemId, unitId, cost = null, lang = DEFAULT_LANG) {
   const item = data.items.find(i => i.id === itemId);
   const unit = data.units.find(u => u.id === unitId);
   if (!item || !unit) return null;
+  // rekisteriin lisätty vertailukohta ei ole budjettimeno — ei omaa sivua
+  if (item.vainRekisteri) return null;
 
   const usedCost = cost && cost > 0 ? cost : unit.cost;
   const edited   = Math.abs(usedCost - unit.cost) > 0.001;
@@ -47,28 +62,23 @@ export function combo(data, itemId, unitId, cost = null) {
     count,
     jaa: item.amount - count * usedCost,
     vakiluku: item.vakiluku ?? data.vakiluku,
-    asukas:   ASUKAS[item.scope] || "jokaista asukasta",
+    lang,
+    asukas: lang === "en"
+      ? (ASUKAS_EN[item.scope] || "every resident")
+      : (ASUKAS[item.scope] || "jokaista asukasta"),
     per: (item.amount / (item.vakiluku ?? data.vakiluku))
-           .toLocaleString("fi-FI", { maximumFractionDigits: 0 }) + " €",
+           .toLocaleString(T(lang).locale, { maximumFractionDigits: 0 }) + " €",
     tuleva: !!item.tuleva,
-    arki: !!item.arki,
     /* Saman päätöksen sisäinen vertailu. Tässä raha oli oikeasti
        vaihtoehtoista: hankkeet kilpailevat samasta määrärahasta.
        Tämä on rehellisempi vertailu kuin hävittäjä vs. päiväkoti. */
     kilpailijat: item.paatos
       ? data.items
           .filter(x => x.paatos === item.paatos && x.id !== item.id)
-          .map(x => ({ id:x.id, label:x.label, amount:x.amount,
+          .map(x => ({ id:x.id, label:x.label, label_en:x.label_en, amount:x.amount,
                        kerta: x.amount ? item.amount / x.amount : null }))
           .sort((a,b) => b.amount - a.amount)
       : [],
-    /* Arkiostoksen "sinun osuutesi" olisi absurdi (kuudesmiljoonasosa
-       hampurilaisesta). Tilalle silta valtion kokoluokkaan: sama ostos
-       kertaa koko maan väkiluku. */
-    silta: item.arki ? {
-      vakiluku: data.vakiluku,
-      summa: item.amount * data.vakiluku
-    } : null,
     ennuste: (item.tuleva && data.ylityshistoria)
       ? {
           kerroin: data.ylityshistoria.mediaani,
@@ -78,54 +88,66 @@ export function combo(data, itemId, unitId, cost = null) {
         }
       : null,
     slug: `${item.id}-${unit.id}` + (edited ? `-${Math.round(usedCost)}` : ""),
-    title: `${eur(item.amount)} = ${fmt(Math.floor(item.amount / usedCost))} ${unit.label}`
+    title: `${eurL(item.amount, lang)} = ${fmtL(Math.floor(item.amount / usedCost), lang)} ${L(unit, lang)}`
   };
 }
 
 /* ── jakokuva ─────────────────────────────────────────────────────────── */
 
 export function ogSvg(c) {
+  const lang = c.lang || DEFAULT_LANG;
+  const tr   = T(lang);
   const cut   = (s, n) => s.length > n ? s.slice(0, n - 1) + "…" : s;
   const num   = fmt(c.count);
   const base  = num.length > 9 ? 112 : num.length > 6 ? 140 : 168;
   const size  = c.edited ? base - 30 : base;   // tee tilaa muokkausmerkinnälle
   const flag  = c.edited
-    ? `<text x="104" y="196" font-family="sans-serif" font-size="24" font-weight="700" fill="#FF4A6E">Lukijan muuttama yksikköhinta: ${esc(fmt(c.cost))} €</text>`
+    ? `<text x="104" y="196" font-family="sans-serif" font-size="24" font-weight="700" fill="#FF4A6E">${esc(lang === "en" ? "Unit price changed by reader" : "Lukijan muuttama yksikköhinta")}: ${esc(fmtL(c.cost, lang))} €</text>`
     : "";
   const top   = c.edited ? 38 : 0;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <rect width="1200" height="630" fill="#FFD84D"/>
   <rect x="56" y="56" width="1088" height="518" rx="40" fill="#FFFFFF"/>
-  <text x="104" y="152" font-family="sans-serif" font-size="30" font-weight="600" fill="#17123A" opacity="0.55">${esc(cut(eur(c.item.amount) + " — " + c.item.label, 46))}</text>
+  <text x="104" y="152" font-family="sans-serif" font-size="30" font-weight="600" fill="#17123A" opacity="0.55">${esc(cut(eurL(c.item.amount, lang) + " — " + L(c.item, lang), 46))}</text>
   ${flag}
   <text x="104" y="${152 + top + size}" font-family="sans-serif" font-size="${size}" font-weight="bold" fill="#FF4A6E" letter-spacing="-4">${esc(num)}</text>
-  <text x="104" y="${208 + top + size}" font-family="sans-serif" font-size="46" font-weight="bold" fill="#17123A">${esc(cut(c.unit.label, 38))}</text>
+  <text x="104" y="${208 + top + size}" font-family="sans-serif" font-size="46" font-weight="bold" fill="#17123A">${esc(cut(L(c.unit, lang), 38))}</text>
   <rect x="104" y="${242 + top + size}" width="${Math.min(940, 420 + c.per.length * 22)}" height="72" rx="20" fill="#0FBF95"/>
-  <text x="130" y="${290 + top + size}" font-family="sans-serif" font-size="32" font-weight="600" fill="#FFFFFF">Sinun osuutesi: ${esc(c.per)}</text>
-  <text x="104" y="544" font-family="sans-serif" font-size="26" font-weight="600" fill="#17123A" opacity="0.5">paljonkose.fi · laskutoimitus ja lähteet sivulla</text>
+  <text x="130" y="${290 + top + size}" font-family="sans-serif" font-size="32" font-weight="600" fill="#FFFFFF">${esc(tr.yourShare)} ${esc(c.per)}</text>
+  <text x="104" y="544" font-family="sans-serif" font-size="26" font-weight="600" fill="#17123A" opacity="0.5">paljonkose.fi · ${esc(lang === "en" ? "calculation and sources on the page" : "laskutoimitus ja lähteet sivulla")}</text>
 </svg>`;
 }
 
 /* ── sivu ─────────────────────────────────────────────────────────────── */
 
 export function pageHtml(c, data, { site, also = [], ogUrl = null }) {
-  const url    = `${site}/p/${c.slug}/`;
+  const lang = c.lang || DEFAULT_LANG;
+  const tr   = T(lang);
+  const B    = base(lang);
+  const fm   = n => fmtL(n, lang);
+  const er   = a => eurL(a, lang);
+  const url    = `${site}${B}/p/${c.slug}/`;
   const imgUrl = ogUrl || `${url}og.png`;
-  const desc   = `${c.item.label}: ${fmt(c.item.amount)} € jaettuna yksikköhinnalla ${fmt(c.cost)} €. Sinun osuutesi ${c.per}. Laskutoimitus ja lähteet näkyvissä.`;
+  const desc = lang === "en"
+    ? `${L(c.item, lang)}: ${fm(c.item.amount)} € divided by a unit price of ${fm(c.cost)} €. Your share ${c.per}. Calculation and sources shown.`
+    : `${c.item.label}: ${fm(c.item.amount)} € jaettuna yksikköhinnalla ${fm(c.cost)} €. Sinun osuutesi ${c.per}. Laskutoimitus ja lähteet näkyvissä.`;
   const badge  = (status) => `<span class="badge b-${status}">${STATUS[status] || status}</span>`;
 
   const alsoHtml = also.map(x =>
-    `<a href="${site}/p/${x.slug}/">${fmt(x.count)} ${esc(x.unit.label)}</a>`).join("\n    ");
+    `<a href="${site}${B}/p/${x.slug}/">${fm(x.count)} ${esc(L(x.unit, lang))}</a>`).join("\n    ");
 
   return `<!DOCTYPE html>
-<html lang="fi">
+<html lang="${lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(c.title)} — Paljonko se on?</title>
+<title>${esc(c.title)} — ${esc(tr.siteName)}</title>
 <meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${url}">
+<link rel="alternate" hreflang="fi" href="${site}/p/${c.slug}/">
+<link rel="alternate" hreflang="en" href="${site}/en/p/${c.slug}/">
+<link rel="alternate" hreflang="x-default" href="${site}/p/${c.slug}/">
 <meta property="og:type" content="article">
 <meta property="og:url" content="${url}">
 <meta property="og:title" content="${esc(c.title)}">
@@ -187,57 +209,55 @@ ${JSON.stringify({
   <div class="card">
     <p class="amount">${esc(eur(c.item.amount))} — ${esc(c.item.label)} on</p>
     <p class="count">${fmt(c.count)}</p>
-    <p class="what">${esc(c.unit.label)}</p>
-    ${c.silta ? `<p class="share-line">Jos jokainen suomalainen ostaisi tämän kerran:
-      <strong>${eur(c.silta.summa)}</strong></p>` : `<p class="share-line">Sinun osuutesi: ${esc(c.per)}${c.item.scope !== "valtio" ? ` (${esc(c.asukas.replace("jokaista ", ""))} kohti)` : ""}</p>`}
+    <p class="what">${esc(L(c.unit, lang))}</p>
+    ${`<p class="share-line">${esc(tr.yourShare)} ${esc(c.per)}${c.item.scope !== "valtio" ? ` (${esc(tr.perPerson(c.asukas.replace("jokaista ", "")))})` : ""}</p>`}
     ${c.kilpailijat && c.kilpailijat.length ? `<p class="rival">
-      <strong>Tässä vertailu on aito.</strong>
-      Samasta ratarahasta kilpailevat myös:
-      ${c.kilpailijat.map(k => `<a href="/p/${k.id}-${c.unit.id}/">${esc(k.label)}</a>
-        (${eur(k.amount)})`).join(", ")}.
-      Näiden välillä valinta on todellinen — toisin kuin vertailussa
-      kokonaan eri hallinnonalojen välillä.</p>` : ""}
-    ${c.ennuste ? `<p class="ennuste"><strong>Tämä on arvio, ei toteutunut hinta.</strong>
-      Viisi vertailukelpoista suomalaista suurhanketta maksoi lopulta mediaanissa
-      ${c.ennuste.kerroin.toLocaleString("fi-FI",{minimumFractionDigits:2,maximumFractionDigits:2})}× arvionsa. Jos sama toistuu, hinta olisi
-      ${eur(c.ennuste.hinta)} — eli ${fmt(c.ennuste.maara)} ${esc(c.unit.label)}.
-      Yksi hankkeista alitti budjettinsa, joten tämä ei ole luonnonlaki.</p>` : ""}
-    ${c.edited ? `<p class="warn">Huom: yksikköhintaa on muutettu. Alkuperäinen arvio oli ${fmt(c.unit.cost)} €, tässä on käytetty ${fmt(c.cost)} €.</p>` : ""}
+      <strong>${esc(tr.rivalTitle)}</strong>
+      ${esc(tr.rivalBody)}
+      ${c.kilpailijat.map(k => `<a href="${B}/p/${k.id}-${c.unit.id}/">${esc(k.label_en && lang === "en" ? k.label_en : k.label)}</a>
+        (${er(k.amount)})`).join(", ")}.
+      ${esc(tr.rivalTail)}</p>` : ""}
+    ${c.ennuste ? `<p class="ennuste"><strong>${esc(tr.forecastTitle)}</strong>
+      ${tr.forecastBody(c.ennuste.otos,
+          c.ennuste.kerroin.toLocaleString(tr.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+          er(c.ennuste.hinta), fm(c.ennuste.maara), esc(L(c.unit, lang)))}
+      ${esc(tr.forecastTail)}</p>` : ""}
+    ${c.edited ? `<p class="warn">${esc(tr.edited(fm(c.unit.cost), fm(c.cost)))}</p>` : ""}
 
-    <div class="sum"><span>${fmt(c.item.amount)} €</span>   <span class="from">${esc(c.item.label)}</span>
-<span class="op">÷</span> <span>${fmt(c.cost)} €</span>   <span class="from">${esc(c.unit.label)} (yksikköhinta)</span>
+    <div class="sum"><span>${fm(c.item.amount)} €</span>   <span class="from">${esc(L(c.item, lang))}</span>
+<span class="op">÷</span> <span>${fm(c.cost)} €</span>   <span class="from">${esc(L(c.unit, lang))} (${esc(tr.unitPrice)})</span>
 ────────────────────
-<span class="res">= ${fmt(c.count)}</span>   <span class="from">${esc(c.unit.label)}</span>${c.jaa > 0 ? `
-<span class="from">jää yli ${fmt(Math.round(c.jaa))} €</span>` : ""}
+<span class="res">= ${fm(c.count)}</span>   <span class="from">${esc(L(c.unit, lang))}</span>${c.jaa > 0 ? `
+<span class="from">${esc(tr.leftOver(fm(Math.round(c.jaa))))}</span>` : ""}
 
-<span>${fmt(c.item.amount)} €</span>
-<span class="op">÷</span> <span>${fmt(c.vakiluku)}</span>   <span class="from">asukasta (${esc(c.item.scope === "valtio" ? "koko maa" : c.item.scope)})</span>
+<span>${fm(c.item.amount)} €</span>
+<span class="op">÷</span> <span>${fm(c.vakiluku)}</span>   <span class="from">${esc(tr.residents(c.item.scope === "valtio" ? tr.wholeCountry : c.item.scope))}</span>
 ────────────────────
-<span class="res">= ${esc(c.per)}</span>   <span class="from">${esc(c.asukas)} kohden</span></div>
+<span class="res">= ${esc(c.per)}</span>   <span class="from">${esc(tr.perPerson(c.asukas))}</span></div>
 
-    <p class="note"><strong>Osoittaja.</strong> ${badge(c.item.status)}${esc(c.item.source?.name || "")}${c.item.note ? " — " + esc(c.item.note) : ""}${c.item.source?.retrieved ? " · haettu " + new Date(c.item.source.retrieved).toLocaleDateString("fi-FI") : ""}</p>
-    <p class="note"><strong>Nimittäjä.</strong> ${badge(c.edited ? "muokattu" : c.unit.status)}${c.edited ? `alkuperäinen lähde: ${esc(c.unit.source?.name || "")}` : esc(c.unit.source?.name || "")}${c.unit.note ? " — " + esc(c.unit.note) : ""}</p>
-    <p class="note"><strong>Mitä tämä ei kerro.</strong> ${c.item.scope === "valtio"
-      ? `Jakolasku olettaa että euro on euro. Oikeasti raha on sidottu momenttiin ja hallinnonalaan, eikä ${esc(c.unit.label.replace(/^(uutta |kilometriä )/, ""))} makseta samasta pussista. Luku kertoo mittasuhteen, ei toteutettavaa vaihtoehtoa.`
-      : `Tämä on kaupungin omaa rahaa, joten vertailu on lähempänä aitoa vaihtoehtoa kuin valtion menoissa — päiväkodit ja koulut maksetaan samasta budjetista. Silti: investointi ja käyttötalous ovat eri momentteja, iso hanke rahoitetaan yleensä lainalla ja jaksotetaan vuosille, eikä sote-palveluita enää makseta kaupungin kassasta vaan hyvinvointialueelta.`}</p>
+    <p class="note"><strong>${esc(tr.numerator)}</strong> ${badge(c.item.status)}${esc(c.item.source?.name || "")}${N(c.item, lang) ? " — " + esc(N(c.item, lang)) : ""}${c.item.source?.retrieved ? ` · ${esc(tr.retrieved)} ` + new Date(c.item.source.retrieved).toLocaleDateString(tr.locale) : ""}</p>
+    <p class="note"><strong>${esc(tr.denominator)}</strong> ${badge(c.edited ? "muokattu" : c.unit.status)}${c.edited ? `${esc(tr.originalSource)} ${esc(c.unit.source?.name || "")}` : esc(c.unit.source?.name || "")}${N(c.unit, lang) ? " — " + esc(N(c.unit, lang)) : ""}</p>
+    <p class="note"><strong>${esc(tr.caveatTitle)}</strong> ${c.item.scope === "valtio"
+      ? esc(tr.caveatState(L(c.unit, lang).replace(/^(uutta |kilometriä |new |kilometres of )/, "")))
+      : esc(tr.caveatCity)}</p>
 
     <div class="acts">
-      <button id="copy">Kopioi linkki</button>
-      <a class="alt" href="${imgUrl}" download="${esc(c.slug)}.png">Lataa kuva</a>
+      <button id="copy">${esc(tr.copyLink)}</button>
+      <a class="alt" href="${imgUrl}" download="${esc(c.slug)}.png">${esc(tr.downloadImage)}</a>
     </div>
   </div>
 
   <div class="also">
-    <h2>Sama summa toisin mitattuna</h2>
+    <h2>${esc(tr.sameSum)}</h2>
     ${alsoHtml}
   </div>
 </div>
 <script>
 document.getElementById("copy").addEventListener("click", async function(){
-  var t = ${JSON.stringify(`${c.title}. Sinun osuutesi ${c.per}. ${url}`)};
-  try { await navigator.clipboard.writeText(t); this.textContent = "Kopioitu ✓"; }
-  catch(e) { this.textContent = "Kopiointi ei onnistunut"; }
-  var self = this; setTimeout(function(){ self.textContent = "Kopioi linkki"; }, 2000);
+  var t = ${JSON.stringify(`${c.title}. ${T(c.lang || DEFAULT_LANG).yourShare} ${c.per}. ${url}`)};
+  try { await navigator.clipboard.writeText(t); this.textContent = ${JSON.stringify(tr.copied)}; }
+  catch(e) { this.textContent = ${JSON.stringify(tr.copyFailed)}; }
+  var self = this; setTimeout(function(){ self.textContent = ${JSON.stringify(tr.copyLink)}; }, 2000);
 });
 </script>
 </body>
@@ -283,6 +303,8 @@ export function verokuitti(data, vuosiansio, kuntavero = 7.5) {
     aste: yhteensa / tulo * 100,
     rivit: data.paaluokat.map(pl => ({
       label: pl.label,
+      label_en: pl.label_en,
+      note_en: pl.note_en,
       note: pl.note || "",
       osuus: pl.amount / kokoBudjetti,
       euroa: valtionvero * pl.amount / kokoBudjetti
@@ -291,13 +313,15 @@ export function verokuitti(data, vuosiansio, kuntavero = 7.5) {
 }
 
 /* ── Yhteinen kehys aputyökalujen sivuille ─────────────────────────── */
-export function shell({ title, desc, site, body, path = "/" }) {
+export function shell({ title, desc, site, body, path = "/", lang = DEFAULT_LANG, altPath = null }) {
+  const tr = T(lang);
   return `<!DOCTYPE html>
-<html lang="fi"><head><meta charset="utf-8">
+<html lang="${lang}"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${esc(title)} — Paljonko se on?</title>
+<title>${esc(title)} — ${esc(tr.siteName)}</title>
 <meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${site}${path}">
+${altPath ? `<link rel="alternate" hreflang="${lang === "en" ? "fi" : "en"}" href="${site}${altPath}">` : ""}
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(desc)}">
 <meta property="og:image" content="${site}/og-default.png">
@@ -325,13 +349,18 @@ export function shell({ title, desc, site, body, path = "/" }) {
    font-weight:600;border-bottom:2px solid var(--ink)}
  tbody tr:last-child td{border-bottom:none}
  .num{font-variant-numeric:tabular-nums;font-weight:600}
+ .mark{font-size:11px;font-weight:700;background:#EDEDED;color:#555;
+   padding:2px 7px;border-radius:99px;white-space:nowrap;vertical-align:middle}
  .pop{color:var(--pop);font-weight:700}
  .sub{font-size:13px;color:var(--mut);display:block;font-weight:400}
  .note{background:#F6F6F6;border-radius:12px;padding:13px 15px;font-size:14px;
    color:#3a3a3a;margin:16px 0 0}
  .note strong{display:block;margin-bottom:3px}
  a{color:inherit}
- .back{display:inline-block;margin-bottom:18px;font-size:14px;font-weight:600}
+ .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:18px}
+ .back{font-size:14px;font-weight:600}
+ .lang{font-size:14px;font-weight:600;background:#fff;padding:6px 12px;border-radius:99px;
+   text-decoration:none;box-shadow:0 1px 0 rgba(0,0,0,.08)}
  input{font:inherit;padding:11px 13px;border:2px solid var(--ink);border-radius:11px;
    background:#fff;width:100%;max-width:220px;font-variant-numeric:tabular-nums}
  button{font:inherit;font-weight:600;padding:11px 20px;border:0;border-radius:11px;
@@ -340,141 +369,147 @@ export function shell({ title, desc, site, body, path = "/" }) {
  .bar i{display:block;height:100%;background:var(--pop)}
 </style></head>
 <body><div class="wrap">
-<a class="back" href="/">← Paljonko se on?</a>
+<div class="topbar">
+  <a class="back" href="${base(lang)}/">← ${esc(tr.siteName)}</a>
+  ${altPath ? `<a class="lang" href="${altPath}">${esc(tr.otherLangName)}</a>` : ""}
+</div>
 ${body}
 </div></body></html>`;
 }
 
 /* ── Ylitysrekisteri ───────────────────────────────────────────────── */
-export function ylityksetHtml(data, { site }) {
+export function ylityksetHtml(data, { site, lang = DEFAULT_LANG }) {
+  const tr = T(lang), pp = P(lang), B = base(lang);
+  const fm = n => fmtL(n, lang), er = a => eurL(a, lang);
   const rivit = data.items
-    .filter(i => i.arvio && !i.tuleva && !i.johdettu && i.arvio > 0)
+    .filter(i => i.arvio && (!i.tuleva || i.vainRekisteri) && !i.johdettu && i.arvio > 0)
     .map(i => ({ ...i, suhde: i.amount / i.arvio, ero: i.amount - i.arvio }))
     .sort((a, b) => b.suhde - a.suhde);
 
   const h = data.ylityshistoria;
   const body = `
-<h1>Arvio vs. toteutunut</h1>
-<p class="lede">Suomalaisten suurhankkeiden alkuperäiset kustannusarviot ja lopulliset
-hinnat. Kaikki hankkeet, joista molemmat luvut ovat saatavilla — myös ne, jotka
-alittivat budjettinsa.</p>
+<h1>${esc(tr.overrunsTitle)}</h1>
+<p class="lede">${esc(tr.overrunsLede)}</p>
 <div class="card">
 <table><thead><tr>
-  <th>Hanke</th><th>Arvio</th><th>Toteutunut</th><th>Erotus</th><th>Kerroin</th>
+  <th>${esc(tr.colProject)}</th><th>${esc(tr.colEstimate)}</th><th>${esc(tr.colActual)}</th><th>${esc(tr.colDiff)}</th><th>${esc(tr.colRatio)}</th>
 </tr></thead><tbody>
 ${rivit.map(r => `<tr>
-  <td>${esc(r.label)}<span class="sub">${esc(r.note || "")}</span></td>
-  <td class="num">${eur(r.arvio)}</td>
-  <td class="num">${eur(r.amount)}</td>
-  <td class="num ${r.ero > 0 ? "pop" : ""}">${r.ero > 0 ? "+" : "−"}${eur(Math.abs(r.ero))}</td>
-  <td class="num ${r.suhde > 1 ? "pop" : ""}">${r.suhde.toLocaleString("fi-FI",
+  <td>${esc(L(r, lang))}${r.vainRekisteri ? ` <span class="mark">${
+    esc(lang === "en" ? "not public money" : "ei julkista rahaa")}</span>` : ""}<span class="sub">${esc(N(r, lang))}</span></td>
+  <td class="num">${er(r.arvio)}</td>
+  <td class="num">${er(r.amount)}</td>
+  <td class="num ${r.ero > 0 ? "pop" : ""}">${r.ero > 0 ? "+" : "−"}${er(Math.abs(r.ero))}</td>
+  <td class="num ${r.suhde > 1 ? "pop" : ""}">${r.suhde.toLocaleString(tr.locale,
       { minimumFractionDigits: 2, maximumFractionDigits: 2 })}×</td>
 </tr>`).join("")}
 </tbody></table>
 </div>
-${h ? `<div class="card"><strong>Mediaani ${h.mediaani.toLocaleString("fi-FI",
-  { minimumFractionDigits: 2, maximumFractionDigits: 2 })}×</strong> (${h.otos} hanketta).
-  Mediaani eikä keskiarvo, jottei yksi karkaava hanke vääristä kuvaa.</div>` : ""}
-<p class="note"><strong>Mitä tämä ei kerro.</strong>
-Vertailukelpoisuus on tulkinnanvaraista: hankkeen sisältö, laajuus ja hintataso
-muuttuvat suunnittelun aikana, eikä jokainen ylitys ole virhe. Osa eroista selittyy
-inflaatiolla, osa laajennuksilla, joista on päätetty erikseen. Alkuperäisen arvion
-vuosi on merkitty jokaisen hankkeen kohdalle. Otos on pieni.</p>`;
+${h ? `<div class="card">${tr.medianLine(h.mediaani.toLocaleString(tr.locale,
+  { minimumFractionDigits: 2, maximumFractionDigits: 2 }), h.otos)}</div>` : ""}
+<p class="note"><strong>${esc(tr.caveatTitle)}</strong> ${esc(tr.overrunsCaveat)}</p>`;
 
-  return shell({ title: "Arvio vs. toteutunut", path: "/ylitykset/", site, body,
-    desc: `Suomalaisten suurhankkeiden kustannusarviot ja toteutuneet hinnat. ${rivit.length} hanketta.` });
+  return shell({ title: tr.overrunsTitle, path: `${B}/${pp.overruns}/`, site, body, lang,
+    altPath: lang === "en" ? "/ylitykset/" : "/en/overruns/",
+    desc: lang === "en"
+      ? `Cost estimates and final prices for Finnish megaprojects. ${rivit.length} projects.`
+      : `Suomalaisten suurhankkeiden kustannusarviot ja toteutuneet hinnat. ${rivit.length} hanketta.` });
 }
 
 /* ── Verokuitti ────────────────────────────────────────────────────── */
-export function kuittiHtml(data, ansio, { site }) {
+export function kuittiHtml(data, ansio, { site, lang = DEFAULT_LANG }) {
+  const tr = T(lang), pp = P(lang), B = base(lang);
+  const fm = n => fmtL(n, lang);
   const k = ansio ? verokuitti(data, ansio) : null;
   const body = `
-<h1>Verokuitti</h1>
-<p class="lede">Syötä vuosiansiosi, niin näet arvion maksamastasi verosta ja siitä,
-mihin valtion osuus siitä jakautuu. Karkea suuruusluokka-arvio — ei veroneuvo.</p>
+<h1>${esc(tr.receiptTitle)}</h1>
+<p class="lede">${esc(tr.receiptLede)}</p>
 <div class="card">
-  <form method="get" action="/kuitti/" onsubmit="event.preventDefault();
-    const v=this.ansio.value.replace(/\\D/g,''); if(v) location.href='/kuitti/'+v+'/';">
+  <form onsubmit="event.preventDefault();
+    const v=this.ansio.value.replace(/\\D/g,''); if(v) location.href='${B}/${pp.receipt}/'+v+'/';">
     <label style="font-size:14px;font-weight:600;display:block;margin-bottom:7px">
-      Vuosiansio, brutto</label>
+      ${esc(tr.grossIncome)}</label>
     <div style="display:flex;gap:9px;flex-wrap:wrap">
       <input name="ansio" inputmode="numeric" placeholder="45000"
-        value="${k ? k.tulo : ""}"><button>Laske</button>
+        value="${k ? k.tulo : ""}"><button>${esc(tr.calculate)}</button>
     </div>
   </form>
 </div>
 ${k ? `
 <div class="card">
   <table><tbody>
-    <tr><td>Valtion tulovero</td><td class="num">${fmt(k.valtionvero)} €</td></tr>
-    <tr><td>Kunnallisvero <span class="sub">${k.kuntavero} % — vaihtelee kunnittain</span></td>
-        <td class="num">${fmt(k.kunnallisvero)} €</td></tr>
-    <tr><td>Eläke- ja työttömyysvakuutusmaksut <span class="sub">ei veroa, mutta palkasta</span></td>
-        <td class="num">${fmt(k.maksut)} €</td></tr>
-    <tr><td><strong>Yhteensä</strong></td>
-        <td class="num pop">${fmt(k.yhteensa)} € (${k.aste.toLocaleString("fi-FI",
+    <tr><td>${esc(tr.stateTax)}</td><td class="num">${fm(k.valtionvero)} €</td></tr>
+    <tr><td>${esc(tr.municipalTax)} <span class="sub">${esc(tr.municipalNote(k.kuntavero))}</span></td>
+        <td class="num">${fm(k.kunnallisvero)} €</td></tr>
+    <tr><td>${esc(tr.contributions)} <span class="sub">${esc(tr.contributionsNote)}</span></td>
+        <td class="num">${fm(k.maksut)} €</td></tr>
+    <tr><td><strong>${esc(tr.total)}</strong></td>
+        <td class="num pop">${fm(k.yhteensa)} € (${k.aste.toLocaleString(tr.locale,
           { maximumFractionDigits: 1 })} %)</td></tr>
   </tbody></table>
 </div>
 <h2 style="font-family:'Bricolage Grotesque',serif;font-size:22px;margin:26px 0 10px">
-  Mihin valtion tuloverosi meni</h2>
+  ${esc(tr.whereItWent)}</h2>
 <div class="card">
-<table><thead><tr><th>Pääluokka</th><th>Osuus</th><th>Sinun euroistasi</th></tr></thead>
+<table><thead><tr><th>${esc(tr.colMainClass)}</th><th>${esc(tr.colShare)}</th><th>${esc(tr.colYourEuros)}</th></tr></thead>
 <tbody>
 ${k.rivit.map(r => `<tr>
-  <td>${esc(r.label)}${r.note ? `<span class="sub">${esc(r.note)}</span>` : ""}
+  <td>${esc(lang === "en" && r.label_en ? r.label_en : r.label)}${(lang === "en" ? r.note_en : r.note) ? `<span class="sub">${esc(lang === "en" ? r.note_en : r.note)}</span>` : ""}
     <div class="bar"><i style="width:${(r.osuus * 100).toFixed(1)}%"></i></div></td>
-  <td class="num">${(r.osuus * 100).toLocaleString("fi-FI", { maximumFractionDigits: 1 })} %</td>
-  <td class="num pop">${fmt(Math.round(r.euroa))} €</td>
+  <td class="num">${(r.osuus * 100).toLocaleString(tr.locale, { maximumFractionDigits: 1 })} %</td>
+  <td class="num pop">${fm(Math.round(r.euroa))} €</td>
 </tr>`).join("")}
 </tbody></table>
 </div>
-<p class="note"><strong>Mitä tämä ei kerro.</strong>
-Laskelma käyttää valtion tuloveroasteikkoa ja ${k.kuntavero} %:n kunnallisveroa,
-eikä huomioi vähennyksiä, pääomatuloja, kirkollisveroa tai kotikuntasi todellista
-veroprosenttia — todellinen veroprosenttisi poikkeaa tästä. Jako pääluokkiin on
-laskennallinen: verot menevät yhteiseen kassaan, eikä yksittäistä euroa voi
-jäljittää tiettyyn menoon. Kunnallisveroa ei ole jaettu tässä lainkaan.</p>`
+<p class="note"><strong>${esc(tr.caveatTitle)}</strong> ${esc(tr.receiptCaveat(k.kuntavero))}</p>`
 : ""}`;
 
-  return shell({ title: k ? `Verokuitti ${fmt(k.tulo)} €` : "Verokuitti",
-    path: k ? `/kuitti/${k.tulo}/` : "/kuitti/", site, body,
-    desc: k ? `Vuosiansiolla ${fmt(k.tulo)} € maksat noin ${fmt(k.yhteensa)} € veroja ja maksuja.`
-            : "Mihin sinun verosi menevät? Syötä vuosiansiosi." });
+  return shell({ title: k ? `${tr.receiptTitle} ${fm(k.tulo)} €` : tr.receiptTitle,
+    path: k ? `${B}/${pp.receipt}/${k.tulo}/` : `${B}/${pp.receipt}/`, site, body, lang,
+    altPath: lang === "en"
+      ? (k ? `/kuitti/${k.tulo}/` : "/kuitti/")
+      : (k ? `/en/tax-receipt/${k.tulo}/` : "/en/tax-receipt/"),
+    desc: k
+      ? (lang === "en"
+          ? `On annual earnings of ${fm(k.tulo)} € you pay roughly ${fm(k.yhteensa)} € in tax and contributions.`
+          : `Vuosiansiolla ${fm(k.tulo)} € maksat noin ${fm(k.yhteensa)} € veroja ja maksuja.`)
+      : (lang === "en" ? "Where does your tax go? Enter your annual earnings."
+                       : "Mihin sinun verosi menevät? Syötä vuosiansiosi.") });
 }
 
 /* ── Vapaa summa ───────────────────────────────────────────────────── */
-export function summaHtml(data, summa, { site }) {
+export function summaHtml(data, summa, { site, lang = DEFAULT_LANG }) {
+  const tr = T(lang), pp = P(lang), B = base(lang);
+  const fm = n => fmtL(n, lang);
   const s = Math.max(0, Math.round(summa));
-  const yks = data.units.filter(u => !!u.arki === (s < 10_000));
+  const yks = data.units;
   const rivit = yks.map(u => ({ u, n: Math.floor(s / u.cost) })).filter(r => r.n > 0);
   const body = `
-<h1>${fmt(s)} €</h1>
-<p class="lede">Mitä tällä summalla saisi? Syötä mikä tahansa luku — vaikka uutisesta
-poimittu.</p>
+<h1>${fm(s)} €</h1>
+<p class="lede">${esc(tr.sumLede)}</p>
 <div class="card">
   <form onsubmit="event.preventDefault();
-    const v=this.summa.value.replace(/[^\\d]/g,''); if(v) location.href='/summa/'+v+'/';">
+    const v=this.summa.value.replace(/[^\\d]/g,''); if(v) location.href='${B}/${pp.sum}/'+v+'/';">
     <div style="display:flex;gap:9px;flex-wrap:wrap">
       <input name="summa" inputmode="numeric" placeholder="340000000" value="${s || ""}">
-      <button>Laske</button>
+      <button>${esc(tr.calculate)}</button>
     </div>
   </form>
 </div>
 ${rivit.length ? `<div class="card"><table><tbody>
-${rivit.map(r => `<tr><td>${esc(r.u.label)}<span class="sub">à ${fmt(r.u.cost)} €${
-  r.u.note ? " — " + esc(r.u.note) : ""}</span></td>
-  <td class="num pop">${fmt(r.n)}</td></tr>`).join("")}
-</tbody></table></div>` : `<div class="card">Syötä summa yllä.</div>`}
-${s > 0 ? `<div class="card">Koko maan mitassa tämä on
-  <strong>${(s / data.vakiluku).toLocaleString("fi-FI",
-    { maximumFractionDigits: 2 })} €</strong> jokaista suomalaista kohden.</div>` : ""}
-<p class="note"><strong>Mitä tämä ei kerro.</strong>
-Jakolasku ei ole päätös. Yksikköhinnat ovat keskiarvoja, ja oikeassa hankkeessa
-hinta riippuu paikasta, laajuudesta ja ajankohdasta. Raha ei myöskään ole vapaasti
-siirrettävissä menokohteesta toiseen.</p>`;
+${rivit.map(r => `<tr><td>${esc(L(r.u, lang))}<span class="sub">à ${fm(r.u.cost)} €${
+  N(r.u, lang) ? " — " + esc(N(r.u, lang)) : ""}</span></td>
+  <td class="num pop">${fm(r.n)}</td></tr>`).join("")}
+</tbody></table></div>` : `<div class="card">${esc(tr.sumEmpty)}</div>`}
+${s > 0 ? `<div class="card">${tr.sumPerCapita((s / data.vakiluku).toLocaleString(tr.locale,
+    { maximumFractionDigits: 2 }) + " €")}</div>` : ""}
+<p class="note"><strong>${esc(tr.caveatTitle)}</strong> ${esc(tr.sumCaveat)}</p>`;
 
-  return shell({ title: s ? `Mitä ${fmt(s)} eurolla sais?` : "Paljonko se on?",
-    path: s ? `/summa/${s}/` : "/summa/", site, body,
-    desc: s ? `${fmt(s)} € muutettuna arkisiksi yksiköiksi.` : "Syötä summa." });
+  return shell({ title: s ? `${fm(s)} €` : tr.sumTitle,
+    path: s ? `${B}/${pp.sum}/${s}/` : `${B}/${pp.sum}/`, site, body, lang,
+    altPath: lang === "en" ? (s ? `/summa/${s}/` : "/summa/") : (s ? `/en/sum/${s}/` : "/en/sum/"),
+    desc: s
+      ? (lang === "en" ? `${fm(s)} € translated into everyday units.`
+                       : `${fm(s)} € muutettuna vertailukelpoisiksi yksiköiksi.`)
+      : (lang === "en" ? "Enter a sum." : "Syötä summa.") });
 }

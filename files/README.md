@@ -34,12 +34,37 @@ Avaa <http://localhost:3000>. Siinä kaikki — `data.json` on repossa valmiina.
 ## Komennot
 
 - `npm run dev` — kehityspalvelin portissa 3000
-- `npm run data` — hakee luvut rajapinnoista, kirjoittaa `data.json`
+- `npm run data` — hakee luvut rajapinnoista, kirjoittaa `data.json` ja synkkaa etusivun varaluvut
 - `npm run pages` — rakentaa staattiset sivut `dist/`-hakemistoon
 - `npm run build` — `data` + `pages`
 - `npm start` — tuotantopalvelin (lue `PORT` ja `SITE_URL` ympäristöstä)
 
 ---
+
+## Kielet
+
+Sivusto on kaksikielinen. Englanninkieliset sivut elävät `/en/`-etuliitteen
+alla ja käyttävät englanninkielisiä polkuja, jotta osoite on luettava:
+
+| Suomi | English |
+|---|---|
+| `/` | `/en/` |
+| `/ylitykset/` | `/en/overruns/` |
+| `/kuitti/45000/` | `/en/tax-receipt/45000/` |
+| `/summa/340000000/` | `/en/sum/340000000/` |
+| `/p/pma-hoit/` | `/en/p/pma-hoit/` |
+
+Käännökset ovat kahdessa tiedostossa:
+
+- `i18n-data.mjs` — menoerien, yksiköiden ja pääluokkien nimikkeet
+- `i18n-ui.mjs` — käyttöliittymän tekstit ja polut
+
+Etusivu on **yksi tiedosto**, joka lukee kielen polusta. Kaksi erillistä
+HTML-tiedostoa erkaantuisi toisistaan ensimmäisen muutoksen jälkeen.
+
+Kun lisäät menoerän tai yksikön, lisää käännös `i18n-data.mjs`:ään.
+Puuttuva käännös ei kaada mitään — sivu näyttää silloin suomenkielisen
+nimikkeen, mikä on huomattavampaa kuin tyhjä kohta.
 
 ## Tiedostot
 
@@ -60,8 +85,6 @@ Kaikki luvut ovat `fetch-data.mjs`:ssä, eivät `data.json`:issa.
 
 - Lisää menoerä → `PLAN.items`
 - Lisää yksikkö → `PLAN.units`
-- Merkitse arkiostos → `arki: true` sekä erässä että yksikössä. Tämä estää
-  miljardien näyttämisen porkkanakiloina ja päinvastoin
 - Anna alkuperäinen kustannusarvio → `arvio: <luku>`. Skripti luo ylityserän
   automaattisesti ja päivittää mediaanikertoimen
 - Merkitse hankkeet, jotka kilpailevat samasta rahasta → sama `paatos:`-tunnus
@@ -72,24 +95,30 @@ Muutoksen jälkeen:
 npm run data
 ```
 
-**Etusivun varaluvut on synkattava erikseen.** `public/index.html` sisältää
-kopion datasta (`ITEMS_FALLBACK`, `UNITS_FALLBACK`, `SCOPES_FALLBACK`), jotta
-sivu toimii vaikka `data.json` ei latautuisi. Ne eivät päivity itsestään.
-Muista myös kopioida `public/index.html` → `paljonko-se-on.html`.
+Etusivu sisältää kopion datasta (`ITEMS_FALLBACK`, `UNITS_FALLBACK`,
+`SCOPES_FALLBACK`), jotta se toimii vaikka `data.json` ei latautuisi.
+`npm run data` päivittää kopion automaattisesti — se ajaa `sync-fallbacks.mjs`,
+joka kirjoittaa sekä `public/index.html`:n että `paljonko-se-on.html`:n.
 
 ---
 
 ## Testaus
 
-Selaimessa ajettava testi kannattaa pitää mukana — `node --check` kertoo vain,
-että tiedosto jäsentyy, ei sitä että käsittelijä kaatuu ajossa.
+Yksikkötestit (Vitest) kattavat `render.mjs`:n laskentafunktiot
+(`combo`, `verokuitti`, `fmt`, `eur`, `esc`):
 
 ```bash
-npm install --no-save jsdom
-node test-dom.mjs
+npm test
 ```
 
-Testi käy läpi kaikki menoerät, klikkaa nappeja ja raportoi konsolivirheet.
+Selaimessa ajettavat testit (Playwright) käynnistävät `server.mjs`:n ja
+käyvät läpi etusivun laskurin — kaikki menoerät, aluesirut, oman summan
+syöttö, yksikköhinnan muokkaus ja jakonappi — oikeassa selaimessa:
+
+```bash
+npx playwright install --with-deps chromium   # kerran
+npm run test:e2e
+```
 
 ---
 
@@ -162,8 +191,7 @@ Kannattaa lukea ennen kuin muuttaa niitä.
   Kruunusiltojen (2,11×) rinnalla. Ilman sitä koko rekisteri olisi
   syytettävissä agendasta
 - **Mediaani, ei keskiarvo**, jottei yksi karkaava hanke vääristä kuvaa
-- **Arkiostoksissa ei paheita.** Tupakka ja alkoholi olisivat klikatuimmat ja
-  samalla ainoa asia, joka kääntäisi sivuston moralisoivaksi. Ne on jätetty
-  tietoisesti pois
-- **Arkiostoksissa ei "sinun osuuttasi"** vaan ×5,6 M -silta. Vertailu puhuu
-  joukosta, ei lukijan valinnoista
+- **Ei henkilökohtaista kulutusta.** Arkiostosten vertailu ("hampurilaisen
+  sijaan kilo porkkanoita") kokeiltiin ja poistettiin: se kääntää sivuston
+  julkisen rahan tarkastelusta yksilön valintojen arvosteluksi, mikä on eri
+  laji ja vie uskottavuuden muulta sisällöltä

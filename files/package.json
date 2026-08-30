@@ -1,16 +1,22 @@
 {
   "name": "paljonkose",
-  "version": "1.0.0",
-  "main": "app.js",
   "scripts": {
-    "data":  "node fetch-data.mjs",
+    "data": "node fetch-data.mjs && node sync-fallbacks.mjs",
     "pages": "node build-pages.mjs",
     "build": "npm run data && npm run pages",
     "start": "node server.mjs",
-    "dev":   "PORT=3000 SITE_URL=http://localhost:3000 node server.mjs"
+    "dev": "PORT=3000 SITE_URL=http://localhost:3000 node server.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "express": "^5.1.0"
-  }
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "vitest": "^4.1.11"
+  },
+  "main": "app.js"
 }

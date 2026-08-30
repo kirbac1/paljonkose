@@ -21,7 +21,8 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { Resvg } from "@resvg/resvg-js";
-import { combo, ogSvg, pageHtml, fmt, eur , ylityksetHtml, kuittiHtml, summaHtml } from "./render.mjs";
+import { combo, ogSvg, pageHtml, fmt, eur, ylityksetHtml, kuittiHtml, summaHtml } from "./render.mjs";
+import { PATHS, LANGS, DEFAULT_LANG } from "./i18n-ui.mjs";
 
 /* Passenger ei takaa työhakemistoa, joten kaikki polut lasketaan tämän
    tiedoston sijainnista. Suhteellinen polku toimii kehityksessä ja
@@ -54,13 +55,15 @@ const ogCache = new Map();
 const OG_MAX  = 500;
 
 function renderOg(c) {
-  if (ogCache.has(c.slug)) return ogCache.get(c.slug);
+  // avaimessa on kieli, muuten englanninkielinen sivu saisi suomenkielisen kuvan
+  const key = `${c.lang || DEFAULT_LANG}:${c.slug}`;
+  if (ogCache.has(key)) return ogCache.get(key);
   const png = new Resvg(ogSvg(c), {
     font: { loadSystemFonts: true, fontFiles, defaultFontFamily: "DejaVu Sans" },
     fitTo: { mode: "width", value: 1200 }
   }).render().asPng();
   if (ogCache.size >= OG_MAX) ogCache.delete(ogCache.keys().next().value);
-  ogCache.set(c.slug, png);
+  ogCache.set(key, png);
   return png;
 }
 
@@ -90,7 +93,7 @@ app.use(express.json({ limit: "4kb" }));
  *  Tunnukset voivat itse sisältää väliviivan (tre-ratikka), joten
  *  ei arvata erotinta vaan sovitetaan tunnettuihin tunnuksiin,
  *  pisin osuma ensin. */
-function parseSlug(slug) {
+function parseSlug(slug, lang = DEFAULT_LANG) {
   let rest = String(slug), cost = null;
 
   const m = rest.match(/-(\d+)$/);
@@ -101,7 +104,7 @@ function parseSlug(slug) {
   }
 
   const ids = matchIds(rest);
-  return ids ? combo(DATA, ids.itemId, ids.unitId, cost) : null;
+  return ids ? combo(DATA, ids.itemId, ids.unitId, cost, lang) : null;
 }
 
 function matchIds(slug) {
@@ -115,30 +118,35 @@ function matchIds(slug) {
   return null;
 }
 
-app.get("/p/:slug/og.png", (req, res) => {
-  const c = parseSlug(req.params.slug);
-  if (!c) return res.status(404).end();
-  res.set("Content-Type", "image/png");
-  res.set("Cache-Control", "public, max-age=86400");
-  res.send(renderOg(c));
-});
+for (const lang of LANGS) {
+  const B = PATHS[lang].root;
 
-// Express kohtelee /p/x ja /p/x/ samana reittinä, joten yksi käsittelijä riittää.
-app.get("/p/:slug", (req, res) => {
-  const c = parseSlug(req.params.slug);
-  if (!c) return res.status(404).send("Tuntematon laskutoimitus");
+  app.get(`${B}/p/:slug/og.png`, (req, res) => {
+    const c = parseSlug(req.params.slug, lang);
+    if (!c) return res.status(404).end();
+    res.set("Content-Type", "image/png");
+    res.set("Cache-Control", "public, max-age=86400");
+    res.send(renderOg(c));
+  });
 
-  const also = DATA.units
-    .filter(u => u.id !== c.unit.id)
-    .map(u => combo(DATA, c.item.id, u.id))
-    .filter(Boolean)
-    .sort((a, b) => (stats[b.slug]?.shares || 0) - (stats[a.slug]?.shares || 0))
-    .slice(0, 4);
+  // Express kohtelee /p/x ja /p/x/ samana reittinä, joten yksi käsittelijä riittää.
+  app.get(`${B}/p/:slug`, (req, res) => {
+    const c = parseSlug(req.params.slug, lang);
+    if (!c) return res.status(404).send(
+      lang === "en" ? "Unknown calculation" : "Tuntematon laskutoimitus");
 
-  bump(c.slug, "views");
-  res.set("Cache-Control", "public, max-age=600");
-  res.send(pageHtml(c, DATA, { site: SITE, also }));
-});
+    const also = DATA.units
+      .filter(u => u.id !== c.unit.id)
+      .map(u => combo(DATA, c.item.id, u.id, null, lang))
+      .filter(Boolean)
+      .sort((a, b) => (stats[b.slug]?.shares || 0) - (stats[a.slug]?.shares || 0))
+      .slice(0, 4);
+
+    bump(c.slug, "views");
+    res.set("Cache-Control", "public, max-age=600");
+    res.send(pageHtml(c, DATA, { site: SITE, also }));
+  });
+}
 
 app.post("/api/share/:slug", (req, res) => {
   const c = parseSlug(req.params.slug);
@@ -175,9 +183,12 @@ app.get("/sitemap.xml", (req, res) => {
   const urls = [];
   for (const i of DATA.items)
     for (const u of DATA.units) {
-      if (!!u.arki !== !!i.arki) continue;   // arki ja miljardit eivät sekoitu
       const c = combo(DATA, i.id, u.id);
-      if (c) urls.push(`  <url><loc>${SITE}/p/${c.slug}/</loc><lastmod>${DATA.generated.slice(0,10)}</lastmod></url>`);
+      if (c) {
+        const lm = DATA.generated.slice(0, 10);
+        urls.push(`  <url><loc>${SITE}/p/${c.slug}/</loc><lastmod>${lm}</lastmod></url>`);
+        urls.push(`  <url><loc>${SITE}/en/p/${c.slug}/</loc><lastmod>${lm}</lastmod></url>`);
+      }
     }
   res.type("application/xml").send(
 `<?xml version="1.0" encoding="UTF-8"?>
@@ -186,33 +197,47 @@ app.get("/sitemap.xml", (req, res) => {
   <url><loc>${SITE}/ylitykset/</loc></url>
   <url><loc>${SITE}/kuitti/</loc></url>
   <url><loc>${SITE}/summa/</loc></url>
+  <url><loc>${SITE}/en/</loc></url>
+  <url><loc>${SITE}/en/overruns/</loc></url>
+  <url><loc>${SITE}/en/tax-receipt/</loc></url>
+  <url><loc>${SITE}/en/sum/</loc></url>
 ${urls.join("\n")}
 </urlset>`);
 });
 
-app.get("/ylitykset/", (req, res) =>
-  res.type("html").send(ylityksetHtml(DATA, { site: SITE })));
+/* Reitit rakennetaan kielittäin samasta käsittelijästä. Yksi määrittely,
+   kaksi kieltä — muuten polut ehtivät erkaantua toisistaan. */
+for (const lang of LANGS) {
+  const p = PATHS[lang], B = p.root;
 
-// Express 5 ei tue "?"-valinnaisia parametreja — kaksi reittiä per sivu.
-const kuitti = (v, res) => {
-  const a = parseInt(String(v || "").replace(/\D/g, ""), 10);
-  res.type("html").send(kuittiHtml(DATA,
-    Number.isFinite(a) && a > 0 ? Math.min(a, 5_000_000) : null, { site: SITE }));
-};
-app.get("/kuitti/", (req, res) => kuitti(null, res));
-app.get("/kuitti/:ansio/", (req, res) => kuitti(req.params.ansio, res));
+  app.get(`${B}/${p.overruns}/`, (req, res) =>
+    res.type("html").send(ylityksetHtml(DATA, { site: SITE, lang })));
 
-const summa = (v, res) => {
-  const n = parseInt(String(v || "").replace(/\D/g, ""), 10);
-  res.type("html").send(summaHtml(DATA,
-    Number.isFinite(n) ? Math.min(n, 1e12) : 0, { site: SITE }));
-};
-app.get("/summa/", (req, res) => summa(null, res));
-app.get("/summa/:summa/", (req, res) => summa(req.params.summa, res));
+  const kuitti = (v, res) => {
+    const a = parseInt(String(v || "").replace(/\D/g, ""), 10);
+    res.type("html").send(kuittiHtml(DATA,
+      Number.isFinite(a) && a > 0 ? Math.min(a, 5_000_000) : null, { site: SITE, lang }));
+  };
+  app.get(`${B}/${p.receipt}/`, (req, res) => kuitti(null, res));
+  app.get(`${B}/${p.receipt}/:ansio/`, (req, res) => kuitti(req.params.ansio, res));
+
+  const summa = (v, res) => {
+    const n = parseInt(String(v || "").replace(/\D/g, ""), 10);
+    res.type("html").send(summaHtml(DATA,
+      Number.isFinite(n) ? Math.min(n, 1e12) : 0, { site: SITE, lang }));
+  };
+  app.get(`${B}/${p.sum}/`, (req, res) => summa(null, res));
+  app.get(`${B}/${p.sum}/:summa/`, (req, res) => summa(req.params.summa, res));
+}
+
 
 app.get("/healthz", (req, res) => res.json({ ok: true, generated: DATA.generated }));
 
 // staattinen etusivu ja muut tiedostot
+/* Etusivu molemmilla kielillä samasta tiedostosta. Sivu lukee kielen
+   polusta, joten /en/ on jaettava osoite eikä selaimen sisäinen tila. */
+app.get("/en/", (req, res) => res.sendFile(P("public", "index.html")));
+
 app.use(express.static(P("public"), { extensions: ["html"], maxAge: "1h" }));
 
 app.listen(PORT, () => {

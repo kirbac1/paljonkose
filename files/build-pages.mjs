@@ -31,7 +31,6 @@ await fs.mkdir(`${OUT}/p`, { recursive: true });
 const built = [];
 for (const item of data.items) {
   for (const unit of data.units) {
-    if (!!unit.arki !== !!item.arki) continue;   // arki ja miljardit eivät sekoitu
     const c = combo(data, item.id, unit.id);
     if (c) built.push(c);
   }
