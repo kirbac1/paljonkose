@@ -2,11 +2,10 @@
 
 React + TypeScript -toteutus laskimesta — **etusivun tuotantototeutus**.
 `npm run build` kirjoittaa `../files/public/`-hakemistoon, jota
-`deploy.yml` ajaa jokaisen julkaisun yhteydessä; vanha vanilla JS
--versio elää enää `../files/paljonko-se-on.html`:ssä, koskemattomana
-referenssinä. Palvelin (`server.mjs`) pysyy ennallaan ja tarjoaa datan
-osoitteessa `/api/data` sekä jaettavat sivut osoitteissa `/p/…`,
-`/ylitykset/` ja `/kuitti/`.
+`deploy.yml` ajaa jokaisen julkaisun yhteydessä. Vanha vanilla JS
+-etusivu on poistettu repostä kokonaan. Palvelin (`server.mjs`) pysyy
+ennallaan ja tarjoaa datan osoitteessa `/api/data` sekä jaettavat sivut
+osoitteissa `/p/…`, `/ylitykset/` ja `/kuitti/`.
 
 ## Komennot
 

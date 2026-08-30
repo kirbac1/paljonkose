@@ -13,9 +13,8 @@ Tuotanto: **paljonkose.fi**
 - [`files/`](files/README.md) — Express-palvelin: `/api/data`, jaettavat
   `/p/…`-sivut, `/ylitykset/`, `/kuitti/`, `/summa/`. Palvelee myös
   etusivun (`files/public/`), joka rakennetaan `web/`:stä deployn
-  yhteydessä — `files/public/`:ssa ei enää ole omaa lähdekoodia.
-  `files/paljonko-se-on.html` on vanhan vanilla JS -etusivun
-  itsenäinen, koskematon kopio (legacy-referenssi, ei tuotannossa).
+  yhteydessä — `files/public/`:ssa ei enää ole omaa lähdekoodia. Vanha
+  vanilla JS -etusivu on poistettu repostä kokonaan.
 - [`web/`](web/README.md) — React + TypeScript, **etusivun
   tuotantototeutus**. `npm run build` kirjoittaa `files/public/`-
   hakemistoon; `deploy.yml` ajaa tämän ennen jokaista julkaisua.

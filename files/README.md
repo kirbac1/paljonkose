@@ -8,10 +8,10 @@ Tuotanto: **paljonkose.fi**
 
 > `public/` on nyt [`../web/`](../web/README.md):n käännösjälki —
 > `npm run build` siellä kirjoittaa tämän hakemiston, eikä sen sisältöä
-> muokata käsin. `paljonko-se-on.html` on vanhan vanilla JS -etusivun
-> itsenäinen, koskematon kopio: legacy-referenssi, ei enää tuotannossa.
-> Tämän hakemiston Express-palvelin (`server.mjs`, `render.mjs`,
-> `/api/data`) palvelee sekä Reactin buildia että näitä muita reittejä.
+> muokata käsin. Vanha vanilla JS -etusivu on poistettu repostä
+> kokonaan. Tämän hakemiston Express-palvelin (`server.mjs`,
+> `render.mjs`, `/api/data`) palvelee sekä Reactin buildia että näitä
+> muita reittejä.
 
 ---
 
@@ -41,7 +41,7 @@ Avaa <http://localhost:3000>. Siinä kaikki — `data.json` on repossa valmiina.
 ## Komennot
 
 - `npm run dev` — kehityspalvelin portissa 3000
-- `npm run data` — hakee luvut rajapinnoista, kirjoittaa `data.json` ja synkkaa etusivun varaluvut
+- `npm run data` — hakee luvut rajapinnoista, kirjoittaa `data.json`
 - `npm run pages` — rakentaa staattiset sivut `dist/`-hakemistoon
 - `npm run build` — `data` + `pages`
 - `npm start` — tuotantopalvelin (lue `PORT` ja `SITE_URL` ympäristöstä)
@@ -79,8 +79,7 @@ nimikkeen, mikä on huomattavampaa kuin tyhjä kohta.
 - `render.mjs` — **jaettu renderöinti**; sekä palvelin että staattinen build käyttävät tätä, joten sivut ovat aina identtiset
 - `fetch-data.mjs` — datan haku ja `data.json`:in kirjoitus. **Kaikki luvut, yksikköhinnat ja pääluokat määritellään täällä**
 - `data.json` — generoitu, mutta committoitu, jotta sivu toimii ilman rajapintoja
-- `public/index.html` — etusivu, jota palvelin tarjoilee
-- `paljonko-se-on.html` — identtinen kopio, jonka voi avata selaimessa ilman palvelinta
+- `public/` — etusivu, jota palvelin tarjoilee. Käännösjälki `../web/`:stä, ei omaa lähdekoodia
 - `build-pages.mjs` — staattinen generaattori (valinnainen)
 - `Dockerfile`, `docker-compose.yml`, `nginx-paljonkose.conf` — tuotanto
 
@@ -102,10 +101,10 @@ Muutoksen jälkeen:
 npm run data
 ```
 
-Etusivu sisältää kopion datasta (`ITEMS_FALLBACK`, `UNITS_FALLBACK`,
-`SCOPES_FALLBACK`), jotta se toimii vaikka `data.json` ei latautuisi.
-`npm run data` päivittää kopion automaattisesti — se ajaa `sync-fallbacks.mjs`,
-joka kirjoittaa sekä `public/index.html`:n että `paljonko-se-on.html`:n.
+React-etusivulla (`../web/`) on oma, erillinen varalukumekanisminsa —
+katso [`web/README.md`](../web/README.md#rakenne) (`data/fallback.ts`,
+`npm run fallback`). Se ei liity tähän datan muokkaukseen suoraan, mutta
+kannattaa päivittää samalla jos muutat `PLAN.items`/`PLAN.units`.
 
 ---
 

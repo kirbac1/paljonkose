@@ -1,7 +1,7 @@
 {
   "name": "paljonkose",
   "scripts": {
-    "data": "node fetch-data.mjs && node sync-fallbacks.mjs",
+    "data": "node fetch-data.mjs",
     "pages": "node build-pages.mjs",
     "build": "npm run data && npm run pages",
     "start": "node server.mjs",

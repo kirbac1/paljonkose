@@ -1,9 +1,8 @@
 name: Deploy to production
 
 # Builds web/ (React) and ships it into files/public/, then deploys
-# files/ to the Plesk server on every push to main. files/'s own vanilla
-# JS is legacy now — its standalone reference copy lives at
-# files/paljonko-se-on.html, untouched by the build.
+# files/ to the Plesk server on every push to main. The old vanilla-JS
+# frontend has been removed from the repo entirely.
 #
 # Server facts below were confirmed by SSHing in on 2026-08-30 — re-check
 # them if the deploy step starts failing after server-side changes:
