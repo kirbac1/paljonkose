@@ -73,7 +73,7 @@ jobs:
 
           rsync -az --delete \
             -e "ssh -o BatchMode=yes" \
-            . "$SSH_USER@$SSH_HOST:$RELEASE/"
+            web/ "$SSH_USER@$SSH_HOST:$RELEASE/"
 
           # Pass values as remote env vars and feed the script on stdin,
           # rather than interpolating into a nested quoted string. Quoting
