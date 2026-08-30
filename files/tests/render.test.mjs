@@ -117,7 +117,7 @@ describe("verokuitti", () => {
     expect(verokuitti(data, -100)).toBeNull();
   });
 
-  it("applies the correct 2026 bracket and splits by pääluokka share", () => {
+  it("applies the correct 2026 bracket and splits by top-level category share", () => {
     const r = verokuitti(data, 40_000, 7.5);
     expect(r.valtionvero).toBe(7207);
     expect(r.kunnallisvero).toBe(3000);

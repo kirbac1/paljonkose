@@ -21,8 +21,8 @@ const ORDER = ["valtio", "helsinki", "tampere", "turku", "oulu", "uusimaa", "tul
 export function Calculator(p: Props) {
   const t = UI[p.lang];
   const { calc } = p;
-  /* Ryhmitellään vain ne alueet, joille löytyy sekä eriä että nimike —
-     tuntematon alue datassa ei saa kaataa valikkoa. */
+  /* Only group scopes that have both items and a label — an unknown
+     scope in the data must not crash the dropdown. */
   const groups = ORDER
     .map(scope => ({
       scope,

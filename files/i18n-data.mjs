@@ -1,13 +1,13 @@
 /**
- * i18n-data.mjs — englanninkieliset vastineet datan nimikkeille.
+ * i18n-data.mjs — English-language equivalents for the data's labels.
  *
- * Pidetään erillään fetch-data.mjs:stä, jotta menoerien määrittelyt
- * pysyvät luettavina ja käännökset yhdessä paikassa. fetch-data.mjs
- * liittää nämä data.jsoniin kenttinä label_en ja note_en.
+ * Kept separate from fetch-data.mjs so the spending-item definitions
+ * stay readable and the translations live in one place. fetch-data.mjs
+ * attaches these to data.json as the label_en and note_en fields.
  *
- * Jos lisäät menoerän tai yksikön, lisää käännös tänne. Puuttuva
- * käännös ei kaada mitään — sivu näyttää silloin suomenkielisen
- * nimikkeen, mikä on huomattavampaa kuin hiljainen tyhjä kohta.
+ * If you add a spending item or a unit, add its translation here. A
+ * missing translation doesn't break anything — the page falls back to
+ * the Finnish label, which is more noticeable than a silent blank spot.
  */
 
 export const ITEMS_EN = {
@@ -90,8 +90,8 @@ export const PAALUOKAT_EN = {
   muu:   ["Other main classes", ""]
 };
 
-/* Demonyymit per capita -riville. Paljaita substantiiveja, koska
-   käännös lisää eteen "per" — "per every person" olisi väärin. */
+/* Demonyms for the per-capita line. Bare nouns, because the translation
+   adds "per" in front — "per every person" would be wrong. */
 export const ASUKAS_EN = {
   valtio:   "person in Finland",
   helsinki: "Helsinki resident",

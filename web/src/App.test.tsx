@@ -4,37 +4,38 @@ import userEvent from "@testing-library/user-event";
 import App from "./App";
 
 /**
- * Komponenttitestit. Nämä ajavat oikeaa DOMia vastaan, koska tyypintarkistus
- * kertoo vain että koodi kääntyy — se ei kerro että käsittelijä toimii.
- * Aiemmassa versiossa juuri tämä ero päästi tuotantoon bugin, jossa
- * menoerän vaihto jätti yksikön ennalleen.
+ * Component tests. These run against the real DOM, because type-checking
+ * only tells you the code compiles — it doesn't tell you the handler
+ * works. In an earlier version, exactly this gap let a bug into
+ * production where switching the spending item left the unit unchanged.
  */
 
 beforeEach(() => {
-  // ei rajapintaa testissä: sovellus käyttää sivulle käännettyjä varalukuja
+  // no API in the test: the app uses the fallback figures compiled into the page
   vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
-  /* Kieli luetaan osoitteesta, ja jsdomin osoite säilyy testien välillä.
-     Ilman nollausta kielenvaihtotesti jättää ?lang=en voimaan ja seuraavat
-     testit ajavat väärällä kielellä — tila vuotaa testistä toiseen. */
+  /* Language is read from the address, and jsdom's address persists
+     between tests. Without resetting it, the language-switch test leaves
+     ?lang=en in effect and later tests run in the wrong language — state
+     leaks from one test to the next. */
   window.history.replaceState(null, "", "/");
 });
 
 const count = () => screen.getByTestId("count").textContent ?? "";
 
 describe("App", () => {
-  it("näyttää laskutoimituksen tuloksen heti", async () => {
+  it("shows the calculation result immediately", async () => {
     render(<App />);
     expect(await screen.findByTestId("count")).toBeInTheDocument();
     expect(count()).not.toBe("");
   });
 
-  it("kertoo lukijalle jos luvut eivät latautuneet", async () => {
+  it("tells the reader if the figures failed to load", async () => {
     render(<App />);
     expect(await screen.findByRole("status")).toHaveTextContent(/tallennetut arvot/i);
   });
 
-  it("vaihtaa kielen ilman sivunlatausta", async () => {
+  it("switches language without a page reload", async () => {
     const user = userEvent.setup();
     render(<App />);
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Paljonko se on?");
@@ -42,12 +43,12 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "In English" }));
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("What would that buy?");
 
-    // ja takaisin — nappi ei saa kadota kummassakaan suunnassa
+    // and back — the button must not disappear in either direction
     await user.click(screen.getByRole("button", { name: "Suomeksi" }));
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Paljonko se on?");
   });
 
-  it("suodattaa menoerät alueen mukaan", async () => {
+  it("filters spending items by region", async () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole("button", { name: "Tampere" }));
@@ -58,7 +59,7 @@ describe("App", () => {
     expect(groups[0]).toHaveAttribute("label", "Tampere");
   });
 
-  it("laskee lukijan oman summan", async () => {
+  it("calculates the reader's own sum", async () => {
     const user = userEvent.setup();
     render(<App />);
     await user.type(screen.getByLabelText("Summa euroina"), "340000000");
@@ -66,26 +67,26 @@ describe("App", () => {
     expect(count()).not.toBe("0");
   });
 
-  it("valitsee pienelle summalle yksikön, johon se riittää", async () => {
+  it("picks a unit a small sum is enough for", async () => {
     const user = userEvent.setup();
     render(<App />);
     await user.type(screen.getByLabelText("Summa euroina"), "500");
     await user.click(screen.getByRole("button", { name: "Paljonko se on?" }));
-    // ei saa jäädä nollaan: joko kappaleita tai osuus
+    // must not land on zero: either whole units or a fraction
     expect(count()).not.toBe("0");
   });
 
-  /* Palvelimen renderöimät sivut ovat helppo unohtaa uudelleenkirjoituksessa:
-     ne eivät ole React-reittejä, joten mikään ei kaadu jos linkit katoavat.
-     Näin kävi kerran — siksi tämä testi on olemassa. */
-  it("linkittää palvelimen renderöimille sivuille", () => {
+  /* Server-rendered pages are easy to forget in a rewrite: they aren't
+     React routes, so nothing crashes if the links disappear. That
+     happened once — that's why this test exists. */
+  it("links to server-rendered pages", () => {
     render(<App />);
     const nav = screen.getByRole("navigation", { name: "Muut sivut" });
     const hrefs = within(nav).getAllByRole("link").map(a => a.getAttribute("href"));
     expect(hrefs).toEqual(["/ylitykset/", "/kuitti/"]);
   });
 
-  it("vaihtaa myös sivulinkit kielen mukana", async () => {
+  it("switches the page links along with the language", async () => {
     const user = userEvent.setup();
     render(<App />);
     await user.click(screen.getByRole("button", { name: "In English" }));
@@ -94,7 +95,7 @@ describe("App", () => {
     expect(hrefs).toEqual(["/en/overruns/", "/en/tax-receipt/"]);
   });
 
-  it("nollaa lukijan muokkaaman hinnan kun menoerä vaihtuu", async () => {
+  it("resets the reader's edited price when the spending item changes", async () => {
     const user = userEvent.setup();
     render(<App />);
 
@@ -105,8 +106,9 @@ describe("App", () => {
     await user.type(price, "99999");
     expect(price.value).toBe("99999");
 
-    // Muokattu hinta ei saa siirtyä seuraavaan erään — se olisi hiljainen
-    // virhe, jossa lukija näkee väärän luvun uskoen sitä oikeaksi.
+    // An edited price must not carry over to the next item — that would
+    // be a silent error where the reader sees a wrong number and
+    // believes it's correct.
     const items = screen.getByLabelText<HTMLSelectElement>("Valitse menoerä");
     const other = [...items.options].find(o => o.value !== items.value);
     expect(other).toBeDefined();

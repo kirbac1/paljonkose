@@ -7,7 +7,7 @@ export const locale = (lang: Lang) => LOCALE[lang];
 export const num = (n: number, lang: Lang) =>
   new Intl.NumberFormat(LOCALE[lang]).format(n);
 
-/** Isot summat lyhennettynä. Miljardi on eri sana eri kielillä. */
+/** Large sums, abbreviated. "Billion" is a different word in each language. */
 export function eur(amount: number, lang: Lang): string {
   const l = LOCALE[lang];
   if (amount >= 1e9) {
@@ -20,7 +20,7 @@ export function eur(amount: number, lang: Lang): string {
   return `${new Intl.NumberFormat(l).format(Math.round(amount))} €`;
 }
 
-/** Pieni osuus merkitsevillä numeroilla — "0,00" ei kerro mitään. */
+/** A small fraction with significant digits — "0.00" doesn't say anything. */
 export function fraction(value: number, lang: Lang): string {
   const l = LOCALE[lang];
   return value < 0.01

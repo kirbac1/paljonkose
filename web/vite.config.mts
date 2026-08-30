@@ -9,7 +9,7 @@ export default defineConfig({
   // shipped on every deploy, those would accumulate forever.
   build: { outDir: "../files/public", emptyOutDir: true },
   server: {
-    // Kehityksessä data ja sivut tulevat olemassa olevalta Express-palvelimelta.
+    // In development, data and pages come from the existing Express server.
     proxy: {
       "/api": "http://localhost:3000",
       "/p": "http://localhost:3000",

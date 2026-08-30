@@ -1,12 +1,12 @@
 import type { Calculation, Dataset, Item, Lang, Unit } from "../types";
 
-/** Lukijan oman summan synteettinen erä-id. Ei koskaan omaa /p/-sivua. */
+/** Synthetic item id for the reader's own sum. Never has a /p/ page of its own. */
 export const OWN_ID = "__oma";
 
 /**
- * Laskutoimitus. Puhdas funktio ilman React-riippuvuuksia, jotta se on
- * testattavissa ilman renderöintiä — tämä on koko laskimen ydin ja
- * ainoa kohta, jossa lukuja käsitellään.
+ * The calculation. A pure function with no React dependency, so it's
+ * testable without rendering — this is the entire core of the
+ * calculator and the only place numbers are handled.
  */
 export function calculate(item: Item, unit: Unit, cost?: number): Calculation {
   const used = cost != null && cost > 0 ? cost : unit.cost;
@@ -18,22 +18,22 @@ export function calculate(item: Item, unit: Unit, cost?: number): Calculation {
     cost: used,
     edited: Math.abs(used - unit.cost) > 0.005,
     count,
-    // Summa voi olla yksikköä pienempi. "0 hoitajan vuosipalkkaa" on
-    // umpikuja, joten kerrotaan osuus sen sijaan.
+    // The sum can be smaller than the unit. "0 nurses' annual salaries"
+    // is a dead end, so a fraction is shown instead.
     fraction: count < 1 ? item.amount / used : null,
     remainder: item.amount - count * used,
     perCapita: item.amount / (item.vakiluku || 1)
   };
 }
 
-/** Menoerät, joilla on oma laskusivu. Nostot ja vertailukohdat eivät. */
+/** Spending items that have their own calculation page. News items and comparison points don't. */
 export function comparableItems(data: Dataset): Item[] {
   return data.items.filter(i => !i.nosto && !i.vainRekisteri);
 }
 
 /**
- * Halvin yksikkö, joka antaa vähintään yhden kappaleen. Käytetään kun
- * lukija syöttää pienen summan — muuten hän näkee pelkän nollan.
+ * The cheapest unit that yields at least one whole item. Used when the
+ * reader enters a small sum — otherwise they'd just see a zero.
  */
 export function bestUnitFor(amount: number, units: Unit[]): Unit | undefined {
   const affordable = units.filter(u => amount >= u.cost);
@@ -45,10 +45,11 @@ export function bestUnitFor(amount: number, units: Unit[]): Unit | undefined {
 }
 
 /**
- * Polku laskutoimituksen omalle jaettavalle sivulle (sama slug-kaava kuin
- * server.mjs:n combo()), tai null jos sellaista ei ole: lukijan oma summa
- * ei koskaan saa sivua, eikä yksikköä pienempi summa (server ei tee
- * sivua kun count < 1 — se näyttäisi tyhjän tai nollan).
+ * The path to the calculation's own shareable page (the same slug
+ * scheme as server.mjs's combo()), or null if there isn't one: the
+ * reader's own sum never gets a page, and neither does a sum smaller
+ * than the unit (the server doesn't build a page when count < 1 — it
+ * would show a blank or a zero).
  */
 export function comboPath(calc: Calculation, lang: Lang): string | null {
   if (calc.item.id === OWN_ID || calc.count < 1) return null;
@@ -58,8 +59,8 @@ export function comboPath(calc: Calculation, lang: Lang): string | null {
 }
 
 /**
- * Hankkeet, jotka kilpailevat samasta määrärahasta. Vain näissä vertailu
- * on aito vaihtoehto — hävittäjä vastaan päiväkoti ei ole.
+ * Projects competing for the same funding. Only here is the comparison
+ * a real alternative — fighter jet vs. daycare center isn't.
  */
 export function rivals(data: Dataset, item: Item): Item[] {
   if (!item.paatos) return [];
@@ -69,8 +70,8 @@ export function rivals(data: Dataset, item: Item): Item[] {
 }
 
 /**
- * Ennuste toteutuneen ylityshistorian mediaanilla. Vain suunnitteilla
- * oleville hankkeille, joiden hinta on arvio eikä toteutunut.
+ * A forecast using the historical overrun record's median. Only for
+ * planned projects whose price is an estimate, not an actual cost.
  */
 export function forecast(data: Dataset, c: Calculation) {
   if (!c.item.tuleva || !data.ylityshistoria) return null;

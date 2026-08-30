@@ -14,38 +14,38 @@ const unit = (over: Partial<Unit> = {}): Unit => ({
 });
 
 describe("calculate", () => {
-  it("jakaa summan yksikköhinnalla", () => {
+  it("divides the sum by the unit price", () => {
     const c = calculate(item({ amount: 10_000 }), unit({ cost: 3000 }));
     expect(c.count).toBe(3);
     expect(c.remainder).toBe(1000);
     expect(c.fraction).toBeNull();
   });
 
-  it("kertoo osuuden kun summa jää yksikköä pienemmäksi", () => {
-    // "0 hoitajan vuosipalkkaa" on umpikuja — lukijan on saatava jokin luku
+  it("returns a fraction when the sum is smaller than the unit", () => {
+    // "0 nurses' annual salaries" is a dead end — the reader needs some number
     const c = calculate(item({ amount: 12 }), unit({ cost: 150 }));
     expect(c.count).toBe(0);
     expect(c.fraction).toBeCloseTo(0.08);
   });
 
-  it("merkitsee muokatun hinnan", () => {
+  it("flags an edited price", () => {
     expect(calculate(item(), unit({ cost: 1000 }), 2000).edited).toBe(true);
     expect(calculate(item(), unit({ cost: 1000 }), 1000).edited).toBe(false);
   });
 
-  it("sivuuttaa kelvottoman hinnan ja käyttää yksikön omaa", () => {
+  it("ignores an invalid price and uses the unit's own", () => {
     expect(calculate(item(), unit({ cost: 1000 }), 0).cost).toBe(1000);
     expect(calculate(item(), unit({ cost: 1000 }), -5).cost).toBe(1000);
   });
 
-  it("laskee per capitan erän oman väkiluvun mukaan, ei koko maan", () => {
+  it("computes the per-capita share using the item's own population, not the whole country's", () => {
     const c = calculate(item({ scope: "tampere", vakiluku: 260_000, amount: 2_600_000 }), unit());
     expect(c.perCapita).toBe(10);
   });
 });
 
 describe("comparableItems", () => {
-  it("jättää pois nostot ja vertailukohdat", () => {
+  it("excludes news items and comparison points", () => {
     const data = { items: [
       item({ id: "a" }),
       item({ id: "b", nosto: true }),
@@ -58,37 +58,37 @@ describe("comparableItems", () => {
 describe("bestUnitFor", () => {
   const units = [unit({ id: "halpa", cost: 150 }), unit({ id: "kallis", cost: 48_000 })];
 
-  it("valitsee kalleimman, johon summa riittää", () => {
+  it("picks the most expensive one the sum is enough for", () => {
     expect(bestUnitFor(100_000, units)?.id).toBe("kallis");
   });
 
-  it("valitsee halvimman kun mikään ei riitä", () => {
+  it("picks the cheapest one when nothing is enough", () => {
     expect(bestUnitFor(12, units)?.id).toBe("halpa");
   });
 });
 
 describe("comboPath", () => {
-  it("rakentaa saman slug-kaavan kuin server.mjs:n combo()", () => {
+  it("builds the same slug scheme as server.mjs's combo()", () => {
     const c = calculate(item({ id: "pma" }), unit({ id: "hoit", cost: 1000 }));
     expect(comboPath(c, "fi")).toBe("/p/pma-hoit/");
   });
 
-  it("lisää muokatun hinnan slugiin, kuten palvelinkin tekee", () => {
+  it("adds the edited price to the slug, just like the server does", () => {
     const c = calculate(item({ id: "pma" }), unit({ id: "hoit", cost: 1000 }), 2500);
     expect(comboPath(c, "fi")).toBe("/p/pma-hoit-2500/");
   });
 
-  it("käyttää /en/-etuliitettä englanniksi", () => {
+  it("uses the /en/ prefix in English", () => {
     const c = calculate(item({ id: "pma" }), unit({ id: "hoit", cost: 1000 }));
     expect(comboPath(c, "en")).toBe("/en/p/pma-hoit/");
   });
 
-  it("palauttaa null lukijan omalle summalle — sillä ei ole sivua", () => {
+  it("returns null for the reader's own sum — it has no page", () => {
     const c = calculate(item({ id: OWN_ID, amount: 500 }), unit({ cost: 100 }));
     expect(comboPath(c, "fi")).toBeNull();
   });
 
-  it("palauttaa null kun summa jää yksikköä pienemmäksi", () => {
+  it("returns null when the sum is smaller than the unit", () => {
     const c = calculate(item({ amount: 12 }), unit({ cost: 150 }));
     expect(c.count).toBe(0);
     expect(comboPath(c, "fi")).toBeNull();
@@ -96,7 +96,7 @@ describe("comboPath", () => {
 });
 
 describe("rivals", () => {
-  it("palauttaa vain saman päätöksen hankkeet", () => {
+  it("returns only projects sharing the same decision tag", () => {
     const data = { items: [
       item({ id: "a", paatos: "rata" }),
       item({ id: "b", paatos: "rata", amount: 5 }),
@@ -107,7 +107,7 @@ describe("rivals", () => {
     expect(rivals(data, a).map(i => i.id)).toEqual(["b"]);
   });
 
-  it("palauttaa tyhjän kun erä ei kuulu päätökseen", () => {
+  it("returns empty when the item doesn't belong to a decision", () => {
     const data = { items: [item({ id: "a" })] } as Dataset;
     expect(rivals(data, data.items[0]!)).toEqual([]);
   });

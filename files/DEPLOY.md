@@ -1,86 +1,90 @@
-# Asennus Pleskiin (Passenger)
+# Installing on Plesk (Passenger)
 
-Sovelluksen juuri: `.../paljonkose/current/files`
+Application root: `.../paljonkose/current/files`
 
-## Plesk-asetukset
+## Plesk settings
 
 - **Application Root**: `.../paljonkose/current/files`
 - **Application Startup File**: `app.js`
 - **Application Mode**: production
-- **Node.js**: 20 tai uudempi
+- **Node.js**: 20 or newer
 
-## Ympäristömuuttujat
+## Environment variables
 
-| Muuttuja | Arvo | Pakollinen |
+| Variable | Value | Required |
 |---|---|---|
-| `SITE_URL` | `https://paljonkose.fi` | **Kyllä** |
-| `PORT` | — | Ei, Passenger antaa |
-| `RELOAD_TOKEN` | satunnainen merkkijono | Vain `/api/reload`-reitille |
+| `SITE_URL` | `https://paljonkose.fi` | **Yes** |
+| `PORT` | — | No, Passenger provides it |
+| `RELOAD_TOKEN` | random string | Only for the `/api/reload` route |
 
-## Kaksi sääntöä, jotka rikkovat sovelluksen jos unohtuvat
+## Two rules that break the app if forgotten
 
-**1. `package.json`:iin ei saa lisätä `"type": "module"`.**
-Passenger lataa käynnistystiedoston `require()`-kutsulla. `app.js` on
-CommonJS-kääre, joka lataa ESM-palvelimen dynaamisella `import()`-kutsulla.
-`"type": "module"` tekisi `app.js`:stä ESM:n ja `require()` kaatuisi.
-Muut tiedostot ovat `.mjs`, joten ne ovat ES-moduuleja ilman asetusta.
+**1. Do not add `"type": "module"` to `package.json`.**
+Passenger loads the startup file with `require()`. `app.js` is a
+CommonJS wrapper that loads the ESM server via a dynamic `import()`
+call. `"type": "module"` would turn `app.js` into ESM and `require()`
+would crash. The other files are `.mjs`, so they're ES modules without
+that setting.
 
-**2. Polut lasketaan `server.mjs`:n sijainnista, ei työhakemistosta.**
-Passenger ei takaa työhakemistoa. `data.json` ja `public/` luetaan
-absoluuttisina polkuina `import.meta.url`:n kautta. Älä muuta niitä
-suhteellisiksi — se toimii kehityksessä ja hajoaa tuotannossa hiljaa.
+**2. Paths are computed from `server.mjs`'s location, not the working
+directory.** Passenger doesn't guarantee a working directory. `data.json`
+and `public/` are read as absolute paths via `import.meta.url`. Don't
+make them relative — that works in development and silently breaks in
+production.
 
-## 301-silmukan selvitys
+## Diagnosing a 301 loop
 
-Jos selain valittaa liiallisista uudelleenohjauksista, sovellus ei ole syy —
-se ei tee yhtään redirectiä. Paikanna se näin:
+If the browser complains about too many redirects, the app isn't the
+cause — it never issues a redirect itself. Locate it like this:
 
 ```bash
 curl -sIL https://paljonkose.fi/ | grep -i "^HTTP\|^location"
 ```
 
-Yleisimmät syyt Pleskissä:
+The most common causes on Plesk:
 
-- **HTTP→HTTPS-uudelleenohjaus päällä kahdesti** — sekä Pleskin
-  "Permanent SEO-safe 301 redirect" että oma direktiivi nginxissä
-- **www ↔ ei-www kiertää kehää** — molemmat ohjaavat toisiinsa
-- **Hosting-asetusten redirect osoittaa itseensä**
+- **The HTTP→HTTPS redirect is enabled twice** — both Plesk's
+  "Permanent SEO-safe 301 redirect" and your own nginx directive
+- **www ↔ non-www loops back on itself** — both redirect to each other
+- **A hosting-settings redirect points at itself**
 
-Tarkista Plesk → Hosting Settings → onko HTTPS-redirect päällä, ja
-Apache & nginx Settings → onko lisädirektiiveissä toinen redirect.
-Vain toinen saa olla.
+Check Plesk → Hosting Settings for whether the HTTPS redirect is on,
+and Apache & nginx Settings for a second redirect in the additional
+directives. Only one should be active.
 
-Testaa aina `curl`illa, älä selaimella: selain välimuistittaa 301:n
-pysyvästi, joten korjaus ei näy ennen kuin tyhjennät välimuistin.
+Always test with `curl`, not a browser: a browser caches a 301
+permanently, so the fix won't show up until you clear the cache.
 
-## Asennuksen jälkeen
+## After installing
 
 ```bash
 npm install --production
 mkdir -p tmp && touch tmp/restart.txt
 ```
 
-Tarkista järjestyksessä:
+Check these in order:
 
 ```
-/healthz                    → {"ok":true,...}   palvelin elää
-/                           → etusivu           staattiset toimivat
-/ylitykset/                 → taulukko          reitit toimivat
-/p/lansirata-pk/og.png      → PNG               natiivimoduuli toimii
+/healthz                    → {"ok":true,...}   the server is alive
+/                           → homepage          static files work
+/ylitykset/                 → table             routes work
+/p/lansirata-pk/og.png      → PNG               the native module works
 ```
 
-Jos `/healthz` vastaa mutta `og.png` ei, `@resvg/resvg-js` ei kääntynyt
-palvelimen arkkitehtuurille. Aja `npm rebuild @resvg/resvg-js`
-palvelimella — älä kopioi `node_modules`ia koneeltasi.
+If `/healthz` responds but `og.png` doesn't, `@resvg/resvg-js` wasn't
+compiled for the server's architecture. Run `npm rebuild
+@resvg/resvg-js` on the server — don't copy `node_modules` from your
+machine.
 
-Käynnistyslokiin tulostuu `Juuri: <polku>`. Jos se ei ole
-`.../current/files`, polut osoittavat väärään paikkaan.
+The startup log prints `Root: <path>`. If it isn't
+`.../current/files`, the paths are pointing at the wrong place.
 
-## Lukujen päivitys
+## Refreshing the figures
 
 ```bash
 npm run data
 ```
 
-Aja kerran käsin ja **lue tuloste** — se on ainoa paikka, josta näet
-tulivatko luvut rajapinnasta vai jäivätkö varaluvut voimaan.
+Run it once by hand and **read the output** — it's the only place
+you'll see whether the figures came from the API or fell back to
+placeholder values.

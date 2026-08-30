@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 /**
- * fetch-data.mjs — hakee luvut avoimista rajapinnoista ja kirjoittaa data.json.
+ * fetch-data.mjs — fetches figures from open APIs and writes data.json.
  *
- * Aja:  node fetch-data.mjs
- * Ajastus: .github/workflows/update-data.yml (kerran vuorokaudessa)
+ * Run:  node fetch-data.mjs
+ * Scheduled by: .github/workflows/update-data.yml (once a day)
  *
- * Miksi build-aikana eikä selaimessa:
- *   Valtion rajapinnat eivät takaa CORS-otsikoita, joten selaimesta tehty
- *   suora kutsu voi kaatua. Haku tehdään palvelimella, sivu lukee vain
- *   oman data.json-tiedostonsa. Sivusto pysyy staattisena.
+ * Why at build time, not in the browser:
+ *   Government APIs don't guarantee CORS headers, so a direct call from
+ *   the browser can fail. The fetch happens on the server; the page only
+ *   ever reads its own data.json. The site stays static.
  *
- * TARKISTA ENNEN TUOTANTOA: taulukko- ja momenttitunnukset merkitty TODO.
+ * VERIFY BEFORE PRODUCTION: table and budget-item codes marked TODO.
  */
 
 import fs from "node:fs/promises";
@@ -19,9 +19,10 @@ import { ITEMS_EN, UNITS_EN, SCOPES_EN, PAALUOKAT_EN } from "./i18n-data.mjs";
 const OUT = "data.json";
 const now = new Date().toISOString();
 
-/* ── Lähderekisteri ───────────────────────────────────────────────────────
-   Jokainen luku kantaa oman alkuperänsä. Sama objekti ajaa sekä haun että
-   sivun "Mistä tämä luku tulee" -tiedon. Yksi totuus, ei kahta listaa.   */
+/* ── Source registry ────────────────────────────────────────────────────
+   Every figure carries its own origin. This same object drives both the
+   fetch and the page's "where does this figure come from" info. One
+   source of truth, not two lists.                                       */
 
 const SOURCES = {
   vk_talous: {
@@ -47,8 +48,8 @@ const SOURCES = {
   },
   vk_kunta: {
     name: "Tilastokeskus — Kuntien ja kuntayhtymien raportoimat taloustiedot",
-    // Oma PxWeb-kantansa samalla palvelimella. Tästä saa kaupunkien
-    // toimintamenot ja investoinnit — TODO: taulun tunnus.
+    // Its own PxWeb database on the same server. This has cities'
+    // operating expenses and investments — TODO: the table id.
     api: "https://pxdata.stat.fi/PxWeb/api/v1/fi/Kuntien_talous",
     docs: "https://pxdata.stat.fi/PXWeb/pxweb/fi/",
     licence: "CC BY 4.0",
@@ -84,7 +85,7 @@ const SOURCES = {
   }
 };
 
-/* ── Apurit ──────────────────────────────────────────────────────────── */
+/* ── Helpers ─────────────────────────────────────────────────────────── */
 
 async function getJSON(url, opts = {}) {
   const res = await fetch(url, {
@@ -95,9 +96,9 @@ async function getJSON(url, opts = {}) {
   return res.json();
 }
 
-/** Valtion talousarvion momentti Valtiokonttorin talous-APIsta.
- *  Esim. pääluokka 27 = puolustusministeriön hallinnonala.
- *  TODO: varmista kentät api.tutkihallintoa.fi/talous/v1 dokumentaatiosta. */
+/** A budget-item line from the state budget via Valtiokonttori's economy API.
+ *  E.g. top-level category 27 = the Ministry of Defence's administrative branch.
+ *  TODO: verify the fields against api.tutkihallintoa.fi/talous/v1's docs. */
 async function haeMomentti({ paaluokka, momentti, vuosi }) {
   const url = `${SOURCES.vk_talous.api}?paaluokka=${paaluokka}&vuosi=${vuosi}`;
   const data = await getJSON(url);
@@ -105,18 +106,19 @@ async function haeMomentti({ paaluokka, momentti, vuosi }) {
   const hit = rows.find(r =>
     String(r.momentti ?? r.tunnus ?? "").startsWith(momentti)
   );
-  if (!hit) throw new Error(`Momenttia ${momentti} ei löytynyt pääluokasta ${paaluokka}`);
+  if (!hit) throw new Error(`Budget item ${momentti} not found in top-level category ${paaluokka}`);
   const euros = Number(hit.maara ?? hit.summa ?? hit.arvo);
-  if (!Number.isFinite(euros)) throw new Error(`Momentin ${momentti} arvo ei ole luku`);
+  if (!Number.isFinite(euros)) throw new Error(`Budget item ${momentti}'s value isn't a number`);
   return euros;
 }
 
 /**
- * Väkiluvut kaikille kunnille Kuntien avainluvut -kannasta.
+ * Population figures for every municipality, from the Kuntien avainluvut database.
  *
- * 8.6.2026 tietokantamuutos lyhensi tunnuksia ja muutti muuttujakoodeja,
- * joten koodeja ei kovakoodata: haetaan ensin metatiedot ja etsitään
- * muuttujat ja arvot nimen perusteella. Kestää seuraavankin muutoksen.
+ * A database change on 2026-06-08 shortened the ids and changed the
+ * variable codes, so the codes aren't hardcoded here: the metadata is
+ * fetched first, and the variables and values are looked up by name.
+ * This survives the next such change too.
  */
 const AVAINLUVUT_TAULU =
   "Kuntien_avainluvut__uusin/kuntien_avainluvut_viimeisin.px";
@@ -125,19 +127,19 @@ async function haeVakiluvut() {
   const base = SOURCES.kuntien_avainluvut.api;
   const url  = `${base}/${AVAINLUVUT_TAULU}`;
 
-  // 1) metatiedot: mitkä muuttujat ja mitkä koodit
+  // 1) metadata: which variables, and which codes
   const meta = await getJSON(url);
   const vars = meta.variables || [];
 
   const alue = vars.find(v => /alue/i.test(v.code) || /alue/i.test(v.text));
   const tied = vars.find(v => /tiedot/i.test(v.code) || /tiedot/i.test(v.text));
-  if (!alue || !tied) throw new Error("Alue- tai Tiedot-muuttujaa ei löytynyt");
+  if (!alue || !tied) throw new Error("Could not find the Region or Data variable");
 
-  // "Väkiluku, 2025" — poimitaan nimen perusteella, ei koodin
+  // "Väkiluku, 2025" ("Population, 2025") — picked by name, not by code
   const vi = tied.valueTexts.findIndex(t => /^väkiluku,/i.test(t.trim()));
-  if (vi < 0) throw new Error("Väkiluku-arvoa ei löytynyt Tiedot-muuttujasta");
+  if (vi < 0) throw new Error("Could not find a population value in the Data variable");
 
-  // 2) data kaikille alueille
+  // 2) data for every region
   const data = await getJSON(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -150,7 +152,7 @@ async function haeVakiluvut() {
     })
   });
 
-  // 3) json-stat2 → { kunnannimi: väkiluku }
+  // 3) json-stat2 → { municipality name: population }
   const dim    = data.dimension?.[alue.code] ?? data.dimension?.[Object.keys(data.dimension)[0]];
   const labels = dim?.category?.label || {};
   const index  = dim?.category?.index || {};
@@ -159,11 +161,11 @@ async function haeVakiluvut() {
     const v = data.value[pos];
     if (Number.isFinite(v)) out[labels[code] || code] = v;
   }
-  if (!Object.keys(out).length) throw new Error("Väkilukuja ei saatu jäsennettyä");
+  if (!Object.keys(out).length) throw new Error("Could not parse any population figures");
   return out;
 }
 
-/** PxWeb-taulukon yksittäinen luku JSON-stat2-muodossa. */
+/** A single figure from a PxWeb table in JSON-stat2 format. */
 async function haeStatFin({ taulu, query }) {
   const url = `${SOURCES.statfin.api}/${taulu}`;
   const data = await getJSON(url, {
@@ -172,14 +174,15 @@ async function haeStatFin({ taulu, query }) {
     body: JSON.stringify({ query, response: { format: "json-stat2" } })
   });
   const v = data?.value?.find(x => x != null);
-  if (!Number.isFinite(v)) throw new Error(`StatFin ${taulu}: ei numeerista arvoa`);
+  if (!Number.isFinite(v)) throw new Error(`StatFin ${taulu}: no numeric value`);
   return v;
 }
 
-/* ── Mitä haetaan ────────────────────────────────────────────────────── */
+/* ── What gets fetched ─────────────────────────────────────────────── */
 
-/* Alueet. vakiluku on asukaskohtaisen luvun jakaja: valtion menot
-   jaetaan koko maalla, kaupungin menot vain sen omilla asukkailla. */
+/* Scopes. vakiluku (population) is the divisor for the per-capita figure:
+   state spending is divided across the whole country, a city's spending
+   only across its own residents. */
 const SCOPES = {
   valtio:   { id:"valtio",   label:"Valtio",    vakiluku: 5_600_000 },
   helsinki: { id:"helsinki", label:"Helsinki",  vakiluku:   680_000 },
@@ -208,10 +211,10 @@ const PLAN = {
     { id:"koko", label:"koko valtion budjetti", source:"vk_talous",
       fallback: 91_300_000_000, note:"talousarvio 2026" },
 
-    /* ── Kaupungit ja hankkeet ──────────────────────────────────────
-       arvio = alkuperäinen kustannusarvio, amount/fallback = toteutunut.
-       Jos arvio on annettu, skripti luo automaattisesti oman
-       "budjetin ylitys" -menoerän erotuksesta. */
+    /* ── Cities and projects ──────────────────────────────────────────
+       arvio = the original cost estimate, amount/fallback = the actual
+       cost. If arvio is given, the script automatically creates its own
+       "budget overrun" spending item from the difference. */
 
     { id:"hki-budjetti", scope:"helsinki", label:"Helsingin budjetti", source:"vk_kunta",
       fallback: 6_000_000_000, note:"käyttötalous — TARKISTA vuosi ja luku" },
@@ -254,19 +257,20 @@ const PLAN = {
     { id:"oul-budjetti", scope:"oulu", label:"Oulun budjetti", source:"vk_kunta",
       fallback: 1_300_000_000, note:"käyttötalous — TARKISTA vuosi ja luku" },
 
-    /* Apotti — HUSin ja Uudenmaan kuntien potilastietojärjestelmä.
-       Luvut vaihtelevat sen mukaan mitä lasketaan mukaan. Käytetään
-       HUSin tarkastuslautakunnan lukua (625,6 M€, 229,5 M€ yli arvion),
-       koska se on tilintarkastuksen luku ja Apotti itse päätyy samaan
-       58 %:n kasvuun. */
+    /* Apotti — the patient record system for HUS and the municipalities
+       of Uusimaa. The figures vary depending on what's counted in.
+       Using HUS's audit committee's figure (625.6 M€, 229.5 M€ over
+       estimate), since it's the audited figure and Apotti itself
+       arrives at the same 58% increase. */
     { id:"apotti", scope:"uusimaa", label:"Apotti", source:"hanke",
       fallback: 626_000_000, arvio: 396_000_000,
       note:"HUSin tarkastuslautakunta 2022: 625,6 M€, 229,5 M€ yli alkuperäisen arvion; " +
            "suurin syy oli 41 % arvioitua suurempi käyttäjämäärä" },
 
-    /* Rekisterissä vain vertailukohtana: EI valtion tai kunnan rahaa,
-       vaan TVO:n ja sen omistajien investointi. Siksi vainRekisteri —
-       tämä ei kuulu budjettivertailuihin eikä per capita -laskuun. */
+    /* In the register only as a comparison point: NOT state or municipal
+       money, but an investment by TVO and its owners. Hence vainRekisteri
+       ("register-only") — this doesn't belong in budget comparisons or
+       the per-capita calculation. */
     { id:"ol3", scope:"tuleva", vainRekisteri: true,
       label:"Olkiluoto 3", source:"hanke",
       fallback: 5_800_000_000, arvio: 3_200_000_000,
@@ -274,9 +278,9 @@ const PLAN = {
            "Kokonaiskustannus laitostoimittajan tappiot mukaan lukien on arvioitu " +
            "n. 11 mrd €:ksi. EI julkista rahaa — mukana vain vertailukohtana" },
 
-    /* ── Suunnitteilla ──────────────────────────────────────────────
-       Nämä ovat arvioita, eivät toteutuneita kustannuksia. Suunnittelu
-       on eri vaiheissa ja luvut tarkentuvat — merkitty tuleva: true. */
+    /* ── Planned ────────────────────────────────────────────────────
+       These are estimates, not actual costs. Planning is at different
+       stages and the figures will be refined — marked tuleva: true. */
 
     { id:"lansirata", scope:"tuleva", tuleva:true, paatos:"ratahankkeet", label:"Länsirata (Turun tunnin juna)", source:"hanke",
       fallback: 3_400_000_000,
@@ -291,10 +295,10 @@ const PLAN = {
       fallback: 5_500_000_000,
       note:"lentorata + uusi suurnopeusrata; halvempi vaihtoehto 4,0 mrd €; suunnittelu keskeytetty" },
   ],
-  /* Valtion budjetin pääluokat. Verokuitti jakaa maksetun valtionveron
-     näiden osuuksien suhteessa. Luvut ovat vuoden 2026 talousarviosta ja
-     TARKISTA ennen julkaisua — fetch-data hakee ne rajapinnasta, kun
-     momenttitunnukset on varmistettu. */
+  /* The state budget's top-level categories. The tax receipt splits the
+     paid state tax in these proportions. The figures are from the 2026
+     budget and VERIFY before publishing — fetch-data will fetch them
+     from the API once the budget-item codes are confirmed. */
   paaluokat: [
     { id:"33", label:"Sosiaali- ja terveysministeriö", fallback: 30_000_000_000,
       note:"sis. hyvinvointialueiden rahoituksen" },
@@ -317,7 +321,7 @@ const PLAN = {
     { id:"ruoka",  label:"viikon ruokaostosta",         source:"arvio",   fallback:150,     note:"perhe, viikko" },
     { id:"lapsi",  label:"lapsilisää vuodeksi",         source:"arvio",   fallback:1500,    note:"yksi lapsi" },
     { id:"palkka", label:"kuukauden palkkaa",           source:"statfin",
-      // TODO: varmista taulun tunnus StatFinin ansiotasotilastosta
+      // TODO: verify the table id against StatFin's earnings-level statistics
       fetch: () => haeStatFin({ taulu:"pal/statfin_pal_pxt_11zt.px", query:[] }),
       fallback:3600, note:"mediaaniansio, brutto" },
     { id:"opp",    label:"oppilasvuotta peruskoulussa", source:"arvio",   fallback:10000,   note:"per oppilas" },
@@ -328,13 +332,13 @@ const PLAN = {
   ],
   vakiluku: {
     source:"statfin",
-    // TODO: varmista väkilukutaulun tunnus
+    // TODO: verify the population-table id
     fetch: () => haeStatFin({ taulu:"vaerak/statfin_vaerak_pxt_11ra.px", query:[] }),
     fallback: 5_600_000
   }
 };
 
-/* ── Suoritus ────────────────────────────────────────────────────────── */
+/* ── Execution ──────────────────────────────────────────────────────── */
 
 async function resolve(entry) {
   const src = SOURCES[entry.source];
@@ -358,12 +362,12 @@ async function resolve(entry) {
     console.log(`  ✓ ${entry.id.padEnd(8)} ${value}`);
     return { ...base, value, status: "rajapinta", source: { ...src, retrieved: now } };
   } catch (err) {
-    console.warn(`  ! ${entry.id.padEnd(8)} haku epäonnistui (${err.message}) — käytetään varalukua`);
+    console.warn(`  ! ${entry.id.padEnd(8)} fetch failed (${err.message}) — using the fallback value`);
     return { ...base, value: entry.fallback, status: "varaluku", error: err.message };
   }
 }
 
-console.log("Haetaan kuntien väkiluvut…");
+console.log("Fetching municipal population figures…");
 try {
   const vak = await haeVakiluvut();
   let osui = 0;
@@ -374,20 +378,20 @@ try {
     }
     const nimi = sc.label;
     if (vak[nimi]) { sc.vakiluku = vak[nimi]; osui++; }
-    else console.warn(`  ! ${nimi}: väkilukua ei löytynyt, käytetään varalukua`);
+    else console.warn(`  ! ${nimi}: population figure not found, using the fallback value`);
   }
   SOURCES.kuntien_avainluvut.retrieved = now;
-  console.log(`  ✓ ${osui}/${Object.keys(SCOPES).length} aluetta rajapinnasta ` +
-              `(${Object.keys(vak).length} kuntaa saatavilla)`);
+  console.log(`  ✓ ${osui}/${Object.keys(SCOPES).length} scopes from the API ` +
+              `(${Object.keys(vak).length} municipalities available)`);
 } catch (err) {
-  console.warn(`  ! väkilukuhaku epäonnistui (${err.message}) — käytetään varalukuja`);
+  console.warn(`  ! fetching population figures failed (${err.message}) — using fallback values`);
 }
 
-console.log("Haetaan menoerät…");
+console.log("Fetching spending items…");
 const items = [];
 for (const e of PLAN.items) items.push(await resolve(e));
 
-// Budjetin ylitys omaksi menoeräkseen. Alitus merkitään erikseen.
+// A budget overrun as its own spending item. An under-run is marked separately.
 const johdetut = [];
 for (const it of items) {
   if (!it.arvio || it.tuleva || it.vainRekisteri) continue;
@@ -395,7 +399,7 @@ for (const it of items) {
   if (Math.abs(ero) < 1_000_000) continue;
   johdetut.push({
     ...it,
-    arvio: null,            // johdettu erä ei itse ole vertailukelpoinen
+    arvio: null,            // a derived entry isn't itself comparable
     johdettu: true,
     id: it.id + "-ylitys",
     label: it.label + (ero > 0 ? ": ylitys" : ": alitus"),
@@ -407,18 +411,18 @@ for (const it of items) {
   });
 }
 items.push(...johdetut);
-console.log(`  → ${johdetut.length} johdettua ylitys/alitus-eraa`);
+console.log(`  → ${johdetut.length} derived overrun/under-run entries`);
 
-console.log("Haetaan yksikköhinnat…");
+console.log("Fetching unit prices…");
 const units = [];
 for (const e of PLAN.units) units.push(await resolve(e));
 
-console.log("Haetaan väkiluku…");
+console.log("Fetching population…");
 const vak = await resolve({ id:"vakiluku", label:"väkiluku", ...PLAN.vakiluku });
 
-/* Toteutunut ylityshistoria. Käytetään tulevien hankkeiden yhteydessä:
-   "jos tämä käyttäytyy kuten aiemmat, hinta on X". Mediaani, ei keskiarvo,
-   jottei yksi karkaava hanke vääristä. Alitukset lasketaan mukaan. */
+/* Historical overrun record. Used for planned projects: "if this behaves
+   like previous ones, the cost is X". Median, not average, so one
+   runaway project doesn't skew it. Under-runs are counted in. */
 const suhteet = items
   .filter(i => i.arvio && !i.tuleva && i.arvio > 0)
   .map(i => ({ label: i.label, suhde: i.value / i.arvio }))
@@ -429,9 +433,9 @@ const mediaani = suhteet.length
   : null;
 
 if (mediaani) {
-  console.log(`\nToteutunut ylityshistoria (${suhteet.length} hanketta):`);
+  console.log(`\nHistorical overrun record (${suhteet.length} projects):`);
   for (const x of suhteet) console.log(`  ${x.suhde.toFixed(2)}×  ${x.label}`);
-  console.log(`  mediaani ${mediaani.toFixed(2)}×`);
+  console.log(`  median ${mediaani.toFixed(2)}×`);
 }
 
 const out = {
@@ -466,4 +470,4 @@ const out = {
 await fs.writeFile(OUT, JSON.stringify(out, null, 2), "utf8");
 
 const live = [...items, ...units].filter(x => x.status === "rajapinta").length;
-console.log(`\nKirjoitettu ${OUT} — ${live} lukua rajapinnasta, ${items.length + units.length - live} muualta.`);
+console.log(`\nWrote ${OUT} — ${live} figures from the API, ${items.length + units.length - live} from elsewhere.`);

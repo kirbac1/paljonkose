@@ -1,75 +1,74 @@
-# Paljonko se on?
+# Paljonko se on? ("What would that buy?")
 
-Suomen valtion ja kaupunkien menoeriä muutettuna arkisiksi yksiköiksi.
-Neutraali suunnittelultaan: kaikki budjettirivit näkyvissä, yksikköhinnat
-lukijan muokattavissa, varaukset esillä eikä piilotettuna.
+Finland's state and municipal spending translated into everyday units.
+Neutral by design: every budget line is visible, unit prices are
+editable by the reader, and caveats are shown rather than hidden.
 
-Tuotanto: **paljonkose.fi**
+Production: **paljonkose.fi**
 
 ---
 
-## Rakenne
+## Structure
 
-- [`files/`](files/README.md) — Express-palvelin: `/api/data`, jaettavat
-  `/p/…`-sivut, `/ylitykset/`, `/kuitti/`, `/summa/`. Palvelee myös
-  etusivun (`files/public/`), joka rakennetaan `web/`:stä deployn
-  yhteydessä — `files/public/`:ssa ei enää ole omaa lähdekoodia. Vanha
-  vanilla JS -etusivu on poistettu repostä kokonaan.
-- [`web/`](web/README.md) — React + TypeScript, **etusivun
-  tuotantototeutus**. `npm run build` kirjoittaa `files/public/`-
-  hakemistoon; `deploy.yml` ajaa tämän ennen jokaista julkaisua.
-- [`deploy/`](deploy/) — GitHub Actionsin deploy-workflow.
+- [`files/`](files/README.md) — Express server: `/api/data`, shareable
+  `/p/…` pages, `/ylitykset/`, `/kuitti/`, `/summa/`. Also serves the
+  homepage (`files/public/`), which is built from `web/` at deploy time
+  — `files/public/` no longer has any source of its own. The old
+  vanilla-JS homepage has been removed from the repo entirely.
+- [`web/`](web/README.md) — React + TypeScript, **the production
+  implementation of the homepage**. `npm run build` writes into
+  `files/public/`; `deploy.yml` runs this before every release.
+- [`deploy/`](deploy/) — GitHub Actions deploy workflow.
 - [`DEPLOYMENT.md`](DEPLOYMENT.md), [`READY-TO-DEPLOY.md`](READY-TO-DEPLOY.md) —
-  SSH-pohjaisen automaattikäyttöönoton pystytys ja tila.
+  setup and status of the SSH-based automatic deployment.
 
 ---
 
-## Pikakäynnistys
+## Quick start
 
 ```bash
 npm install
 npm run dev
 ```
 
-Avaa <http://localhost:3000>. Katso [`files/README.md`](files/README.md)
-mitä sivuja löytyy ja miten dataa muokataan.
+Open <http://localhost:3000>. See [`files/README.md`](files/README.md)
+for what pages exist and how to edit the data.
 
 ---
 
-## Testaus
+## Testing
 
 ```bash
-cd files && npm test          # Vitest — render.mjs:n laskentafunktiot
-cd files && npm run test:e2e  # Playwright — rakennettu React-etusivu oikeassa selaimessa
-cd web   && npm test          # Vitest — React-komponentit ja laskentalogiikka
+cd files && npm test          # Vitest — render.mjs's calculation functions
+cd files && npm run test:e2e  # Playwright — the built React homepage in a real browser
+cd web   && npm test          # Vitest — React components and calculation logic
 ```
 
-Tarkemmat kuvaukset kummankin testijoukon kattavuudesta:
-[`files/README.md`](files/README.md#testaus) ja
-[`web/README.md`](web/README.md#testaus-paikallisesti).
+Detailed coverage of each test suite:
+[`files/README.md`](files/README.md#testing) and
+[`web/README.md`](web/README.md#local-testing).
 
 ---
 
 ## CI/CD
 
-[`.github/workflows/`](.github/workflows/) ajaa testit (`test.yml`,
-kutsuttuna sekä `ci.yml`:stä että `deploy.yml`:stä) jokaisella pushilla ja
-PR:llä. `main`-haaraan pushatessa `deploy.yml` rakentaa `web/`:n
-(`files/public/`-hakemistoon), rsynkkaa `files/`-hakemiston Plesk-
-palvelimelle, asentaa riippuvuudet siellä ja käynnistää sovelluksen
-uudelleen Passengerin kautta.
+[`.github/workflows/`](.github/workflows/) runs the tests (`test.yml`,
+called from both `ci.yml` and `deploy.yml`) on every push and PR.
+Pushing to `main`, `deploy.yml` builds `web/` (into `files/public/`),
+rsyncs the `files/` directory to the Plesk server, installs dependencies
+there, and restarts the app via Passenger.
 
-> **Miksi palvelimella ei näy `web/`-hakemistoa.** `web/` käännetään
-> GitHub Actionsin ajourassa (`npm run build` kirjoittaa
-> `files/public/`-hakemistoon), ja vain `files/` rsynkataan palvelimelle
-> — `web/`:n lähdekoodi, sen `node_modules` ja TypeScript-tiedostot eivät
-> koskaan päädy sinne. Palvelin ei tarvitse Node/npm/Vite-työkaluja
-> Reactin kääntämiseen, se vain tarjoilee jo käännetyt tiedostot
-> osoitteesta `files/public/` (`index.html` + `assets/*.js/css`).
-> Tarkista: `ls ~/paljonkose/current/files/public/` palvelimella.
+> **Why you don't see a `web/` directory on the server.** `web/` is
+> compiled in the GitHub Actions run (`npm run build` writes into
+> `files/public/`), and only `files/` is rsynced to the server —
+> `web/`'s source code, its `node_modules`, and its TypeScript files
+> never end up there. The server doesn't need Node/npm/Vite to compile
+> React, it just serves the already-compiled files from `files/public/`
+> (`index.html` + `assets/*.js/css`). Check with:
+> `ls ~/paljonkose/current/files/public/` on the server.
 
-## Tuotantoon
+## Production
 
-Automaattinen: push `main`-haaraan, katso `Actions`-välilehti. Manuaalinen
-vaihtoehto ja pystytysohjeet: [`DEPLOYMENT.md`](DEPLOYMENT.md). Docker-
-pohjaiselle ajolle: [`files/README.md`](files/README.md#tuotantoon).
+Automatic: push to `main`, check the `Actions` tab. Manual option and
+setup instructions: [`DEPLOYMENT.md`](DEPLOYMENT.md). For running via
+Docker: [`files/README.md`](files/README.md#production).

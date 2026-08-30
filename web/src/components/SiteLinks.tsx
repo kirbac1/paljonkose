@@ -1,16 +1,16 @@
 import type { Lang } from "../types";
 
 /**
- * Linkit palvelimen renderöimille sivuille.
+ * Links to server-rendered pages.
  *
- * Nämä eivät ole React-reittejä: ylitysrekisteri ja verokuitti
- * renderöidään palvelimella, koska ne ovat jaettavia ja hakukoneiden
- * luettavia sivuja. Tässä tarvitaan siis vain linkit — mutta osoitteet
- * ovat kielikohtaisia, joten ne kuuluvat komponenttiin eivätkä HTML:ään.
+ * These aren't React routes: the overrun register and the tax receipt
+ * are rendered by the server, because they're shareable, search-engine
+ * readable pages. So all that's needed here is the links — but the
+ * addresses are language-specific, so they belong in the component,
+ * not the HTML.
  *
- * Ei linkkiä /nostot/-sivulle — sillä ei ole vastaavaa reittiä
- * server.mjs:ssä (eikä vanhassa vanilla-versiossakaan), joten linkki
- * olisi pelkkä 404.
+ * No link to a /nostot/ page — it has no matching route in server.mjs
+ * (nor did the old vanilla version), so the link would just be a 404.
  */
 const LINKS = {
   fi: [

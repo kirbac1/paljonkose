@@ -5,9 +5,9 @@ import { UI } from "../i18n";
 interface Props { lang: Lang; onSubmit: (amount: number) => void }
 
 /**
- * Lukijan oma summa. Laskee paikan päällä eikä navigoi minnekään —
- * uutisesta poimittu luku on koko ominaisuuden käyttötapaus, ja se
- * katkeaisi jos sivu vaihtuisi alta.
+ * The reader's own sum. Calculates in place and doesn't navigate
+ * anywhere — a number picked up from a news article is the whole point
+ * of this feature, and that would break if the page changed underneath it.
  */
 export function OwnSum({ lang, onSubmit }: Props) {
   const t = UI[lang];

@@ -1,59 +1,59 @@
-# Paljonko se on?
+# Paljonko se on? ("What would that buy?")
 
-Suomen valtion ja kaupunkien menoeriä muutettuna arkisiksi yksiköiksi.
-Neutraali suunnittelultaan: kaikki budjettirivit näkyvissä, yksikköhinnat
-lukijan muokattavissa, varaukset esillä eikä piilotettuna.
+Finland's state and municipal spending translated into everyday units.
+Neutral by design: every budget line is visible, unit prices are
+editable by the reader, and caveats are shown rather than hidden.
 
-Tuotanto: **paljonkose.fi**
+Production: **paljonkose.fi**
 
-> `public/` on nyt [`../web/`](../web/README.md):n käännösjälki —
-> `npm run build` siellä kirjoittaa tämän hakemiston, eikä sen sisältöä
-> muokata käsin. Vanha vanilla JS -etusivu on poistettu repostä
-> kokonaan. Tämän hakemiston Express-palvelin (`server.mjs`,
-> `render.mjs`, `/api/data`) palvelee sekä Reactin buildia että näitä
-> muita reittejä.
+> `public/` is now [`../web/`](../web/README.md)'s build output —
+> `npm run build` there writes this directory, and its contents aren't
+> edited by hand. The old vanilla-JS homepage has been removed from the
+> repo entirely. This directory's Express server (`server.mjs`,
+> `render.mjs`, `/api/data`) serves both the React build and these
+> other routes.
 
 ---
 
-## Pikakäynnistys
+## Quick start
 
 ```bash
 npm install
 npm run dev
 ```
 
-Avaa <http://localhost:3000>. Siinä kaikki — `data.json` on repossa valmiina.
+Open <http://localhost:3000>. That's it — `data.json` is already in the repo.
 
 ---
 
-## Mitä katsoa
+## What to look at
 
-- `/` — etusivu: menoerän ja yksikön valinta, oma summa, sekuntikello
-- `/ylitykset/` — arvio vs. toteutunut, mediaanikerroin
-- `/kuitti/45000/` — verokuitti: mihin valtion tuloverosi menee
-- `/summa/340000000/` — mikä tahansa summa arkisiksi yksiköiksi
-- `/p/lansirata-pk/` — sivu, jolla näkyy sekä ylitysennuste että kilpailevat hankkeet
-- `/p/ark-burgeri-pork/` — arkiostos ja ×5,6 M -silta
-- `/sitemap.xml` — kaikki 282 sivua
+- `/` — homepage: pick a spending item and a unit, enter your own sum, watch the ticker
+- `/ylitykset/` — estimate vs. actual, median overrun factor
+- `/kuitti/45000/` — tax receipt: where your income tax actually goes
+- `/summa/340000000/` — turn any sum into everyday units
+- `/p/lansirata-pk/` — a page showing both the overrun forecast and competing projects
+- `/p/ark-burgeri-pork/` — a everyday-purchase comparison and its ×5.6M bridge
+- `/sitemap.xml` — all 282 pages
 
 ---
 
-## Komennot
+## Commands
 
-- `npm run dev` — kehityspalvelin portissa 3000
-- `npm run data` — hakee luvut rajapinnoista, kirjoittaa `data.json`
-- `npm run pages` — rakentaa staattiset sivut `dist/`-hakemistoon
+- `npm run dev` — dev server on port 3000
+- `npm run data` — fetches figures from the APIs, writes `data.json`
+- `npm run pages` — builds static pages into `dist/`
 - `npm run build` — `data` + `pages`
-- `npm start` — tuotantopalvelin (lue `PORT` ja `SITE_URL` ympäristöstä)
+- `npm start` — production server (reads `PORT` and `SITE_URL` from the environment)
 
 ---
 
-## Kielet
+## Languages
 
-Sivusto on kaksikielinen. Englanninkieliset sivut elävät `/en/`-etuliitteen
-alla ja käyttävät englanninkielisiä polkuja, jotta osoite on luettava:
+The site is bilingual. English pages live under the `/en/` prefix and
+use English-language paths, so the address itself is readable:
 
-| Suomi | English |
+| Finnish | English |
 |---|---|
 | `/` | `/en/` |
 | `/ylitykset/` | `/en/overruns/` |
@@ -61,76 +61,78 @@ alla ja käyttävät englanninkielisiä polkuja, jotta osoite on luettava:
 | `/summa/340000000/` | `/en/sum/340000000/` |
 | `/p/pma-hoit/` | `/en/p/pma-hoit/` |
 
-Käännökset ovat kahdessa tiedostossa:
+Translations live in two files:
 
-- `i18n-data.mjs` — menoerien, yksiköiden ja pääluokkien nimikkeet
-- `i18n-ui.mjs` — käyttöliittymän tekstit ja polut
+- `i18n-data.mjs` — labels for spending items, units, and top-level categories
+- `i18n-ui.mjs` — UI copy and paths
 
-Etusivu on **yksi tiedosto**, joka lukee kielen polusta. Kaksi erillistä
-HTML-tiedostoa erkaantuisi toisistaan ensimmäisen muutoksen jälkeen.
+The homepage is **one file** that reads the language from the path. Two
+separate HTML files would drift apart after the first change to either.
 
-Kun lisäät menoerän tai yksikön, lisää käännös `i18n-data.mjs`:ään.
-Puuttuva käännös ei kaada mitään — sivu näyttää silloin suomenkielisen
-nimikkeen, mikä on huomattavampaa kuin tyhjä kohta.
+When you add a spending item or a unit, add its translation to
+`i18n-data.mjs`. A missing translation doesn't break anything — the
+page falls back to the Finnish label, which is more noticeable than a
+blank spot.
 
-## Tiedostot
+## Files
 
-- `server.mjs` — Express-palvelin, kaikki reitit
-- `render.mjs` — **jaettu renderöinti**; sekä palvelin että staattinen build käyttävät tätä, joten sivut ovat aina identtiset
-- `fetch-data.mjs` — datan haku ja `data.json`:in kirjoitus. **Kaikki luvut, yksikköhinnat ja pääluokat määritellään täällä**
-- `data.json` — generoitu, mutta committoitu, jotta sivu toimii ilman rajapintoja
-- `public/` — etusivu, jota palvelin tarjoilee. Käännösjälki `../web/`:stä, ei omaa lähdekoodia
-- `build-pages.mjs` — staattinen generaattori (valinnainen)
-- `Dockerfile`, `docker-compose.yml`, `nginx-paljonkose.conf` — tuotanto
+- `server.mjs` — Express server, all routes
+- `render.mjs` — **shared rendering**; both the server and the static build use this, so pages are always identical
+- `fetch-data.mjs` — fetches the data and writes `data.json`. **Every figure, unit price, and top-level category is defined here**
+- `data.json` — generated, but committed, so the site works without the APIs
+- `public/` — the homepage the server serves. Build output from `../web/`, no source of its own
+- `build-pages.mjs` — static generator (optional)
+- `Dockerfile`, `docker-compose.yml`, `nginx-paljonkose.conf` — production
 
 ---
 
-## Datan muokkaus
+## Editing the data
 
-Kaikki luvut ovat `fetch-data.mjs`:ssä, eivät `data.json`:issa.
+All figures live in `fetch-data.mjs`, not in `data.json`.
 
-- Lisää menoerä → `PLAN.items`
-- Lisää yksikkö → `PLAN.units`
-- Anna alkuperäinen kustannusarvio → `arvio: <luku>`. Skripti luo ylityserän
-  automaattisesti ja päivittää mediaanikertoimen
-- Merkitse hankkeet, jotka kilpailevat samasta rahasta → sama `paatos:`-tunnus
+- Add a spending item → `PLAN.items`
+- Add a unit → `PLAN.units`
+- Give the original cost estimate → `arvio: <number>`. The script
+  automatically creates an overrun entry and updates the median factor
+- Mark projects competing for the same funding → same `paatos:` tag
 
-Muutoksen jälkeen:
+After a change:
 
 ```bash
 npm run data
 ```
 
-React-etusivulla (`../web/`) on oma, erillinen varalukumekanisminsa —
-katso [`web/README.md`](../web/README.md#rakenne) (`data/fallback.ts`,
-`npm run fallback`). Se ei liity tähän datan muokkaukseen suoraan, mutta
-kannattaa päivittää samalla jos muutat `PLAN.items`/`PLAN.units`.
+The React homepage (`../web/`) has its own, separate fallback-data
+mechanism — see [`web/README.md`](../web/README.md#structure)
+(`data/fallback.ts`, `npm run fallback`). It isn't directly tied to
+this data-editing step, but it's worth updating alongside if you change
+`PLAN.items`/`PLAN.units`.
 
 ---
 
-## Testaus
+## Testing
 
-Yksikkötestit (Vitest) kattavat `render.mjs`:n laskentafunktiot
+Unit tests (Vitest) cover `render.mjs`'s calculation functions
 (`combo`, `verokuitti`, `fmt`, `eur`, `esc`):
 
 ```bash
 npm test
 ```
 
-Selaimessa ajettavat testit (Playwright) käynnistävät `server.mjs`:n ja
-käyvät läpi etusivun laskurin — kaikki menoerät, aluesirut, oman summan
-syöttö, yksikköhinnan muokkaus ja jakonappi — oikeassa selaimessa. Nämä
-ajavat `public/`:iin käännettyä Reactia; aja `npm run build` ensin
-`../web/`:ssä jos et ole vielä:
+Browser tests (Playwright) start `server.mjs` and exercise the homepage
+calculator — every spending item, region chips, entering your own sum,
+editing the unit price, and the share button — in a real browser. These
+run against the React build compiled into `public/`; run `npm run
+build` in `../web/` first if you haven't yet:
 
 ```bash
-npx playwright install --with-deps chromium   # kerran
+npx playwright install --with-deps chromium   # once
 npm run test:e2e
 ```
 
 ---
 
-## Tuotantoon
+## Production
 
 ```bash
 echo "RELOAD_TOKEN=$(openssl rand -hex 16)" > .env
@@ -138,7 +140,7 @@ docker compose up -d
 curl localhost:3000/healthz
 ```
 
-Sitten reverse proxy ja sertifikaatti:
+Then the reverse proxy and certificate:
 
 ```bash
 sudo cp nginx-paljonkose.conf /etc/nginx/sites-available/paljonkose.fi
@@ -147,59 +149,62 @@ sudo nginx -t && sudo systemctl reload nginx
 sudo certbot --nginx -d paljonkose.fi -d www.paljonkose.fi
 ```
 
-Compose nostaa kaksi konttia:
+Compose brings up two containers:
 
-- `web` — palvelin
-- `updater` — hakee luvut kerran vuorokaudessa ja kutsuu `/api/reload`.
-  Ei uudelleenkäynnistystä, ei katkosta
-
----
-
-## Ennen julkaisua
-
-Nämä ovat oikeita esteitä, eivät viimeistelyä.
-
-- [ ] **Aja `npm run data` palvelimella ja lue tuloste.** Se on ainoa paikka,
-      josta näet tulivatko luvut rajapinnasta vai jäivätkö varaluvut voimaan.
-      Sandboxissa verkko oli estetty, joten mitään ei ole testattu oikeaa
-      rajapintaa vasten
-- [ ] **Tarkista veroasteikko `render.mjs`:n `ASTEIKKO_2026`-taulukosta.**
-      Väärä asteikko on pahempi virhe kuin väärä päiväkodin hinta, koska lukija
-      vertaa sitä omaan verokorttiinsa ja huomaa eron heti
-- [ ] **Tarkista kaikki TARKISTA-merkinnät** `fetch-data.mjs`:ssä —
-      kaupunkien budjetit, Tampereen areena, Turun ratikka
-- [ ] Varmista Länsimetron lopullinen hinta (1 088 vai 1 186 M€, oikeuskäsittely
-      kesken)
-- [ ] Varmista Valtiokonttorin momenttitunnukset ja StatFinin taulutunnukset
-- [ ] Etsi Kuntien taloustietojen taulu kaupunkien budjettien hakuun
-- [ ] Tarkista pääluokkien jako — nyt käsin kirjattu, summautuu 91,3 mrd €:iin
-- [ ] Lisää brändifontit `./fonts/`-hakemistoon, jotta jakokuvat vastaavat sivua
-- [ ] Aseta `RELOAD_TOKEN` `.env`-tiedostoon
-- [ ] Anna verokuitti verotusta tuntevan luettavaksi. Se on sivuston ainoa kohta,
-      joka väittää jotain lukijan omasta rahasta, ja siksi ensimmäinen asia,
-      jota kritisoidaan
+- `web` — the server
+- `updater` — fetches figures once a day and calls `/api/reload`.
+  No restart, no downtime
 
 ---
 
-## Suunnittelun periaatteet
+## Before publishing
 
-Nämä eivät ole mielipiteitä vaan syitä, joiden takia koodi on kuten on.
-Kannattaa lukea ennen kuin muuttaa niitä.
+These are real blockers, not polish.
 
-- **Jokainen luku kantaa alkuperänsä.** Sivu näyttää mistä luku on haettu,
-  milloin, ja onko se virallinen vai arvio
-- **Yksikköhinnat ovat muokattavissa.** Lukija saa olla eri mieltä, ja muokattu
-  hinta näkyy jakokuvassa asti
-- **Varaukset ovat näkyvissä.** Erityisesti fungibiliteetti: raha ei ole
-  vapaasti siirrettävissä hallinnonalojen välillä. Vertailu hävittäjän ja
-  päiväkodin välillä ei ole aito valinta, ja sivu sanoo sen itse
-- **Aito vertailu erotellaan.** Neljä ratahanketta kilpailee samasta
-  määrärahasta — vain siinä laatikossa lukee, että vertailu on todellinen
-- **Ylitysrekisteri sisältää alitukset.** Rantatunneli (0,98×) on mukana
-  Kruunusiltojen (2,11×) rinnalla. Ilman sitä koko rekisteri olisi
-  syytettävissä agendasta
-- **Mediaani, ei keskiarvo**, jottei yksi karkaava hanke vääristä kuvaa
-- **Ei henkilökohtaista kulutusta.** Arkiostosten vertailu ("hampurilaisen
-  sijaan kilo porkkanoita") kokeiltiin ja poistettiin: se kääntää sivuston
-  julkisen rahan tarkastelusta yksilön valintojen arvosteluksi, mikä on eri
-  laji ja vie uskottavuuden muulta sisällöltä
+- [ ] **Run `npm run data` on the server and read the output.** It's
+      the only place you'll see whether the figures came from the API
+      or fell back to placeholder values. The network was blocked in
+      the sandbox, so nothing has been tested against the real API
+- [ ] **Check the tax bracket table in `render.mjs`'s `ASTEIKKO_2026`.**
+      A wrong bracket is a worse error than a wrong daycare price,
+      because the reader compares it to their own tax card and notices
+      the difference immediately
+- [ ] **Check every TARKISTA ("verify") marker** in `fetch-data.mjs` —
+      city budgets, the Tampere arena, the Turku tram
+- [ ] Confirm the West Metro's final cost (1,088 vs. 1,186 M€, litigation
+      ongoing)
+- [ ] Confirm Valtiokonttori's budget-item codes and StatFin's table IDs
+- [ ] Find the municipal finance table for looking up city budgets
+- [ ] Check the top-level category breakdown — currently entered by hand, sums to 91.3 bn €
+- [ ] Add brand fonts to the `./fonts/` directory so share images match the page
+- [ ] Set `RELOAD_TOKEN` in the `.env` file
+- [ ] Have someone who knows tax law read the tax-receipt feature. It's
+      the only place on the site that claims something about the
+      reader's own money, and so the first thing that will be
+      criticized
+
+---
+
+## Design principles
+
+These aren't opinions — they're the reasons the code is the way it is.
+Worth reading before changing them.
+
+- **Every figure carries its provenance.** The page shows where a
+  figure came from, when, and whether it's official or an estimate
+- **Unit prices are editable.** The reader is allowed to disagree, and
+  an edited price shows up all the way into the share image
+- **Caveats are visible.** Fungibility especially: money isn't freely
+  transferable between administrative branches. Comparing a fighter jet
+  to a daycare center isn't a real choice, and the page says so itself
+- **Real comparisons are set apart.** Four rail projects compete for
+  the same funding — only in that box does it say the comparison is real
+- **The overrun register includes under-runs.** The Rantatunneli tunnel
+  (0.98×) sits alongside the Crown Bridges (2.11×). Without it, the
+  whole register would be open to a charge of cherry-picking an agenda
+- **Median, not average**, so one runaway project doesn't skew the picture
+- **No personal-consumption comparisons.** Comparing everyday purchases
+  ("a kilo of carrots instead of a burger") was tried and removed: it
+  turns the site from examining public money into judging individual
+  choices, which is a different kind of argument and costs the rest of
+  the content its credibility

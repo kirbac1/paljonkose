@@ -6,10 +6,11 @@ import { forecast, rivals } from "../lib/calc";
 interface Props { calc: Calculation; data: Dataset; lang: Lang }
 
 /**
- * Laskutoimitus auki kirjoitettuna, lähteineen ja varauksineen.
+ * The calculation spelled out, with its sources and caveats.
  *
- * Tämä on sivuston puolustus: lukija näkee mistä molemmat luvut tulevat
- * ja mitä jakolasku ei kerro. Ilman tätä sivu on pelkkä väite.
+ * This is the site's defense: the reader sees where both figures come
+ * from and what the division doesn't tell them. Without this, the page
+ * is just a claim.
  */
 export function CalculationDetail({ calc, data, lang }: Props) {
   const t = UI[lang];

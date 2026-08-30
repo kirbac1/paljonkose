@@ -6,10 +6,10 @@ import { UI } from "../i18n";
 interface Props { annualBudget: number; lang: Lang }
 
 /**
- * Kulutusvauhti. Kertoo mitä on kulunut sen jälkeen kun sivu avattiin —
- * ei absoluuttista lukua, joka olisi mielivaltainen.
+ * The spending rate. Shows what's been spent since the page was opened
+ * — not an absolute figure, which would be arbitrary.
  *
- * Kunnioittaa prefers-reduced-motion: liikkuva luku on animaatio.
+ * Respects prefers-reduced-motion: a moving number is an animation.
  */
 export function BudgetTicker({ annualBudget, lang }: Props) {
   const [spent, setSpent] = useState(0);

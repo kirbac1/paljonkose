@@ -1,19 +1,20 @@
 /**
- * types.ts — sovelluksen tietomalli.
+ * types.ts — the app's data model.
  *
- * Tyypit on johdettu data.jsonista, jonka fetch-data.mjs tuottaa. Ne ovat
- * ainoa paikka, jossa datan muoto on kirjattu — palvelin ei tarjoa skeemaa,
- * joten tämä tiedosto on sopimus palvelimen ja käyttöliittymän välillä.
+ * The types are derived from data.json, which fetch-data.mjs produces.
+ * They're the only place the data's shape is written down — the server
+ * doesn't provide a schema, so this file is the contract between the
+ * server and the UI.
  */
 
 export type Lang = "fi" | "en";
 
-/** Alue, johon menoerä kuuluu. Ratkaisee per capita -jakajan. */
+/** The scope a spending item belongs to. Determines the per-capita divisor. */
 export type ScopeId =
   | "valtio" | "helsinki" | "tampere" | "turku" | "oulu" | "uusimaa"
   | "tuleva" | "nosto";
 
-/** Mistä luku on peräisin. Näytetään lukijalle merkkinä. */
+/** Where a figure comes from. Shown to the reader as a badge. */
 export type Status = "rajapinta" | "kasin" | "arvio" | "muokattu";
 
 export interface Scope {
@@ -30,7 +31,7 @@ export interface Source {
   docs?: string;
 }
 
-/** Uutislähde nostoille. Pakollinen — nosto ilman lähdettä ei päädy dataan. */
+/** A news source for a news item ("nosto"). Required — a news item without a source doesn't make it into the data. */
 export interface NewsSource {
   url: string;
   julkaisija: string;
@@ -48,15 +49,15 @@ export interface Item {
   vakiluku: number;
   status: Status;
   source?: Source;
-  /** Alkuperäinen kustannusarvio, jos hanke on valmis ja arvio tiedossa. */
+  /** The original cost estimate, if the project is finished and an estimate is known. */
   arvio?: number | null;
-  /** Suunnitteilla — hinta on arvio, ei toteutunut. */
+  /** Planned — the price is an estimate, not the actual cost. */
   tuleva?: boolean;
-  /** Kilpailee samasta määrärahasta muiden saman tunnuksen hankkeiden kanssa. */
+  /** Competes for the same funding as other projects sharing this tag. */
   paatos?: string | null;
-  /** Vertailukohta ylitysrekisterissä, ei julkista rahaa — ei omaa laskusivua. */
+  /** A comparison point in the overrun register, not public money — no page of its own. */
   vainRekisteri?: boolean;
-  /** Yksittäinen uutisoitu meno. */
+  /** A single reported news item. */
   nosto?: boolean;
   konteksti?: string | null;
   lahde?: NewsSource | null;
@@ -88,19 +89,19 @@ export interface Dataset {
 }
 
 /**
- * Yksi laskutoimitus. Erotettu Itemistä ja Unitista, koska lukija voi
- * muuttaa yksikköhintaa — silloin `cost` poikkeaa `unit.cost`:sta ja
- * sivun on kerrottava siitä.
+ * One calculation. Kept separate from Item and Unit, because the reader
+ * can change the unit price — at that point `cost` differs from
+ * `unit.cost`, and the page has to say so.
  */
 export interface Calculation {
   item: Item;
   unit: Unit;
-  /** Käytetty yksikköhinta. Sama kuin unit.cost, ellei lukija ole muuttanut. */
+  /** The unit price actually used. Same as unit.cost, unless the reader has edited it. */
   cost: number;
   edited: boolean;
-  /** Montako yksikköä summalla saisi. Nolla, jos summa on yksikköä pienempi. */
+  /** How many units the sum would buy. Zero if the sum is smaller than the unit. */
   count: number;
-  /** Osuus yhdestä yksiköstä, kun count on 0. Muuten null. */
+  /** The fraction of one unit, when count is 0. Otherwise null. */
   fraction: number | null;
   remainder: number;
   perCapita: number;

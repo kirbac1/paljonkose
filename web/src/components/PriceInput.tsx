@@ -3,24 +3,25 @@ import type { Lang } from "../types";
 import { UI } from "../i18n";
 
 interface Props {
-  /** Voimassa oleva hinta — yksikön oma tai lukijan muokkaama. */
+  /** The price in effect — the unit's own, or edited by the reader. */
   value: number;
   lang: Lang;
   onChange: (cost: number | null) => void;
 }
 
 /**
- * Yksikköhinnan kenttä.
+ * The unit-price field.
  *
- * Kenttä pitää oman merkkijononsa sen sijaan että näyttäisi suoraan lukua.
- * Ilman sitä kenttää ei voi tyhjentää: tyhjä arvo tulkitaan nollaksi, hinta
- * palautuu yksikön omaksi ja luku ilmestyy takaisin keskellä kirjoittamista.
- * Lukija joutuisi maalaamaan koko kentän joka kerta.
+ * The field keeps its own string instead of displaying the number
+ * directly. Without that, the field couldn't be cleared: an empty value
+ * would be read as zero, the price would revert to the unit's own, and
+ * the number would reappear mid-keystroke. The reader would have to
+ * select the whole field every time.
  */
 export function PriceInput({ value, lang, onChange }: Props) {
   const [draft, setDraft] = useState(String(Math.round(value)));
 
-  // Ulkopuolinen muutos (erä vaihtui, hinta nollattiin) syrjäyttää luonnoksen.
+  // An external change (item switched, price reset) overrides the draft.
   useEffect(() => { setDraft(String(Math.round(value))); }, [value]);
 
   return (

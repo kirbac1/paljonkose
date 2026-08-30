@@ -1,8 +1,8 @@
 import { t as T, paths as P, DEFAULT_LANG } from "./i18n-ui.mjs";
 import { ASUKAS_EN } from "./i18n-data.mjs";
 
-/* Kielikohtainen nimike. Puuttuva käännös putoaa takaisin suomeen —
-   näkyvä suomenkielinen sana on parempi kuin tyhjä kohta. */
+/* Language-specific label. A missing translation falls back to Finnish —
+   a visible Finnish word is better than a blank spot. */
 const L  = (o, lang) => (lang === "en" && o.label_en) ? o.label_en : o.label;
 const N  = (o, lang) => (lang === "en" && o.note_en  != null) ? o.note_en : (o.note || "");
 const fmtL = (n, lang) => new Intl.NumberFormat(T(lang).locale).format(n);
@@ -12,9 +12,9 @@ const eurL = (a, lang) => a >= 1e9
 const base = (lang) => P(lang).root;
 
 /**
- * render.mjs — yhteinen renderöinti.
- * Sekä build-pages.mjs (staattinen) että server.mjs (dynaaminen) käyttävät tätä,
- * joten esirenderöity ja lennossa tehty sivu ovat aina identtiset.
+ * render.mjs — shared rendering.
+ * Both build-pages.mjs (static) and server.mjs (dynamic) use this,
+ * so a pre-rendered page and one built on the fly are always identical.
  */
 
 export const fmt = n => new Intl.NumberFormat("fi-FI").format(n);
@@ -34,7 +34,7 @@ export const STATUS = {
   muokattu:  "lukijan muuttama"
 };
 
-/** Laskee yhden kombinaation. cost voi olla lukijan oma arvo. */
+/** Computes one combination. cost may be the reader's own value. */
 const ASUKAS = {
   valtio:   "jokaista suomalaista",
   helsinki: "jokaista helsinkiläistä",
@@ -47,7 +47,7 @@ export function combo(data, itemId, unitId, cost = null, lang = DEFAULT_LANG) {
   const item = data.items.find(i => i.id === itemId);
   const unit = data.units.find(u => u.id === unitId);
   if (!item || !unit) return null;
-  // rekisteriin lisätty vertailukohta ei ole budjettimeno — ei omaa sivua
+  // a comparison item added to the register isn't a budget expense — no page of its own
   if (item.vainRekisteri) return null;
 
   const usedCost = cost && cost > 0 ? cost : unit.cost;
@@ -69,9 +69,9 @@ export function combo(data, itemId, unitId, cost = null, lang = DEFAULT_LANG) {
     per: (item.amount / (item.vakiluku ?? data.vakiluku))
            .toLocaleString(T(lang).locale, { maximumFractionDigits: 0 }) + " €",
     tuleva: !!item.tuleva,
-    /* Saman päätöksen sisäinen vertailu. Tässä raha oli oikeasti
-       vaihtoehtoista: hankkeet kilpailevat samasta määrärahasta.
-       Tämä on rehellisempi vertailu kuin hävittäjä vs. päiväkoti. */
+    /* Comparison within the same decision. Here the money really was
+       fungible: the projects compete for the same funding. This is a
+       more honest comparison than fighter jet vs. daycare center. */
     kilpailijat: item.paatos
       ? data.items
           .filter(x => x.paatos === item.paatos && x.id !== item.id)
@@ -92,7 +92,7 @@ export function combo(data, itemId, unitId, cost = null, lang = DEFAULT_LANG) {
   };
 }
 
-/* ── jakokuva ─────────────────────────────────────────────────────────── */
+/* ── share image ──────────────────────────────────────────────────────── */
 
 export function ogSvg(c) {
   const lang = c.lang || DEFAULT_LANG;
@@ -100,7 +100,7 @@ export function ogSvg(c) {
   const cut   = (s, n) => s.length > n ? s.slice(0, n - 1) + "…" : s;
   const num   = fmt(c.count);
   const base  = num.length > 9 ? 112 : num.length > 6 ? 140 : 168;
-  const size  = c.edited ? base - 30 : base;   // tee tilaa muokkausmerkinnälle
+  const size  = c.edited ? base - 30 : base;   // make room for the edited-price flag
   const flag  = c.edited
     ? `<text x="104" y="196" font-family="sans-serif" font-size="24" font-weight="700" fill="#FF4A6E">${esc(lang === "en" ? "Unit price changed by reader" : "Lukijan muuttama yksikköhinta")}: ${esc(fmtL(c.cost, lang))} €</text>`
     : "";
@@ -119,7 +119,7 @@ export function ogSvg(c) {
 </svg>`;
 }
 
-/* ── sivu ─────────────────────────────────────────────────────────────── */
+/* ── page ─────────────────────────────────────────────────────────────── */
 
 export function pageHtml(c, data, { site, also = [], ogUrl = null }) {
   const lang = c.lang || DEFAULT_LANG;
@@ -265,10 +265,10 @@ document.getElementById("copy").addEventListener("click", async function(){
 }
 
 /* ─────────────────────────────────────────────────────────────────────
-   Verokuitti. Karkea malli, joka kertoo suuruusluokan — ei veroneuvo.
-   Vero lasketaan v. 2026 valtion tuloveroasteikolla + kunnallisverolla,
-   ja maksettu valtionvero jaetaan pääluokkien osuuksien suhteessa.
-   TARKISTA asteikko ennen julkaisua.
+   Tax receipt. A rough model that gives an order of magnitude — not tax
+   advice. Tax is computed on the 2026 state income-tax bracket plus
+   municipal tax, and the paid state tax is split by top-level category
+   share. VERIFY the bracket table before publishing.
    ───────────────────────────────────────────────────────────────────── */
 
 const ASTEIKKO_2026 = [
@@ -288,8 +288,8 @@ export function verokuitti(data, vuosiansio, kuntavero = 7.5) {
   const valtionvero = Math.max(0, p.vero + (tulo - p.raja) * p.pros / 100);
   const kunnallisvero = tulo * kuntavero / 100;
 
-  // Palkansaajan omat vakuutusmaksut. Eivät ole veroa, mutta näkyvät palkassa.
-  const maksut = tulo * (7.15 + 1.90 + 0.59) / 100;   // TyEL + työttömyys + sv
+  // The employee's own insurance contributions. Not tax, but they show up in the paycheck.
+  const maksut = tulo * (7.15 + 1.90 + 0.59) / 100;   // pension + unemployment + health insurance
 
   const yhteensa = valtionvero + kunnallisvero + maksut;
   const kokoBudjetti = data.paaluokat.reduce((s, x) => s + x.amount, 0);
@@ -312,7 +312,7 @@ export function verokuitti(data, vuosiansio, kuntavero = 7.5) {
   };
 }
 
-/* ── Yhteinen kehys aputyökalujen sivuille ─────────────────────────── */
+/* ── Shared shell for the utility pages ────────────────────────────── */
 export function shell({ title, desc, site, body, path = "/", lang = DEFAULT_LANG, altPath = null }) {
   const tr = T(lang);
   return `<!DOCTYPE html>
@@ -377,7 +377,7 @@ ${body}
 </div></body></html>`;
 }
 
-/* ── Ylitysrekisteri ───────────────────────────────────────────────── */
+/* ── Overrun register ─────────────────────────────────────────────── */
 export function ylityksetHtml(data, { site, lang = DEFAULT_LANG }) {
   const tr = T(lang), pp = P(lang), B = base(lang);
   const fm = n => fmtL(n, lang), er = a => eurL(a, lang);
@@ -416,7 +416,7 @@ ${h ? `<div class="card">${tr.medianLine(h.mediaani.toLocaleString(tr.locale,
       : `Suomalaisten suurhankkeiden kustannusarviot ja toteutuneet hinnat. ${rivit.length} hanketta.` });
 }
 
-/* ── Verokuitti ────────────────────────────────────────────────────── */
+/* ── Tax receipt ───────────────────────────────────────────────────── */
 export function kuittiHtml(data, ansio, { site, lang = DEFAULT_LANG }) {
   const tr = T(lang), pp = P(lang), B = base(lang);
   const fm = n => fmtL(n, lang);
@@ -477,7 +477,7 @@ ${k.rivit.map(r => `<tr>
                        : "Mihin sinun verosi menevät? Syötä vuosiansiosi.") });
 }
 
-/* ── Vapaa summa ───────────────────────────────────────────────────── */
+/* ── Free-form sum ─────────────────────────────────────────────────── */
 export function summaHtml(data, summa, { site, lang = DEFAULT_LANG }) {
   const tr = T(lang), pp = P(lang), B = base(lang);
   const fm = n => fmtL(n, lang);

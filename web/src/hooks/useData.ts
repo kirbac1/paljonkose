@@ -8,9 +8,10 @@ type State =
   | { status: "stale";   data: Dataset; error: string };
 
 /**
- * Datan haku. Sivu ei koskaan jää tyhjäksi: jos rajapinta ei vastaa,
- * käytetään sivulle käännettyjä varalukuja ja kerrotaan siitä lukijalle.
- * Hiljainen epäonnistuminen olisi pahempi kuin vanhentunut luku.
+ * Data fetching. The page never ends up empty: if the API doesn't
+ * respond, the fallback figures compiled into the page are used, and
+ * the reader is told about it. A silent failure would be worse than a
+ * stale figure.
  */
 export function useData(url = "/api/data"): State {
   const [state, setState] = useState<State>({ status: "loading", data: FALLBACK });

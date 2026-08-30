@@ -1,16 +1,16 @@
 /**
- * i18n-ui.mjs — käyttöliittymän tekstit.
+ * i18n-ui.mjs — UI copy.
  *
- * Funktiot ottavat argumentteja siellä, missä teksti sisältää lukuja.
- * Näin kielikohtainen sanajärjestys säilyy — merkkijonojen liimaaminen
- * yhteen toimii suomeksi ja hajoaa englanniksi tai päinvastoin.
+ * Functions take arguments wherever the text contains a number. This
+ * preserves language-specific word order — concatenating strings works
+ * in Finnish and breaks in English, or the other way around.
  */
 
 export const LANGS = ["fi", "en"];
 export const DEFAULT_LANG = "fi";
 
-/* Polut kielittäin. Englanninkieliset sivut elävät /en/-etuliitteen alla
-   ja käyttävät englanninkielisiä slugeja, jotta osoite on luettava. */
+/* Paths per language. English pages live under the /en/ prefix and use
+   English-language slugs, so the address itself is readable. */
 export const PATHS = {
   fi: { root: "",    p: "p", overruns: "ylitykset", receipt: "kuitti", sum: "summa" },
   en: { root: "/en", p: "p", overruns: "overruns",  receipt: "tax-receipt", sum: "sum" }
@@ -60,7 +60,7 @@ export const T = {
       `${n} vertailukelpoista suomalaista suurhanketta maksoi lopulta mediaanissa ${kerroin}× arvionsa. Jos sama toistuu, hinta olisi ${hinta} — eli ${maara} ${unit}.`,
     forecastTail: "Yksi hankkeista alitti budjettinsa, joten tämä ei ole luonnonlaki.",
 
-    /* Ylitysrekisteri */
+    /* Overrun register */
     overrunsTitle: "Arvio vs. toteutunut",
     overrunsLede:
       "Suomalaisten suurhankkeiden alkuperäiset kustannusarviot ja lopulliset hinnat. Kaikki hankkeet, joista molemmat luvut ovat saatavilla — myös ne, jotka alittivat budjettinsa.",
@@ -70,7 +70,7 @@ export const T = {
     overrunsCaveat:
       "Vertailukelpoisuus on tulkinnanvaraista: hankkeen sisältö, laajuus ja hintataso muuttuvat suunnittelun aikana, eikä jokainen ylitys ole virhe. Osa eroista selittyy inflaatiolla, osa laajennuksilla, joista on päätetty erikseen. Alkuperäisen arvion vuosi on merkitty jokaisen hankkeen kohdalle. Otos on pieni.",
 
-    /* Verokuitti */
+    /* Tax receipt */
     receiptTitle: "Verokuitti",
     receiptLede:
       "Syötä vuosiansiosi, niin näet arvion maksamastasi verosta ja siitä, mihin valtion osuus siitä jakautuu. Karkea suuruusluokka-arvio — ei veroneuvo.",
@@ -87,7 +87,7 @@ export const T = {
     receiptCaveat: (p) =>
       `Laskelma käyttää valtion tuloveroasteikkoa ja ${p} %:n kunnallisveroa, eikä huomioi vähennyksiä, pääomatuloja, kirkollisveroa tai kotikuntasi todellista veroprosenttia — todellinen veroprosenttisi poikkeaa tästä. Jako pääluokkiin on laskennallinen: verot menevät yhteiseen kassaan, eikä yksittäistä euroa voi jäljittää tiettyyn menoon. Kunnallisveroa ei ole jaettu tässä lainkaan.`,
 
-    /* Vapaa summa */
+    /* Free-form sum */
     sumTitle: "Mitä sillä sais?",
     sumLede: "Mitä tällä summalla saisi? Syötä mikä tahansa luku — vaikka uutisesta poimittu.",
     sumEmpty: "Syötä summa yllä.",

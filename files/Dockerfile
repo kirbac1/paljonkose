@@ -1,6 +1,6 @@
 FROM node:20-slim
 
-# resvg tarvitsee fontit tekstin rasterointiin
+# resvg needs fonts to rasterize text
 RUN apt-get update && apt-get install -y --no-install-recommends \
       fonts-dejavu-core ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -12,10 +12,10 @@ RUN npm ci --omit=dev || npm install --omit=dev
 
 COPY render.mjs server.mjs fetch-data.mjs build-pages.mjs ./
 COPY public ./public
-# valinnainen: omat brändifontit
+# optional: your own brand fonts
 COPY font[s] ./fonts
 
-# ensimmäinen data mukaan imageen, cron päivittää sen myöhemmin volumeen
+# first data bundled into the image; cron updates it later in the volume
 COPY data.json ./data.json
 
 ENV PORT=3000

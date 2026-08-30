@@ -8,11 +8,11 @@ const read = (): Lang => {
 };
 
 /**
- * Kieli luetaan polusta (/en/) tai kyselyparametrista (?lang=en).
+ * Language is read from the path (/en/) or a query parameter (?lang=en).
  *
- * Vaihto ei lataa sivua uudelleen. Aiempi versio navigoi suoraan
- * osoitteeseen /en/, mikä toimi vain palvelimella — staattisella
- * isännällä lukija päätyi 404-sivulle ja nappi näytti katoavan.
+ * Switching doesn't reload the page. An earlier version navigated
+ * straight to /en/, which only worked on the server — on a static host
+ * the reader landed on a 404 and the toggle appeared to vanish.
  */
 export function useLang(): [Lang, () => void] {
   const [lang, setLang] = useState<Lang>(read);
@@ -28,7 +28,7 @@ export function useLang(): [Lang, () => void] {
         else u.searchParams.delete("lang");
         window.history.replaceState(null, "", u);
       } catch {
-        // osoitteen päivitys on koriste — kielenvaihto toimii ilmankin
+        // updating the address is cosmetic — switching languages still works without it
       }
       return next;
     });

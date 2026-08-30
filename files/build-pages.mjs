@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * build-pages.mjs — staattinen versio: kirjoittaa jokaisen laskutoimituksen
- * levylle. Käyttää samaa render.mjs-moduulia kuin server.mjs, joten
- * staattinen ja dynaaminen sivu ovat identtiset.
+ * build-pages.mjs — static version: writes every calculation to disk.
+ * Uses the same render.mjs module as server.mjs, so the static and
+ * dynamic pages are identical.
  *
  *   SITE_URL=https://paljonkose.fi node build-pages.mjs
  */
@@ -23,7 +23,7 @@ if (existsSync("fonts")) {
     .filter(f => /\.(ttf|otf)$/i.test(f))
     .map(f => path.resolve("fonts", f));
 }
-console.log(fontFiles.length ? `Fontit: ${fontFiles.length} omaa` : "Fontit: järjestelmäfontit");
+console.log(fontFiles.length ? `Fonts: ${fontFiles.length} custom` : "Fonts: system fonts");
 
 await fs.rm(OUT, { recursive: true, force: true });
 await fs.mkdir(`${OUT}/p`, { recursive: true });
@@ -83,4 +83,4 @@ await fs.writeFile(`${OUT}/sitemap.xml`,
 ${built.map(b => `  <url><loc>${SITE}/p/${b.slug}/</loc><lastmod>${data.generated.slice(0,10)}</lastmod></url>`).join("\n")}
 </urlset>`, "utf8");
 
-console.log(`\nValmis: ${built.length} sivua + kuvat → ${OUT}/`);
+console.log(`\nDone: ${built.length} pages + images → ${OUT}/`);

@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "fallback": "node gen-fallback.mjs ../data.json"
+    "fallback": "node gen-fallback.mjs ../files/data.json"
   },
   "keywords": [],
   "author": "",

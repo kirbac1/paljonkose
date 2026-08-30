@@ -1,9 +1,9 @@
 import type { Item, Lang, Scope, Unit } from "./types";
 
 /**
- * Käyttöliittymän tekstit. Funktiot siellä, missä teksti sisältää lukuja —
- * merkkijonojen liimaaminen yhteen toimii toisella kielellä ja hajoaa
- * toisella, koska sanajärjestys on eri.
+ * UI copy. Functions wherever the text contains a number — concatenating
+ * strings works in one language and breaks in the other, because the
+ * word order differs.
  */
 export const UI = {
   fi: {
@@ -86,12 +86,12 @@ export const UI = {
     loading: "Loading figures…",
     loadFailed: "Figures failed to load. Showing the values stored in the page."
   }
-};   // ei "as const": tekstit sijoitetaan tilaan, joten leveä string on oikea tyyppi
+};   // no "as const": the text goes into state, so a wide string is the correct type
 
 export type Strings = typeof UI[Lang];
 
-/** Nimike kielen mukaan. Puuttuva käännös putoaa suomeen: näkyvä
- *  suomenkielinen sana on parempi kuin tyhjä kohta. */
+/** The label for the current language. A missing translation falls
+ *  back to Finnish: a visible Finnish word is better than a blank spot. */
 export const label = (o: Item | Unit | Scope, lang: Lang): string =>
   lang === "en" && o.label_en ? o.label_en : o.label;
 

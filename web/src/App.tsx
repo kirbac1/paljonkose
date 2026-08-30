@@ -19,7 +19,7 @@ export default function App() {
   const [scope, setScope] = useState("kaikki");
   const [itemId, setItemId] = useState<string | null>(null);
   const [unitId, setUnitId] = useState<string | null>(null);
-  /** null = käytä yksikön omaa hintaa. Luku = lukija on muuttanut sitä. */
+  /** null = use the unit's own price. A number = the reader has edited it. */
   const [cost, setCost] = useState<number | null>(null);
   const [own, setOwn] = useState<Item | null>(null);
   const [shareLabel, setShareLabel] = useState<string>(t.copy);
@@ -30,9 +30,9 @@ export default function App() {
     [all, scope]
   );
 
-  /* Tyhjä data on aito mahdollisuus: rajapinta voi palauttaa listan ilman
-     eriä. Käsitellään se nimenomaisesti eikä "!"-operaattorilla — muuten
-     vika ilmenee vasta ajossa, väärässä paikassa. */
+  /* Empty data is a real possibility: the API can return a list with no
+     items. Handled explicitly rather than with a "!" operator — otherwise
+     the bug would only show up at runtime, in the wrong place. */
   const item = (own && itemId === OWN_ID ? own : all.find(i => i.id === itemId))
     ?? visible[0] ?? all[0] ?? null;
   const unit = data.units.find(u => u.id === unitId) ?? data.units[0] ?? null;
@@ -44,7 +44,7 @@ export default function App() {
 
   const pickItem = useCallback((id: string) => {
     setItemId(id);
-    setCost(null);        // muokattu hinta ei saa siirtyä toiseen erään
+    setCost(null);        // an edited price must not carry over to a different item
   }, []);
 
   const pickScope = useCallback((s: string) => {
@@ -54,8 +54,9 @@ export default function App() {
   }, [all]);
 
   /**
-   * Lukijan oma summa. Pieni luku ei mahdu kalliiseen yksikköön, joten
-   * valitaan halvin, joka antaa vähintään yhden — muuten näkyy nolla.
+   * The reader's own sum. A small number doesn't fit an expensive unit,
+   * so the cheapest one that yields at least one is picked — otherwise
+   * a zero would show up.
    */
   const submitOwn = useCallback((amount: number) => {
     const synthetic: Item = {
@@ -73,9 +74,9 @@ export default function App() {
 
   const share = useCallback(async () => {
     if (!calc) return;
-    // Jokaisella oikealla laskutoimituksella on oma, palvelimen renderöimä
-    // sivu (samat luvut, oikea og:image) — jaetaan se, ei etusivun
-    // yleistä osoitetta, joka ei kertoisi mitä lukija juuri katsoi.
+    // Every real calculation has its own, server-rendered page (same
+    // figures, correct og:image) — share that, not the homepage's
+    // generic address, which wouldn't say what the reader was just looking at.
     const path = comboPath(calc, lang);
     const url = path ? `${window.location.origin}${path}` : window.location.href;
     const text = `${eur(calc.item.amount, lang)} = ${calc.count} ${

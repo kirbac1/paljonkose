@@ -1,113 +1,114 @@
-# Paljonko se on? — käyttöliittymä
+# Paljonko se on? — user interface
 
-React + TypeScript -toteutus laskimesta — **etusivun tuotantototeutus**.
-`npm run build` kirjoittaa `../files/public/`-hakemistoon, jota
-`deploy.yml` ajaa jokaisen julkaisun yhteydessä. Vanha vanilla JS
--etusivu on poistettu repostä kokonaan. Palvelin (`server.mjs`) pysyy
-ennallaan ja tarjoaa datan osoitteessa `/api/data` sekä jaettavat sivut
-osoitteissa `/p/…`, `/ylitykset/` ja `/kuitti/`.
+React + TypeScript implementation of the calculator — **the production
+implementation of the homepage**. `npm run build` writes into
+`../files/public/`, which `deploy.yml` runs on every release. The old
+vanilla-JS homepage has been removed from the repo entirely. The server
+(`server.mjs`) stays as-is and serves the data at `/api/data` plus the
+shareable pages at `/p/…`, `/ylitykset/`, and `/kuitti/`.
 
-## Komennot
+## Commands
 
 ```bash
 npm install
-npm run dev        # Vite, portti 5173, /api välitetään porttiin 3000
-npm test           # Vitest — 19 testiä
+npm run dev        # Vite, port 5173, /api proxied to port 3000
+npm test           # Vitest — 24 tests
 npm run typecheck  # tsc --noEmit, strict
-npm run build      # tyypit + tuotantokäännös
-npm run fallback   # kirjoittaa ../data.json varaluvuiksi
+npm run build      # types + production build
+npm run fallback   # writes ../data.json into fallback data
 ```
 
-`npm run dev` olettaa että Express-palvelin on käynnissä portissa 3000.
+`npm run dev` assumes the Express server is running on port 3000.
 
-## Testaus paikallisesti
+## Local testing
 
-Kaksi palvelinta pyörii rinnakkain kehityksessä — Vite tarjoaa tämän
-React-sovelluksen, Express tarjoaa datan ja jaettavat sivut.
+Two servers run side by side in development — Vite serves this React
+app, Express serves the data and the shareable pages.
 
-1. Käynnistä Express-palvelin toisessa terminaalissa, projektin
-   `files/`-hakemistosta:
+1. Start the Express server in another terminal, from the project's
+   `files/` directory:
 
    ```bash
    cd ../files
-   npm run dev        # portti 3000
+   npm run dev        # port 3000
    ```
 
-2. Käynnistä tämän hakemiston Vite-kehityspalvelin:
+2. Start this directory's Vite dev server:
 
    ```bash
-   npm run dev        # portti 5173, /api, /p, /ylitykset, /kuitti → :3000
+   npm run dev        # port 5173, /api, /p, /ylitykset, /kuitti → :3000
    ```
 
-3. Avaa <http://localhost:5173>. Jos portti 3000 ei vastaa, sovellus ei
-   kaadu — se näyttää `data/fallback.ts`:n varaluvut ja kertoo siitä
-   lukijalle (`useData`-hookin `stale`-tila).
+3. Open <http://localhost:5173>. If port 3000 doesn't respond, the app
+   doesn't crash — it shows `data/fallback.ts`'s placeholder figures and
+   tells the reader so (the `useData` hook's `stale` state).
 
-Yksikkötestit eivät tarvitse kumpaakaan palvelinta käyntiin — ne ajavat
-jsdomissa eristettyinä:
+Unit tests don't need either server running — they run isolated in jsdom:
 
 ```bash
-npm test           # lib/calc.test.ts + App.test.tsx, 19 testiä
+npm test           # lib/calc.test.ts + App.test.tsx, 24 tests
 ```
 
-## Rakenne
+## Structure
 
 ```
 src/
-  types.ts              tietomalli — sopimus palvelimen kanssa
-  i18n.ts               tekstit ja nimikkeet, fi/en
-  lib/calc.ts           laskutoimitus, puhtaita funktioita
-  lib/format.ts         luvut ja valuutta kielen mukaan
-  hooks/useData.ts      datan haku, varaluvut jos rajapinta ei vastaa
-  hooks/useLang.ts      kieli polusta tai parametrista
-  components/           esitys, ei logiikkaa
-    SiteLinks.tsx       linkit palvelimen renderöimille sivuille
-  data/fallback.ts      GENEROITU — älä muokkaa
+  types.ts              data model — the contract with the server
+  i18n.ts               copy and labels, fi/en
+  lib/calc.ts           calculation, pure functions
+  lib/format.ts         numbers and currency by language
+  hooks/useData.ts      data fetching, falls back if the API doesn't respond
+  hooks/useLang.ts      language from the path or a query parameter
+  components/           presentation, no logic
+    SiteLinks.tsx       links to server-rendered pages
+  data/fallback.ts      GENERATED — do not edit
 ```
 
-## Miksi näin
+## Why it's built this way
 
-**Laskenta on erillään Reactista.** `lib/calc.ts` ei tunne komponentteja,
-joten sen voi testata ilman renderöintiä. Kymmenen testiä ajaa 8
-millisekunnissa, mikä pitää ne käytössä.
+**Calculation is separate from React.** `lib/calc.ts` doesn't know about
+components, so it can be tested without rendering. Ten tests run in 8
+milliseconds, which keeps them in active use.
 
-**Tyhjä data käsitellään erikseen.** `noUncheckedIndexedAccess` on päällä,
-joten `items[0]` on `Item | undefined`. Sovellus näyttää latausviestin sen
-sijaan että kaatuisi `!`-operaattoriin — vika ajossa olisi ilmennyt
-väärässä paikassa.
+**Empty data is handled explicitly.** `noUncheckedIndexedAccess` is on,
+so `items[0]` is `Item | undefined`. The app shows a loading message
+instead of crashing on a `!` operator — a runtime bug would otherwise
+have shown up in the wrong place.
 
-**Varaluvut generoidaan.** `data/fallback.ts` on käännetty `data.jsonista`.
-Käsin ylläpidetty kopio erkaantuisi, ja ero näkyisi vain silloin kun
-rajapinta on jo alhaalla.
+**Fallback figures are generated.** `data/fallback.ts` is compiled from
+`data.json`. A hand-maintained copy would drift, and the gap would only
+show up once the API was already down.
 
-**Hinta-kenttä pitää oman merkkijononsa.** Ilman sitä kenttää ei voi
-tyhjentää: tyhjä tulkittaisiin nollaksi, hinta palautuisi yksikön omaksi
-ja luku ilmestyisi takaisin kesken kirjoittamisen. Tämän löysi testi, ei
-lukeminen.
+**The price field keeps its own string.** Without that, the field can't
+be cleared: an empty value would be read as zero, the price would
+revert to the unit's own, and the number would reappear mid-keystroke.
+A test found this, not a reading of the code.
 
-**Palvelimen sivuille on testi.** `/ylitykset/` ja `/kuitti/` eivät ole
-React-reittejä, joten mikään ei kaadu jos linkit katoavat
-uudelleenkirjoituksessa. Niin kävi kerran — nyt `App.test.tsx` kiinnittää
-osoitteet, ja `../files/tests/e2e/calculator.spec.mjs` klikkaa ne oikeasti
-auki rakennettua sivua vasten. (`/nostot/`-linkki poistettiin kokonaan —
-sillä ei koskaan ollut vastaavaa palvelinreittiä.)
+**Server pages have a test.** `/ylitykset/` and `/kuitti/` aren't React
+routes, so nothing crashes if the links disappear in a rewrite. That
+happened once — now `App.test.tsx` pins the addresses, and
+`../files/tests/e2e/calculator.spec.mjs` actually clicks them open
+against the built page. (The `/nostot/` link was removed entirely — it
+never had a matching server route.)
 
-**Kielenvaihto ei lataa sivua.** Aiempi versio navigoi osoitteeseen `/en/`,
-mikä toimi vain palvelimella; staattisella isännällä lukija päätyi
-404-sivulle ja nappi näytti katoavan.
+**Switching language doesn't reload the page.** An earlier version
+navigated straight to `/en/`, which only worked on the server; on a
+static host the reader landed on a 404 and the toggle appeared to vanish.
 
-## Mitä testit kattavat
+## What the tests cover
 
-- `lib/calc.test.ts` — jakolasku, osuus kun summa jää yksikköä pienemmäksi,
-  muokatun hinnan tunnistus, kelvoton syöte, per capita erän omalla
-  väkiluvulla, nostojen suodatus, kilpailevat hankkeet
-- `App.test.tsx` — renderöityy, kertoo epäonnistuneesta latauksesta,
-  kielenvaihto molempiin suuntiin, aluesuodatus, lukijan oma summa,
-  pieni summa saa kelvollisen yksikön, muokattu hinta nollautuu erän
-  vaihtuessa, linkit palvelimen sivuille ja niiden kielikohtaiset osoitteet
+- `lib/calc.test.ts` — the division, the fraction shown when a sum is
+  smaller than the unit, detecting an edited price, invalid input, the
+  per-capita share using an item's own population figure, filtering out
+  news items, competing projects, and the `/p/…` link built for a given
+  calculation (`comboPath`)
+- `App.test.tsx` — renders, reports a failed load, switches language
+  both ways, region filtering, the reader's own sum, a small sum gets a
+  sensible unit, an edited price resets when the item changes, links to
+  server pages and their language-specific addresses
 
-## Vielä tekemättä
+## Still to do
 
-- Reitit `/ylitykset/` ja `/kuitti/` renderöi yhä palvelin. Ne toimivat,
-  mutta jakavat logiikkaa `render.mjs`:n kanssa
-- Ei virheiden kasausta eikä metriikkaa
+- The `/ylitykset/` and `/kuitti/` routes are still rendered by the
+  server. They work, but share logic with `render.mjs`
+- No error aggregation, no metrics

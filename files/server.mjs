@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /**
- * server.mjs — dynaaminen versio omalle palvelimelle.
+ * server.mjs — dynamic version, for your own server.
  *
- * Mitä tämä lisää staattiseen versioon:
- *   • mikä tahansa kombinaatio renderöidään lennossa, myös lukijan
- *     itse muuttamalla yksikköhinnalla → /p/pma-hoit-52000/
- *   • jakokuva generoidaan samalle URLille → linkkiesikatselu on oikein
- *   • kevyt jakolaskuri, jonka avulla näet mikä vertailu oikeasti leviää
+ * What this adds over the static version:
+ *   • any combination is rendered on the fly, including the reader's
+ *     own edited unit price → /p/pma-hoit-52000/
+ *   • the share image is generated for that exact URL → the link preview is correct
+ *   • a lightweight share counter, so you can see which comparisons actually spread
  *
- * Ei tietokantaa. Laskurit kirjoitetaan levylle JSON-tiedostoon.
+ * No database. Counters are written to a JSON file on disk.
  *
  *   npm install
  *   node fetch-data.mjs
@@ -24,9 +24,9 @@ import { Resvg } from "@resvg/resvg-js";
 import { combo, ogSvg, pageHtml, fmt, eur, ylityksetHtml, kuittiHtml, summaHtml } from "./render.mjs";
 import { PATHS, LANGS, DEFAULT_LANG } from "./i18n-ui.mjs";
 
-/* Passenger ei takaa työhakemistoa, joten kaikki polut lasketaan tämän
-   tiedoston sijainnista. Suhteellinen polku toimii kehityksessä ja
-   hajoaa tuotannossa — hiljaa, koska cwd voi olla mikä tahansa. */
+/* Passenger doesn't guarantee a working directory, so every path is
+   computed from this file's own location. A relative path works in
+   development and silently breaks in production, since cwd can be anything. */
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const P = (...xs) => path.join(ROOT, ...xs);
 
@@ -34,15 +34,15 @@ const PORT  = process.env.PORT || 3000;
 const SITE  = (process.env.SITE_URL || `http://localhost:${PORT}`).replace(/\/$/, "");
 const STATS = process.env.STATS_FILE || "./stats.json";
 
-/* ── data, uudelleenladattava ilman uudelleenkäynnistystä ─────────────── */
+/* ── data, reloadable without a restart ────────────────────────────── */
 let DATA = JSON.parse(await fs.readFile(P("data.json"), "utf8"));
 async function reload() {
   DATA = JSON.parse(await fs.readFile(P("data.json"), "utf8"));
   ogCache.clear();
-  console.log("data.json ladattu uudelleen:", DATA.generated);
+  console.log("data.json reloaded:", DATA.generated);
 }
 
-/* ── fontit ───────────────────────────────────────────────────────────── */
+/* ── fonts ────────────────────────────────────────────────────────────── */
 let fontFiles = [];
 if (existsSync("fonts")) {
   fontFiles = (await fs.readdir("fonts"))
@@ -50,12 +50,12 @@ if (existsSync("fonts")) {
     .map(f => path.resolve("fonts", f));
 }
 
-/* ── kuvavälimuisti: sama URL renderöidään kerran ─────────────────────── */
+/* ── image cache: the same URL is rendered once ────────────────────── */
 const ogCache = new Map();
 const OG_MAX  = 500;
 
 function renderOg(c) {
-  // avaimessa on kieli, muuten englanninkielinen sivu saisi suomenkielisen kuvan
+  // language is part of the key, otherwise the English page would get the Finnish image
   const key = `${c.lang || DEFAULT_LANG}:${c.slug}`;
   if (ogCache.has(key)) return ogCache.get(key);
   const png = new Resvg(ogSvg(c), {
@@ -67,7 +67,7 @@ function renderOg(c) {
   return png;
 }
 
-/* ── jakolaskuri ──────────────────────────────────────────────────────── */
+/* ── share counter ────────────────────────────────────────────────── */
 let stats = {};
 try { stats = JSON.parse(await fs.readFile(STATS, "utf8")); } catch {}
 let dirty = false;
@@ -75,7 +75,7 @@ setInterval(async () => {
   if (!dirty) return;
   dirty = false;
   try { await fs.writeFile(STATS, JSON.stringify(stats), "utf8"); }
-  catch (e) { console.warn("stats-kirjoitus epäonnistui:", e.message); }
+  catch (e) { console.warn("writing stats failed:", e.message); }
 }, 30_000);
 
 const bump = (slug, key) => {
@@ -84,22 +84,21 @@ const bump = (slug, key) => {
   dirty = true;
 };
 
-/* ── reitit ───────────────────────────────────────────────────────────── */
+/* ── routes ───────────────────────────────────────────────────────────── */
 const app = express();
 app.disable("x-powered-by");
 app.use(express.json({ limit: "4kb" }));
 
-/** Slug: {item}-{unit} tai {item}-{unit}-{oma hinta}.
- *  Tunnukset voivat itse sisältää väliviivan (tre-ratikka), joten
- *  ei arvata erotinta vaan sovitetaan tunnettuihin tunnuksiin,
- *  pisin osuma ensin. */
+/** Slug: {item}-{unit} or {item}-{unit}-{own price}.
+ *  The ids can themselves contain a hyphen (tre-ratikka), so instead of
+ *  guessing the separator, match against known ids, longest match first. */
 function parseSlug(slug, lang = DEFAULT_LANG) {
   let rest = String(slug), cost = null;
 
   const m = rest.match(/-(\d+)$/);
   if (m) {
     const withoutNum = rest.slice(0, -m[0].length);
-    // luku on hinta vain jos loppuosa on kelvollinen ilman sitä
+    // the number is a price only if the remainder is valid without it
     if (matchIds(withoutNum)) { cost = Number(m[1]); rest = withoutNum; }
   }
 
@@ -129,7 +128,7 @@ for (const lang of LANGS) {
     res.send(renderOg(c));
   });
 
-  // Express kohtelee /p/x ja /p/x/ samana reittinä, joten yksi käsittelijä riittää.
+  // Express treats /p/x and /p/x/ as the same route, so one handler is enough.
   app.get(`${B}/p/:slug`, (req, res) => {
     const c = parseSlug(req.params.slug, lang);
     if (!c) return res.status(404).send(
@@ -155,7 +154,7 @@ app.post("/api/share/:slug", (req, res) => {
   res.json({ ok: true, shares: stats[c.slug].shares });
 });
 
-/** Mikä vertailu leviää — käytä tätä päivän merkinnän valintaan. */
+/** Which comparison is spreading — use this to pick the day's entry. */
 app.get("/api/top", (req, res) => {
   const top = Object.entries(stats)
     .map(([slug, s]) => ({ slug, ...s }))
@@ -169,7 +168,7 @@ app.get("/api/data", (req, res) => {
   res.json(DATA);
 });
 
-/** Kutsu tätä kun fetch-data.mjs on ajettu (cron / systemd timer). */
+/** Call this once fetch-data.mjs has run (cron / systemd timer). */
 app.post("/api/reload", async (req, res) => {
   if (process.env.RELOAD_TOKEN &&
       req.get("x-token") !== process.env.RELOAD_TOKEN) {
@@ -205,8 +204,8 @@ ${urls.join("\n")}
 </urlset>`);
 });
 
-/* Reitit rakennetaan kielittäin samasta käsittelijästä. Yksi määrittely,
-   kaksi kieltä — muuten polut ehtivät erkaantua toisistaan. */
+/* Routes are built per language from the same handler. One definition,
+   two languages — otherwise the paths would drift apart from each other. */
 for (const lang of LANGS) {
   const p = PATHS[lang], B = p.root;
 
@@ -233,15 +232,16 @@ for (const lang of LANGS) {
 
 app.get("/healthz", (req, res) => res.json({ ok: true, generated: DATA.generated }));
 
-// staattinen etusivu ja muut tiedostot
-/* Etusivu molemmilla kielillä samasta tiedostosta. Sivu lukee kielen
-   polusta, joten /en/ on jaettava osoite eikä selaimen sisäinen tila. */
+// the static homepage and other files
+/* The homepage in both languages from the same file. The page reads the
+   language from the path, so /en/ has to be a shareable address, not
+   browser-internal state. */
 app.get("/en/", (req, res) => res.sendFile(P("public", "index.html")));
 
 app.use(express.static(P("public"), { extensions: ["html"], maxAge: "1h" }));
 
 app.listen(PORT, () => {
-  console.log(`Käynnissä: ${SITE} (portti ${PORT})`);
-  console.log(`Juuri: ${ROOT}`);
-  console.log(`Data: ${DATA.items.length} menoerää × ${DATA.units.length} yksikköä`);
+  console.log(`Running: ${SITE} (port ${PORT})`);
+  console.log(`Root: ${ROOT}`);
+  console.log(`Data: ${DATA.items.length} items × ${DATA.units.length} units`);
 });
