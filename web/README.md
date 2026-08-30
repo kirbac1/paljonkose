@@ -1,10 +1,12 @@
 # Paljonko se on? — käyttöliittymä
 
-React + TypeScript -toteutus laskimesta — **etusivun uusi ja tuleva
-tuotantototeutus**, joka korvaa `../files/public/index.html`:n
-vanilla JS -legacy-version. Palvelin (`server.mjs`) pysyy ennallaan ja
-tarjoaa datan osoitteessa `/api/data` sekä jaettavat sivut osoitteissa
-`/p/…`, `/ylitykset/`, `/kuitti/` ja `/nostot/`.
+React + TypeScript -toteutus laskimesta — **etusivun tuotantototeutus**.
+`npm run build` kirjoittaa `../files/public/`-hakemistoon, jota
+`deploy.yml` ajaa jokaisen julkaisun yhteydessä; vanha vanilla JS
+-versio elää enää `../files/paljonko-se-on.html`:ssä, koskemattomana
+referenssinä. Palvelin (`server.mjs`) pysyy ennallaan ja tarjoaa datan
+osoitteessa `/api/data` sekä jaettavat sivut osoitteissa `/p/…`,
+`/ylitykset/` ja `/kuitti/`.
 
 ## Komennot
 
@@ -35,7 +37,7 @@ React-sovelluksen, Express tarjoaa datan ja jaettavat sivut.
 2. Käynnistä tämän hakemiston Vite-kehityspalvelin:
 
    ```bash
-   npm run dev        # portti 5173, /api, /p, /ylitykset, /kuitti, /nostot → :3000
+   npm run dev        # portti 5173, /api, /p, /ylitykset, /kuitti → :3000
    ```
 
 3. Avaa <http://localhost:5173>. Jos portti 3000 ei vastaa, sovellus ei
@@ -84,9 +86,12 @@ tyhjentää: tyhjä tulkittaisiin nollaksi, hinta palautuisi yksikön omaksi
 ja luku ilmestyisi takaisin kesken kirjoittamisen. Tämän löysi testi, ei
 lukeminen.
 
-**Palvelimen sivuille on testi.** `/ylitykset/`, `/kuitti/` ja `/nostot/`
-eivät ole React-reittejä, joten mikään ei kaadu jos linkit katoavat
-uudelleenkirjoituksessa. Niin kävi kerran — nyt testi kiinnittää ne.
+**Palvelimen sivuille on testi.** `/ylitykset/` ja `/kuitti/` eivät ole
+React-reittejä, joten mikään ei kaadu jos linkit katoavat
+uudelleenkirjoituksessa. Niin kävi kerran — nyt `App.test.tsx` kiinnittää
+osoitteet, ja `../files/tests/e2e/calculator.spec.mjs` klikkaa ne oikeasti
+auki rakennettua sivua vasten. (`/nostot/`-linkki poistettiin kokonaan —
+sillä ei koskaan ollut vastaavaa palvelinreittiä.)
 
 **Kielenvaihto ei lataa sivua.** Aiempi versio navigoi osoitteeseen `/en/`,
 mikä toimi vain palvelimella; staattisella isännällä lukija päätyi
@@ -104,8 +109,6 @@ mikä toimi vain palvelimella; staattisella isännällä lukija päätyi
 
 ## Vielä tekemättä
 
-- Reitit `/ylitykset/`, `/kuitti/` ja `/nostot/` renderöi yhä palvelin.
-  Ne toimivat, mutta jakavat logiikkaa `render.mjs`:n kanssa
-- Ei e2e-testejä. Playwright kattaisi jakonapin ja leikepöydän, joita
-  jsdom ei mallinna
+- Reitit `/ylitykset/` ja `/kuitti/` renderöi yhä palvelin. Ne toimivat,
+  mutta jakavat logiikkaa `render.mjs`:n kanssa
 - Ei virheiden kasausta eikä metriikkaa

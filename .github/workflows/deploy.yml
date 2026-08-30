@@ -1,7 +1,9 @@
 name: Deploy to production
 
-# Ships files/ (the live vanilla-JS app) to the Plesk server on every push
-# to main. web/ is a local prototype and is not part of the release.
+# Builds web/ (React) and ships it into files/public/, then deploys
+# files/ to the Plesk server on every push to main. files/'s own vanilla
+# JS is legacy now — its standalone reference copy lives at
+# files/paljonko-se-on.html, untouched by the build.
 #
 # Server facts below were confirmed by SSHing in on 2026-08-30 — re-check
 # them if the deploy step starts failing after server-side changes:
@@ -49,6 +51,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Build web/ (React) into files/public/
+        working-directory: web
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+
       - name: Set up SSH
         env:
           SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
@@ -77,11 +91,12 @@ jobs:
 
           ssh -o BatchMode=yes "$SSH_USER@$SSH_HOST" "mkdir -p '$RELEASE/files'"
 
-          # Only files/ is deployed. node_modules is reinstalled on the
-          # server (resvg-js ships a native binary — safer to install it
-          # where it'll actually run than to copy a binary built on the
-          # Actions runner's architecture). tests/ and Playwright's own
-          # output have no business in a release either.
+          # files/ now contains the freshly built React app under public/
+          # (written by the previous step). node_modules is reinstalled on
+          # the server instead of copied over — resvg-js ships a native
+          # binary, safer to install it where it'll actually run than to
+          # copy one built on the Actions runner's architecture. tests/
+          # and Playwright's own output have no business in a release.
           rsync -az -e "ssh -o BatchMode=yes" \
             --exclude node_modules \
             --exclude tests \

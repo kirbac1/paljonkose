@@ -82,7 +82,7 @@ describe("App", () => {
     render(<App />);
     const nav = screen.getByRole("navigation", { name: "Muut sivut" });
     const hrefs = within(nav).getAllByRole("link").map(a => a.getAttribute("href"));
-    expect(hrefs).toEqual(["/nostot/", "/ylitykset/", "/kuitti/"]);
+    expect(hrefs).toEqual(["/ylitykset/", "/kuitti/"]);
   });
 
   it("vaihtaa myös sivulinkit kielen mukana", async () => {
@@ -91,7 +91,7 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "In English" }));
     const nav = screen.getByRole("navigation", { name: "More pages" });
     const hrefs = within(nav).getAllByRole("link").map(a => a.getAttribute("href"));
-    expect(hrefs).toEqual(["/en/highlights/", "/en/overruns/", "/en/tax-receipt/"]);
+    expect(hrefs).toEqual(["/en/overruns/", "/en/tax-receipt/"]);
   });
 
   it("nollaa lukijan muokkaaman hinnan kun menoerä vaihtuu", async () => {

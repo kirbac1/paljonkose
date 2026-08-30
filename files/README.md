@@ -6,10 +6,12 @@ lukijan muokattavissa, varaukset esillä eikä piilotettuna.
 
 Tuotanto: **paljonkose.fi**
 
-> `public/index.html` ja `paljonko-se-on.html` ovat vanhaa vanilla JS
-> -etusivua — legacy, korvautumassa [`../web/`](../web/README.md):llä.
+> `public/` on nyt [`../web/`](../web/README.md):n käännösjälki —
+> `npm run build` siellä kirjoittaa tämän hakemiston, eikä sen sisältöä
+> muokata käsin. `paljonko-se-on.html` on vanhan vanilla JS -etusivun
+> itsenäinen, koskematon kopio: legacy-referenssi, ei enää tuotannossa.
 > Tämän hakemiston Express-palvelin (`server.mjs`, `render.mjs`,
-> `/api/data`) pysyy käytössä molemmille toteutuksille.
+> `/api/data`) palvelee sekä Reactin buildia että näitä muita reittejä.
 
 ---
 
@@ -118,7 +120,9 @@ npm test
 
 Selaimessa ajettavat testit (Playwright) käynnistävät `server.mjs`:n ja
 käyvät läpi etusivun laskurin — kaikki menoerät, aluesirut, oman summan
-syöttö, yksikköhinnan muokkaus ja jakonappi — oikeassa selaimessa:
+syöttö, yksikköhinnan muokkaus ja jakonappi — oikeassa selaimessa. Nämä
+ajavat `public/`:iin käännettyä Reactia; aja `npm run build` ensin
+`../web/`:ssä jos et ole vielä:
 
 ```bash
 npx playwright install --with-deps chromium   # kerran

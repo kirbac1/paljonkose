@@ -11,15 +11,14 @@ Tuotanto: **paljonkose.fi**
 ## Rakenne
 
 - [`files/`](files/README.md) — Express-palvelin: `/api/data`, jaettavat
-  `/p/…`-sivut, `/ylitykset/`, `/kuitti/`, `/summa/`. Tätä tarvitaan
-  taustalla molemmille etusivuille. Sisältää myös **vanhan vanilla JS
-  -etusivun** (`public/index.html`), joka on nyt legacy-toteutus —
-  korvautumassa `web/`:llä.
-- [`web/`](web/README.md) — React + TypeScript, **etusivun uusi ja
-  tuleva tuotantototeutus**. Käyttää samaa `files/`-backendia
-  `/api/data`:n ja jaettavien sivujen kautta. Ei vielä kytketty
-  julkaisuputkeen (`npm run build` kirjoittaa `files/public/`-hakemistoon,
-  mutta deploy ei vielä aja sitä).
+  `/p/…`-sivut, `/ylitykset/`, `/kuitti/`, `/summa/`. Palvelee myös
+  etusivun (`files/public/`), joka rakennetaan `web/`:stä deployn
+  yhteydessä — `files/public/`:ssa ei enää ole omaa lähdekoodia.
+  `files/paljonko-se-on.html` on vanhan vanilla JS -etusivun
+  itsenäinen, koskematon kopio (legacy-referenssi, ei tuotannossa).
+- [`web/`](web/README.md) — React + TypeScript, **etusivun
+  tuotantototeutus**. `npm run build` kirjoittaa `files/public/`-
+  hakemistoon; `deploy.yml` ajaa tämän ennen jokaista julkaisua.
 - [`deploy/`](deploy/) — GitHub Actionsin deploy-workflow.
 - [`DEPLOYMENT.md`](DEPLOYMENT.md), [`READY-TO-DEPLOY.md`](READY-TO-DEPLOY.md) —
   SSH-pohjaisen automaattikäyttöönoton pystytys ja tila.
@@ -42,8 +41,8 @@ mitä sivuja löytyy ja miten dataa muokataan.
 
 ```bash
 cd files && npm test          # Vitest — render.mjs:n laskentafunktiot
-cd files && npm run test:e2e  # Playwright — etusivun laskuri oikeassa selaimessa
-cd web   && npm test          # Vitest — React-prototyypin komponentit ja logiikka
+cd files && npm run test:e2e  # Playwright — rakennettu React-etusivu oikeassa selaimessa
+cd web   && npm test          # Vitest — React-komponentit ja laskentalogiikka
 ```
 
 Tarkemmat kuvaukset kummankin testijoukon kattavuudesta:
@@ -56,9 +55,10 @@ Tarkemmat kuvaukset kummankin testijoukon kattavuudesta:
 
 [`.github/workflows/`](.github/workflows/) ajaa testit (`test.yml`,
 kutsuttuna sekä `ci.yml`:stä että `deploy.yml`:stä) jokaisella pushilla ja
-PR:llä. `main`-haaraan pushatessa `deploy.yml` rsynkkaa `files/`-hakemiston
-Plesk-palvelimelle, asentaa riippuvuudet siellä ja käynnistää sovelluksen
-uudelleen Passengerin kautta. `web/` ei ole vielä osa julkaisuputkea.
+PR:llä. `main`-haaraan pushatessa `deploy.yml` rakentaa `web/`:n
+(`files/public/`-hakemistoon), rsynkkaa `files/`-hakemiston Plesk-
+palvelimelle, asentaa riippuvuudet siellä ja käynnistää sovelluksen
+uudelleen Passengerin kautta.
 
 ## Tuotantoon
 
