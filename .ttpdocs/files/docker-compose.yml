@@ -1,0 +1,36 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    environment:
+      SITE_URL: "https://paljonkose.fi"
+      PORT: "3000"
+      STATS_FILE: "/data/stats.json"
+      RELOAD_TOKEN: "${RELOAD_TOKEN}"         # from the .env file
+    volumes:
+      - state:/data
+      - ./data.json:/app/data.json:ro         # the updater writes this
+    ports:
+      - "127.0.0.1:3000:3000"                 # only reachable via the reverse proxy
+
+  # Fetches figures once a day and asks web to reload them.
+  # No restart, no downtime.
+  updater:
+    build: .
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      'while true; do
+         node fetch-data.mjs || echo "fetch failed, keeping the old figures";
+         wget -q -O- --post-data="" --header="x-token=$${RELOAD_TOKEN}" http://web:3000/api/reload || true;
+         sleep 86400;
+       done'
+    environment:
+      RELOAD_TOKEN: "${RELOAD_TOKEN}"
+    volumes:
+      - ./data.json:/app/data.json            # write access here
+    depends_on:
+      - web
+
+volumes:
+  state:

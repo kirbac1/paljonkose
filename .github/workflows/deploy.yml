@@ -4,27 +4,24 @@ name: Deploy to production
 # files/ to the Plesk server on every push to main. The old vanilla-JS
 # frontend has been removed from the repo entirely.
 #
-# Server facts below were confirmed by SSHing in on 2026-08-30 — re-check
-# them if the deploy step starts failing after server-side changes:
-#   - Passenger's app root is ~/paljonkose/current/files (`ps` shows
-#     `Passenger NodeApp: .../paljonkose/current/files`)
-#   - Passenger restarts the app when files/tmp/restart.txt's mtime changes
-#   - node comes from nodenv; it resolves the version from a .node-version
-#     file at the release root (sibling of files/, not inside it) — "22"
-#     is what the current release uses
-#   - the canonical domain is https://paljonkose.fi. paljonkose.kirbac.fi
-#     still reaches the same app and is 301'd to the canonical host by
-#     server.mjs, so both keep working but only one is indexed
-#   - SITE_URL must be set for the app, or canonical/og:url/og:image fall
-#     back to http://localhost:PORT. It lives in files/.env, which
-#     server.mjs loads via process.loadEnvFile() and this workflow carries
-#     forward between releases
-#   - files/.bootstrap.cjs is a Plesk-generated Passenger startup shim,
-#     not tracked in git. The first automated deploy shipped a release
-#     without it and took the site down with "Web application could not
-#     be started" — this workflow now (re)writes it every time, and
-#     copies files/.env forward from the previous release since nothing
-#     in git supplies it either
+# Server facts, confirmed by SSHing in on 2026-09-02. Re-check if a deploy
+# starts failing after server-side changes:
+#   - paljonkose.fi is its own Plesk subscription, separate from kirbac.fi.
+#     Passenger's app root is ~/httpdocs and its restart file is
+#     ~/httpdocs/tmp/restart.txt (NOT inside files/)
+#   - the app itself lives in httpdocs/files. That is a symlink into
+#     ~/paljonkose/releases/<stamp>/files, which is what makes a release
+#     swap atomic and a rollback a one-line relink. Verified that Passenger
+#     follows it.
+#   - stats.json sits at ~/httpdocs/stats.json, outside the release, so
+#     share counters survive a deploy
+#   - node comes from nodenv; "22" is what the app runs under
+#   - permissions matter: a release extracted with restrictive modes makes
+#     the web server return 403 while the app itself is perfectly healthy.
+#     Directories must end up 755 and files 644.
+#   - SITE_URL must be set, or canonical/og:url/og:image silently fall back
+#     to http://localhost:PORT. It lives in files/.env, loaded by server.mjs
+#     via process.loadEnvFile() and carried forward between releases.
 on:
   push:
     branches: [main]
@@ -91,81 +88,89 @@ jobs:
           set -euo pipefail
           RELEASE="paljonkose/releases/$(date -u +%Y%m%d-%H%M%S)-${GITHUB_SHA::7}"
 
-          ssh -o BatchMode=yes "$SSH_USER@$SSH_HOST" \
-            "mkdir -p '$RELEASE/files' && mkdir -p ~/paljonkose/releases"
+          ssh -o BatchMode=yes "$SSH_USER@$SSH_HOST" "mkdir -p '$RELEASE/files'"
 
-          # files/ now contains the freshly built React app under public/
-          # (written by the previous step). node_modules is reinstalled on
-          # the server instead of copied over — resvg-js ships a native
-          # binary, safer to install it where it'll actually run than to
-          # copy one built on the Actions runner's architecture. tests/
-          # and Playwright's own output have no business in a release.
-          rsync -az -e "ssh -o BatchMode=yes" \
+          # node_modules is installed on the server rather than copied:
+          # resvg-js ships a native binary, and the runner's architecture is
+          # not the server's. tests/ and Playwright output do not belong in
+          # a release.
+          rsync -az --no-perms --no-owner --no-group --chmod=D755,F644 \
+            -e "ssh -o BatchMode=yes" \
             --exclude node_modules \
+            --exclude .env \
             --exclude tests \
             --exclude playwright-report \
             --exclude test-results \
             files/ "$SSH_USER@$SSH_HOST:$RELEASE/files/"
 
-          # Env vars in, not interpolated into a nested quoted string —
-          # quoting through ssh is the classic place this kind of script
-          # breaks.
+          # Values passed as remote env vars rather than interpolated into a
+          # nested quoted string — quoting through ssh is where this kind of
+          # script usually breaks.
           ssh -o BatchMode=yes "$SSH_USER@$SSH_HOST" \
             RELEASE="$RELEASE" KEEP=5 SITE_URL="$SITE_URL" bash -s <<'REMOTE'
           set -euo pipefail
-          cd "$HOME/$RELEASE"
+          APP=~/httpdocs
+          REL="$HOME/$RELEASE"
 
-          # Matches the version the currently-live release runs under.
-          echo "22" > .node-version
-          export PATH="$HOME/.nodenv/shims:$PATH"
+          cd "$REL/files"
 
-          cd files
-          npm ci --omit=dev --no-audit --no-fund
-
-          # Plesk's Node Toolkit generates this wrapper itself when you
-          # save the app's settings in the panel — it is not in git, and a
-          # fresh release directory never has one. Without it Passenger
-          # cannot find a startup file and serves a 500.
+          # Plesk's Node Toolkit writes this wrapper itself when you save the
+          # app in the panel. It is not in git, so a fresh release has none,
+          # and without it Passenger cannot find a startup file and serves a
+          # 500.
           cat > .bootstrap.cjs <<'BOOTSTRAP'
           // Do not remove or edit this file. Automatically generated by NodeJS Toolkit wrapper to load .mjs files
           import("./server.mjs");
           BOOTSTRAP
 
-          # .env isn't in git either. Carry it forward from whatever is
-          # currently live so secrets set there aren't lost on every deploy.
-          if [ -f "$HOME/paljonkose/current/files/.env" ]; then
-            cp -p "$HOME/paljonkose/current/files/.env" .env
+          # .env is not in git either. Carry it forward from whatever is
+          # currently live so anything set there survives the deploy.
+          if [ -L "$APP/files" ] && [ -f "$APP/files/.env" ]; then
+            cp -p "$APP/files/.env" .env
           fi
 
           # First deploy into a fresh subscription has nothing to carry
           # forward. Without SITE_URL the app falls back to localhost and
-          # silently poisons every canonical link and share image, so write
-          # a usable .env rather than shipping that.
+          # quietly poisons every canonical link and share image.
           if ! grep -qE '^SITE_URL=https?://' .env 2>/dev/null; then
-            echo "no usable SITE_URL in .env — writing one from the workflow"
+            echo "no usable SITE_URL — writing one from the workflow"
             printf 'SITE_URL=%s\nNODE_ENV=production\nSTATS_FILE=./stats.json\n' \
-              "$SITE_URL" >> .env
+              "$SITE_URL" > .env
           fi
-          grep -E '^SITE_URL=' .env
 
-          cd ..
-          ln -sfn "$HOME/$RELEASE" "$HOME/paljonkose/current.tmp"
-          mv -Tf "$HOME/paljonkose/current.tmp" "$HOME/paljonkose/current"
+          export PATH="$HOME/.nodenv/versions/22/bin:$PATH"
+          npm ci --omit=dev --no-audit --no-fund
 
-          # Passenger restarts the app once this file's mtime changes.
-          mkdir -p "$HOME/paljonkose/current/files/tmp"
-          touch "$HOME/paljonkose/current/files/tmp/restart.txt"
+          # A release whose directories are not traversable by the web server
+          # produces a 403 while the app itself is healthy — a genuinely
+          # confusing failure, so set the modes explicitly.
+          find "$REL" -type d -exec chmod 755 {} +
+          find "$REL" -type f -exec chmod 644 {} +
+          chmod 600 "$REL/files/.env"
+
+          # Atomic swap: build the new link beside the old one, then rename
+          # over it. mv -T on a symlink is a single rename(2), so no request
+          # ever sees a half-swapped directory.
+          ln -sfn "$REL/files" "$APP/files.tmp"
+          mv -Tf "$APP/files.tmp" "$APP/files"
+
+          # Passenger's app root is httpdocs, so its restart file lives there
+          # rather than inside the release.
+          mkdir -p "$APP/tmp"
+          touch "$APP/tmp/restart.txt"
 
           # Prune by name, not mtime: release dirs are YYYYmmdd-HHMMSS-sha,
-          # so reverse lexicographic order is reverse chronological order,
-          # and two releases made in the same second still sort correctly.
+          # so reverse lexicographic order is reverse chronological, and two
+          # releases in the same second still sort correctly.
           cd "$HOME/paljonkose/releases"
-          live="$(readlink -f "$HOME/paljonkose/current")"
+          live="$(readlink -f "$APP/files")"
           ls -1d -- */ | sort -r | tail -n +$((KEEP + 1)) | while read -r d; do
-            # Never delete whatever is currently live, whatever the sort says.
-            if [ "$(readlink -f "$d")" = "$live" ]; then continue; fi
+            # Never delete whatever is currently serving, whatever the sort says.
+            [ "$(readlink -f "${d}files")" = "$live" ] && continue
             rm -rf -- "$d"
           done
+
+          echo "live release: $(readlink "$APP/files")"
           REMOTE
 
           echo "Deployed ${GITHUB_SHA::7} to $RELEASE"

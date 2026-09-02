@@ -1,0 +1,1106 @@
+{
+  "generated": "2026-08-27T14:45:50.482Z",
+  "ylityshistoria": {
+    "mediaani": 1.6610644257703082,
+    "otos": 7,
+    "hankkeet": [
+      {
+        "label": "Rantatunneli",
+        "suhde": 0.978
+      },
+      {
+        "label": "Raide-Jokeri",
+        "suhde": 1.404
+      },
+      {
+        "label": "Apotti",
+        "suhde": 1.581
+      },
+      {
+        "label": "Länsimetro, 1. vaihe",
+        "suhde": 1.661
+      },
+      {
+        "label": "Olympiastadionin remontti",
+        "suhde": 1.711
+      },
+      {
+        "label": "Olkiluoto 3",
+        "suhde": 1.813
+      },
+      {
+        "label": "Kruunusillat",
+        "suhde": 2.105
+      }
+    ]
+  },
+  "vakiluku": 5600000,
+  "vakilukuSource": {
+    "name": "Tilastokeskus — StatFin (PxWeb API)",
+    "api": "https://pxdata.stat.fi/PxWeb/api/v1/fi/StatFin",
+    "docs": "https://stat.fi/fi/palvelut/tilastodatapalvelut/avoin-data-ja-rajapinnat/tietokantojen-rajapintakaytto",
+    "licence": "CC BY 4.0",
+    "kind": "api",
+    "retrieved": null
+  },
+  "scopes": {
+    "valtio": {
+      "id": "valtio",
+      "label": "Valtio",
+      "vakiluku": 5600000,
+      "label_en": "State"
+    },
+    "helsinki": {
+      "id": "helsinki",
+      "label": "Helsinki",
+      "vakiluku": 680000,
+      "label_en": "Helsinki"
+    },
+    "tampere": {
+      "id": "tampere",
+      "label": "Tampere",
+      "vakiluku": 260000,
+      "label_en": "Tampere"
+    },
+    "turku": {
+      "id": "turku",
+      "label": "Turku",
+      "vakiluku": 200000,
+      "label_en": "Turku"
+    },
+    "oulu": {
+      "id": "oulu",
+      "label": "Oulu",
+      "vakiluku": 215000,
+      "label_en": "Oulu"
+    },
+    "tuleva": {
+      "id": "tuleva",
+      "label": "Suunnitteilla",
+      "vakiluku": 5600000,
+      "label_en": "Planned"
+    },
+    "uusimaa": {
+      "id": "uusimaa",
+      "label": "Uusimaa",
+      "vakiluku": 1750000,
+      "label_en": "Uusimaa"
+    }
+  },
+  "vakilukuLahde": {
+    "name": "Tilastokeskus — Kuntien avainluvut",
+    "api": "https://pxdata.stat.fi/PxWeb/api/v1/fi/Kuntien_avainluvut",
+    "docs": "https://stat.fi/fi/palvelut/tilastodatapalvelut/tilastotietokannat/kuntien-avainluvut",
+    "licence": "CC BY 4.0",
+    "kind": "api"
+  },
+  "items": [
+    {
+      "id": "pma",
+      "scope": "valtio",
+      "label": "Ukraina: aseapu",
+      "amount": 3400000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Ukraine: military aid",
+      "note_en": "cumulative 2022–5/2026, 33 packages",
+      "vakiluku": 5600000,
+      "note": "kertymä 2022–5/2026, 33 pakettia",
+      "status": "kasin",
+      "source": {
+        "name": "Puolustusministeriö — tiedotteet puolustustarvikeavusta",
+        "api": null,
+        "docs": "https://www.defmin.fi/",
+        "licence": "julkinen tiedote",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hum",
+      "scope": "valtio",
+      "label": "Ukraina: siviiliapu",
+      "amount": 1200000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Ukraine: civilian aid",
+      "note_en": "cumulative, incl. reception costs",
+      "vakiluku": 5600000,
+      "note": "kertymä, sis. vastaanottokuluja",
+      "status": "kasin",
+      "source": {
+        "name": "Ulkoministeriö — Ukrainan tukitilastot",
+        "api": null,
+        "docs": "https://um.fi/",
+        "licence": "julkinen tiedote",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "f35",
+      "scope": "valtio",
+      "label": "hävittäjät",
+      "amount": 1400000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "fighter jets",
+      "note_en": "2026 budget",
+      "vakiluku": 5600000,
+      "note": "talousarvio 2026",
+      "status": "varaluku",
+      "source": {
+        "name": "Valtiokonttori — Valtion talous -API",
+        "api": "https://api.tutkihallintoa.fi/talous/v1/luvut",
+        "docs": "https://avoindata.tutkihallintoa.fi/apis",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "pmh",
+      "scope": "valtio",
+      "label": "puolustushankinnat",
+      "amount": 1500000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "defence procurement",
+      "note_en": "2026 budget",
+      "vakiluku": 5600000,
+      "note": "talousarvio 2026",
+      "status": "varaluku",
+      "source": {
+        "name": "Valtiokonttori — Valtion talous -API",
+        "api": "https://api.tutkihallintoa.fi/talous/v1/luvut",
+        "docs": "https://avoindata.tutkihallintoa.fi/apis",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "pvtm",
+      "scope": "valtio",
+      "label": "Puolustusvoimat",
+      "amount": 2600000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Defence Forces",
+      "note_en": "operating expenses 2026",
+      "vakiluku": 5600000,
+      "note": "toimintamenot 2026",
+      "status": "varaluku",
+      "source": {
+        "name": "Valtiokonttori — Valtion talous -API",
+        "api": "https://api.tutkihallintoa.fi/talous/v1/luvut",
+        "docs": "https://avoindata.tutkihallintoa.fi/apis",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "koko",
+      "scope": "valtio",
+      "label": "koko valtion budjetti",
+      "amount": 91300000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "the entire state budget",
+      "note_en": "2026 budget",
+      "vakiluku": 5600000,
+      "note": "talousarvio 2026",
+      "status": "kasin",
+      "source": {
+        "name": "Valtiokonttori — Valtion talous -API",
+        "api": "https://api.tutkihallintoa.fi/talous/v1/luvut",
+        "docs": "https://avoindata.tutkihallintoa.fi/apis",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-budjetti",
+      "scope": "helsinki",
+      "label": "Helsingin budjetti",
+      "amount": 6000000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Helsinki city budget",
+      "note_en": "operating budget — VERIFY year and figure",
+      "vakiluku": 680000,
+      "note": "käyttötalous — TARKISTA vuosi ja luku",
+      "status": "kasin",
+      "source": {
+        "name": "Tilastokeskus — Kuntien ja kuntayhtymien raportoimat taloustiedot",
+        "api": "https://pxdata.stat.fi/PxWeb/api/v1/fi/Kuntien_talous",
+        "docs": "https://pxdata.stat.fi/PXWeb/pxweb/fi/",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-lansimetro",
+      "scope": "helsinki",
+      "label": "Länsimetro, 1. vaihe",
+      "amount": 1186000000,
+      "arvio": 714000000,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "West Metro, phase 1",
+      "note_en": "Ruoholahti–Matinkylä; the 2008 estimate approved by the councils was 714 M€",
+      "vakiluku": 680000,
+      "note": "Ruoholahti–Matinkylä; valtuustojen hyväksymä arvio 2008 oli 714 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-kruunusillat",
+      "scope": "helsinki",
+      "label": "Kruunusillat",
+      "amount": 800000000,
+      "arvio": 380000000,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Crown Bridges",
+      "note_en": "tram link to Laajasalo; cost doubled in 2021",
+      "vakiluku": 680000,
+      "note": "raitiotieyhteys Laajasaloon; hinta kaksinkertaistui 2021",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-jokeri",
+      "scope": "helsinki",
+      "label": "Raide-Jokeri",
+      "amount": 386000000,
+      "arvio": 275000000,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Jokeri Light Rail",
+      "note_en": "Helsinki 268 M€ + Espoo 118 M€; 2016 estimate was 275 M€",
+      "vakiluku": 680000,
+      "note": "Helsinki 268 M€ + Espoo 118 M€; arvio 2016 oli 275 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-stadion",
+      "scope": "helsinki",
+      "label": "Olympiastadionin remontti",
+      "amount": 337000000,
+      "arvio": 197000000,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Olympic Stadium renovation",
+      "note_en": "final cost 337 M€; according to the National Audit Office the estimate was 197 M€",
+      "vakiluku": 680000,
+      "note": "lopullinen hinta 337 M€, VTV:n mukaan arvio oli 197 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-oodi",
+      "scope": "helsinki",
+      "label": "Oodi",
+      "amount": 98000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Oodi",
+      "note_en": "central library, completed 2018 — VERIFY",
+      "vakiluku": 680000,
+      "note": "keskustakirjasto, valmistui 2018 — TARKISTA",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tre-budjetti",
+      "scope": "tampere",
+      "label": "Tampereen budjetti",
+      "amount": 1500000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Tampere city budget",
+      "note_en": "operating budget — VERIFY year and figure",
+      "vakiluku": 260000,
+      "note": "käyttötalous — TARKISTA vuosi ja luku",
+      "status": "kasin",
+      "source": {
+        "name": "Tilastokeskus — Kuntien ja kuntayhtymien raportoimat taloustiedot",
+        "api": "https://pxdata.stat.fi/PxWeb/api/v1/fi/Kuntien_talous",
+        "docs": "https://pxdata.stat.fi/PXWeb/pxweb/fi/",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tre-ratikka",
+      "scope": "tampere",
+      "label": "Ratikka, osa 1",
+      "amount": 240000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Tram, part 1",
+      "note_en": "Hervanta–centre–Tays; state share 71 M€",
+      "vakiluku": 260000,
+      "note": "Hervanta–keskusta–Tays; valtion osuus 71 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tre-ratikka2",
+      "scope": "tampere",
+      "label": "Ratikka, osa 2",
+      "amount": 44000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Tram, part 2",
+      "note_en": "centre–Hiedanranta–Lentävänniemi, 2016 estimate",
+      "vakiluku": 260000,
+      "note": "keskusta–Hiedanranta–Lentävänniemi, arvio 2016",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tre-vaunut",
+      "scope": "tampere",
+      "label": "Ratikkavaunut",
+      "amount": 81000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Tram vehicles",
+      "note_en": "rolling stock, 2016 estimate",
+      "vakiluku": 260000,
+      "note": "kalustohankinta, arvio 2016",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tre-tunneli",
+      "scope": "tampere",
+      "label": "Rantatunneli",
+      "amount": 176000000,
+      "arvio": 180000000,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Rantatunneli",
+      "note_en": "Finland's longest road tunnel; came in 4.1 M€ UNDER its target cost",
+      "vakiluku": 260000,
+      "note": "Suomen pisin maantietunneli; tavoitekustannus ALITTUI 4,1 M€:lla",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tre-areena",
+      "scope": "tampere",
+      "label": "Kansi ja Areena",
+      "amount": 550000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Deck and Arena",
+      "note_en": "whole project; the city's share is smaller — VERIFY",
+      "vakiluku": 260000,
+      "note": "koko hanke, kaupungin osuus pienempi — TARKISTA",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tku-budjetti",
+      "scope": "turku",
+      "label": "Turun budjetti",
+      "amount": 1200000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Turku city budget",
+      "note_en": "operating budget — VERIFY year and figure",
+      "vakiluku": 200000,
+      "note": "käyttötalous — TARKISTA vuosi ja luku",
+      "status": "kasin",
+      "source": {
+        "name": "Tilastokeskus — Kuntien ja kuntayhtymien raportoimat taloustiedot",
+        "api": "https://pxdata.stat.fi/PxWeb/api/v1/fi/Kuntien_talous",
+        "docs": "https://pxdata.stat.fi/PXWeb/pxweb/fi/",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tku-ratikka",
+      "scope": "turku",
+      "label": "Turun raitiotie",
+      "amount": 300000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Turku tram",
+      "note_en": "project estimate — VERIFY",
+      "vakiluku": 200000,
+      "note": "hankearvio — TARKISTA",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "oul-budjetti",
+      "scope": "oulu",
+      "label": "Oulun budjetti",
+      "amount": 1300000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Oulu city budget",
+      "note_en": "operating budget — VERIFY year and figure",
+      "vakiluku": 215000,
+      "note": "käyttötalous — TARKISTA vuosi ja luku",
+      "status": "kasin",
+      "source": {
+        "name": "Tilastokeskus — Kuntien ja kuntayhtymien raportoimat taloustiedot",
+        "api": "https://pxdata.stat.fi/PxWeb/api/v1/fi/Kuntien_talous",
+        "docs": "https://pxdata.stat.fi/PXWeb/pxweb/fi/",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "apotti",
+      "scope": "uusimaa",
+      "label": "Apotti",
+      "amount": 626000000,
+      "arvio": 396000000,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Apotti",
+      "note_en": "HUS audit committee 2022: 625.6 M€, 229.5 M€ above the original estimate; the main cause was a user count 41 % higher than forecast",
+      "vakiluku": 1750000,
+      "note": "HUSin tarkastuslautakunta 2022: 625,6 M€, 229,5 M€ yli alkuperäisen arvion; suurin syy oli 41 % arvioitua suurempi käyttäjämäärä",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "ol3",
+      "scope": "tuleva",
+      "label": "Olkiluoto 3",
+      "amount": 5800000000,
+      "arvio": 3200000000,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": true,
+      "label_en": "Olkiluoto 3",
+      "note_en": "TVO's investment 5.8 bn €; the 2002 contract price was 3.2 bn €. Total cost including the supplier's losses has been estimated at about 11 bn €. NOT public money — included for comparison only",
+      "vakiluku": 5600000,
+      "note": "TVO:n investointi 5,8 mrd €; sopimushinta 2002 oli 3,2 mrd €. Kokonaiskustannus laitostoimittajan tappiot mukaan lukien on arvioitu n. 11 mrd €:ksi. EI julkista rahaa — mukana vain vertailukohtana",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "lansirata",
+      "scope": "tuleva",
+      "label": "Länsirata (Turun tunnin juna)",
+      "amount": 3400000000,
+      "arvio": null,
+      "tuleva": true,
+      "paatos": "ratahankkeet",
+      "vainRekisteri": false,
+      "label_en": "Western Railway (Turku one-hour train)",
+      "note_en": "preliminary estimate, 2022 price level; nominal value 4.82 bn €; benefit-cost ratio 0.44",
+      "vakiluku": 5600000,
+      "note": "alustava arvio, v. 2022 hintataso; nimellisarvo 4,82 mrd €; hyöty-kustannussuhde 0,44",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "lentorata",
+      "scope": "tuleva",
+      "label": "Lentorata",
+      "amount": 2700000000,
+      "arvio": null,
+      "tuleva": true,
+      "paatos": "ratahankkeet",
+      "vainRekisteri": false,
+      "label_en": "Airport Rail Line",
+      "note_en": "30 km of track, 28 km of it in tunnel; Pasila–airport–Kerava",
+      "vakiluku": 5600000,
+      "note": "30 km rataa, josta 28 km tunnelissa; Pasila–lentoasema–Kerava",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "itarata",
+      "scope": "tuleva",
+      "label": "Itärata",
+      "amount": 1800000000,
+      "arvio": null,
+      "tuleva": true,
+      "paatos": "ratahankkeet",
+      "vainRekisteri": false,
+      "label_en": "Eastern Railway",
+      "note_en": "Helsinki–Porvoo–Kouvola; nominal value 3.48 bn €; preliminary planning under way",
+      "vakiluku": 5600000,
+      "note": "Helsinki–Porvoo–Kouvola; nimellisarvo 3,48 mrd €; esisuunnittelu kesken",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "suomirata",
+      "scope": "tuleva",
+      "label": "Suomi-rata (suurnopeusvaihtoehto)",
+      "amount": 5500000000,
+      "arvio": null,
+      "tuleva": true,
+      "paatos": "ratahankkeet",
+      "vainRekisteri": false,
+      "label_en": "Finland Line (high-speed option)",
+      "note_en": "airport line + new high-speed track; cheaper option 4.0 bn €; planning suspended",
+      "vakiluku": 5600000,
+      "note": "lentorata + uusi suurnopeusrata; halvempi vaihtoehto 4,0 mrd €; suunnittelu keskeytetty",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-lansimetro-ylitys",
+      "scope": "helsinki",
+      "label": "Länsimetro, 1. vaihe: ylitys",
+      "amount": 472000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "West Metro, phase 1: overrun",
+      "note_en": "actual 1186 M€, estimate was 714 M€",
+      "vakiluku": 680000,
+      "note": "toteutunut 1186 M€, arvio oli 714 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-kruunusillat-ylitys",
+      "scope": "helsinki",
+      "label": "Kruunusillat: ylitys",
+      "amount": 420000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Crown Bridges: overrun",
+      "note_en": "actual 800 M€, estimate was 380 M€",
+      "vakiluku": 680000,
+      "note": "toteutunut 800 M€, arvio oli 380 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-jokeri-ylitys",
+      "scope": "helsinki",
+      "label": "Raide-Jokeri: ylitys",
+      "amount": 111000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Jokeri Light Rail: overrun",
+      "note_en": "actual 386 M€, estimate was 275 M€",
+      "vakiluku": 680000,
+      "note": "toteutunut 386 M€, arvio oli 275 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "hki-stadion-ylitys",
+      "scope": "helsinki",
+      "label": "Olympiastadionin remontti: ylitys",
+      "amount": 140000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Olympic Stadium renovation: overrun",
+      "note_en": "actual 337 M€, estimate was 197 M€",
+      "vakiluku": 680000,
+      "note": "toteutunut 337 M€, arvio oli 197 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "tre-tunneli-ylitys",
+      "scope": "tampere",
+      "label": "Rantatunneli: alitus",
+      "amount": 4000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Rantatunneli: under budget",
+      "note_en": "estimate was 180 M€, actual 176 M€ — the project came in under budget",
+      "vakiluku": 260000,
+      "note": "arvio oli 180 M€, toteutunut 176 M€ — hanke alitti budjettinsa",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    },
+    {
+      "id": "apotti-ylitys",
+      "scope": "uusimaa",
+      "label": "Apotti: ylitys",
+      "amount": 230000000,
+      "arvio": null,
+      "tuleva": false,
+      "paatos": null,
+      "vainRekisteri": false,
+      "label_en": "Apotti: overrun",
+      "note_en": "actual 626 M€, estimate was 396 M€",
+      "vakiluku": 1750000,
+      "note": "toteutunut 626 M€, arvio oli 396 M€",
+      "status": "kasin",
+      "source": {
+        "name": "Hankepäätös, tilinpäätös tai VTV:n tarkastuskertomus",
+        "api": null,
+        "docs": null,
+        "licence": "julkinen asiakirja",
+        "kind": "manual",
+        "retrieved": null
+      }
+    }
+  ],
+  "paaluokat": [
+    {
+      "id": "33",
+      "label": "Sosiaali- ja terveysministeriö",
+      "amount": 30000000000,
+      "note": "sis. hyvinvointialueiden rahoituksen",
+      "status": "kasin",
+      "label_en": "Ministry of Social Affairs and Health",
+      "note_en": "incl. funding for the wellbeing services counties"
+    },
+    {
+      "id": "28",
+      "label": "Valtiovarainministeriö",
+      "amount": 22500000000,
+      "note": "sis. kuntien valtionosuudet ja EU-maksut",
+      "status": "kasin",
+      "label_en": "Ministry of Finance",
+      "note_en": "incl. central government transfers to municipalities and EU payments"
+    },
+    {
+      "id": "29",
+      "label": "Opetus- ja kulttuuriministeriö",
+      "amount": 8200000000,
+      "note": "",
+      "status": "kasin",
+      "label_en": "Ministry of Education and Culture",
+      "note_en": ""
+    },
+    {
+      "id": "27",
+      "label": "Puolustusministeriö",
+      "amount": 6400000000,
+      "note": "",
+      "status": "kasin",
+      "label_en": "Ministry of Defence",
+      "note_en": ""
+    },
+    {
+      "id": "32",
+      "label": "Työ- ja elinkeinoministeriö",
+      "amount": 3600000000,
+      "note": "",
+      "status": "kasin",
+      "label_en": "Ministry of Economic Affairs and Employment",
+      "note_en": ""
+    },
+    {
+      "id": "31",
+      "label": "Liikenne- ja viestintäministeriö",
+      "amount": 3500000000,
+      "note": "",
+      "status": "kasin",
+      "label_en": "Ministry of Transport and Communications",
+      "note_en": ""
+    },
+    {
+      "id": "36",
+      "label": "Valtionvelan korot",
+      "amount": 3500000000,
+      "note": "",
+      "status": "kasin",
+      "label_en": "Interest on central government debt",
+      "note_en": ""
+    },
+    {
+      "id": "30",
+      "label": "Maa- ja metsätalousministeriö",
+      "amount": 2700000000,
+      "note": "",
+      "status": "kasin",
+      "label_en": "Ministry of Agriculture and Forestry",
+      "note_en": ""
+    },
+    {
+      "id": "26",
+      "label": "Sisäministeriö",
+      "amount": 1900000000,
+      "note": "",
+      "status": "kasin",
+      "label_en": "Ministry of the Interior",
+      "note_en": ""
+    },
+    {
+      "id": "24",
+      "label": "Ulkoministeriö",
+      "amount": 1400000000,
+      "note": "sis. kehitysyhteistyön",
+      "status": "kasin",
+      "label_en": "Ministry for Foreign Affairs",
+      "note_en": "incl. development cooperation"
+    },
+    {
+      "id": "25",
+      "label": "Oikeusministeriö",
+      "amount": 1100000000,
+      "note": "",
+      "status": "kasin",
+      "label_en": "Ministry of Justice",
+      "note_en": ""
+    },
+    {
+      "id": "muu",
+      "label": "Muut pääluokat",
+      "amount": 6500000000,
+      "note": "",
+      "status": "kasin",
+      "label_en": "Other main classes",
+      "note_en": ""
+    }
+  ],
+  "units": [
+    {
+      "id": "ruoka",
+      "label": "viikon ruokaostosta",
+      "cost": 150,
+      "note": "perhe, viikko",
+      "status": "arvio",
+      "source": {
+        "name": "Oma laskelma julkisista tilastoista",
+        "api": null,
+        "docs": null,
+        "licence": "suuruusluokka-arvio",
+        "kind": "estimate",
+        "retrieved": null
+      },
+      "label_en": "weekly grocery shops",
+      "note_en": "family, one week"
+    },
+    {
+      "id": "lapsi",
+      "label": "lapsilisää vuodeksi",
+      "cost": 1500,
+      "note": "yksi lapsi",
+      "status": "arvio",
+      "source": {
+        "name": "Oma laskelma julkisista tilastoista",
+        "api": null,
+        "docs": null,
+        "licence": "suuruusluokka-arvio",
+        "kind": "estimate",
+        "retrieved": null
+      },
+      "label_en": "years of child benefit",
+      "note_en": "one child"
+    },
+    {
+      "id": "palkka",
+      "label": "kuukauden palkkaa",
+      "cost": 3600,
+      "note": "mediaaniansio, brutto",
+      "status": "varaluku",
+      "source": {
+        "name": "Tilastokeskus — StatFin (PxWeb API)",
+        "api": "https://pxdata.stat.fi/PxWeb/api/v1/fi/StatFin",
+        "docs": "https://stat.fi/fi/palvelut/tilastodatapalvelut/avoin-data-ja-rajapinnat/tietokantojen-rajapintakaytto",
+        "licence": "CC BY 4.0",
+        "kind": "api",
+        "retrieved": null
+      },
+      "label_en": "months of salary",
+      "note_en": "median earnings, gross"
+    },
+    {
+      "id": "opp",
+      "label": "oppilasvuotta peruskoulussa",
+      "cost": 10000,
+      "note": "per oppilas",
+      "status": "arvio",
+      "source": {
+        "name": "Oma laskelma julkisista tilastoista",
+        "api": null,
+        "docs": null,
+        "licence": "suuruusluokka-arvio",
+        "kind": "estimate",
+        "retrieved": null
+      },
+      "label_en": "pupil-years of basic education",
+      "note_en": "per pupil"
+    },
+    {
+      "id": "hoit",
+      "label": "hoitajan vuosipalkkaa",
+      "cost": 48000,
+      "note": "palkka + työnantajakulut",
+      "status": "arvio",
+      "source": {
+        "name": "Oma laskelma julkisista tilastoista",
+        "api": null,
+        "docs": null,
+        "licence": "suuruusluokka-arvio",
+        "kind": "estimate",
+        "retrieved": null
+      },
+      "label_en": "nurses' annual salaries",
+      "note_en": "salary plus employer costs"
+    },
+    {
+      "id": "tie",
+      "label": "kilometriä tienkorjausta",
+      "cost": 400000,
+      "note": "päällystetty tie",
+      "status": "arvio",
+      "source": {
+        "name": "Oma laskelma julkisista tilastoista",
+        "api": null,
+        "docs": null,
+        "licence": "suuruusluokka-arvio",
+        "kind": "estimate",
+        "retrieved": null
+      },
+      "label_en": "kilometres of road repair",
+      "note_en": "paved road"
+    },
+    {
+      "id": "pk",
+      "label": "uutta päiväkotia",
+      "cost": 6000000,
+      "note": "n. 100 paikkaa",
+      "status": "arvio",
+      "source": {
+        "name": "Oma laskelma julkisista tilastoista",
+        "api": null,
+        "docs": null,
+        "licence": "suuruusluokka-arvio",
+        "kind": "estimate",
+        "retrieved": null
+      },
+      "label_en": "new daycare centres",
+      "note_en": "approx. 100 places"
+    },
+    {
+      "id": "oodi",
+      "label": "Oodia",
+      "cost": 98000000,
+      "note": "toteutunut rakennuskustannus",
+      "status": "arvio",
+      "source": {
+        "name": "Oma laskelma julkisista tilastoista",
+        "api": null,
+        "docs": null,
+        "licence": "suuruusluokka-arvio",
+        "kind": "estimate",
+        "retrieved": null
+      },
+      "label_en": "Oodi libraries",
+      "note_en": "actual construction cost"
+    }
+  ]
+}
