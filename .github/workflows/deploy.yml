@@ -86,11 +86,13 @@ jobs:
         env:
           SSH_HOST: ${{ secrets.DEPLOY_HOST }}
           SSH_USER: ${{ secrets.DEPLOY_USER }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://paljonkose.fi' }}
         run: |
           set -euo pipefail
           RELEASE="paljonkose/releases/$(date -u +%Y%m%d-%H%M%S)-${GITHUB_SHA::7}"
 
-          ssh -o BatchMode=yes "$SSH_USER@$SSH_HOST" "mkdir -p '$RELEASE/files'"
+          ssh -o BatchMode=yes "$SSH_USER@$SSH_HOST" \
+            "mkdir -p '$RELEASE/files' && mkdir -p ~/paljonkose/releases"
 
           # files/ now contains the freshly built React app under public/
           # (written by the previous step). node_modules is reinstalled on
@@ -109,7 +111,7 @@ jobs:
           # quoting through ssh is the classic place this kind of script
           # breaks.
           ssh -o BatchMode=yes "$SSH_USER@$SSH_HOST" \
-            RELEASE="$RELEASE" KEEP=5 bash -s <<'REMOTE'
+            RELEASE="$RELEASE" KEEP=5 SITE_URL="$SITE_URL" bash -s <<'REMOTE'
           set -euo pipefail
           cd "$HOME/$RELEASE"
 
@@ -134,6 +136,17 @@ jobs:
           if [ -f "$HOME/paljonkose/current/files/.env" ]; then
             cp -p "$HOME/paljonkose/current/files/.env" .env
           fi
+
+          # First deploy into a fresh subscription has nothing to carry
+          # forward. Without SITE_URL the app falls back to localhost and
+          # silently poisons every canonical link and share image, so write
+          # a usable .env rather than shipping that.
+          if ! grep -qE '^SITE_URL=https?://' .env 2>/dev/null; then
+            echo "no usable SITE_URL in .env — writing one from the workflow"
+            printf 'SITE_URL=%s\nNODE_ENV=production\nSTATS_FILE=./stats.json\n' \
+              "$SITE_URL" >> .env
+          fi
+          grep -E '^SITE_URL=' .env
 
           cd ..
           ln -sfn "$HOME/$RELEASE" "$HOME/paljonkose/current.tmp"
