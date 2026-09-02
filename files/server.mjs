@@ -30,9 +30,47 @@ import { PATHS, LANGS, DEFAULT_LANG } from "./i18n-ui.mjs";
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const P = (...xs) => path.join(ROOT, ...xs);
 
+/* Passenger passes only the variables configured in the Plesk panel, so a
+   deploy could not carry its own settings. Loading .env here means config
+   travels with the release. Node 20.12+ has this built in — no dependency.
+   Absent or unreadable .env is fine; process.env still wins over it. */
+try {
+  process.loadEnvFile(P(".env"));
+} catch {
+  // no .env in this release, or it is not readable — fall through to defaults
+}
+
 const PORT  = process.env.PORT || 3000;
-const SITE  = (process.env.SITE_URL || `http://localhost:${PORT}`).replace(/\/$/, "");
 const STATS = process.env.STATS_FILE || "./stats.json";
+
+/* SITE is baked into canonical links, og:url and og:image, so getting it
+   wrong is not cosmetic: it tells search engines the wrong address and makes
+   every shared link preview point somewhere that does not exist. Production
+   ran for months without SITE_URL set, emitting http://localhost:3000 into
+   every share page — hence the loud warning rather than a silent default. */
+const SITE_URL_RAW = (process.env.SITE_URL || "").trim();
+if (!SITE_URL_RAW) {
+  console.warn(
+    "SITE_URL is not set. Falling back to localhost — canonical URLs, " +
+    "og:url and og:image will all be wrong outside local development."
+  );
+} else if (!/^https?:\/\//i.test(SITE_URL_RAW)) {
+  console.warn(`SITE_URL=${SITE_URL_RAW} has no http(s):// scheme and will be ignored.`);
+}
+
+const SITE = (
+  /^https?:\/\//i.test(SITE_URL_RAW) ? SITE_URL_RAW : `http://localhost:${PORT}`
+).replace(/\/$/, "");
+
+/* One address, so the site does not compete with itself in search results.
+   Any other host that reaches this app is redirected to the canonical one. */
+const CANONICAL_HOST = (() => {
+  try {
+    return new URL(SITE).host;
+  } catch {
+    return null;
+  }
+})();
 
 /* ── data, reloadable without a restart ────────────────────────────── */
 let DATA = JSON.parse(await fs.readFile(P("data.json"), "utf8"));
@@ -88,6 +126,26 @@ const bump = (slug, key) => {
 const app = express();
 app.disable("x-powered-by");
 app.use(express.json({ limit: "4kb" }));
+
+/* Redirect every other hostname to the canonical one, before any route runs.
+   paljonkose.kirbac.fi and paljonkose.fi both reach this app and served
+   identical content, which splits search ranking between two addresses.
+
+   Localhost and bare IPs are left alone so development and the server's own
+   health probe keep working, and /healthz is exempt for the same reason —
+   a monitor hitting it by IP should get a body, not a 301. */
+app.use((req, res, next) => {
+  if (!CANONICAL_HOST || req.path === "/healthz") return next();
+
+  const host = (req.headers.host || "").toLowerCase();
+  const isLocal = !host || /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(host) ||
+                  /^\d{1,3}(\.\d{1,3}){3}(:\d+)?$/.test(host);
+
+  if (isLocal || host === CANONICAL_HOST.toLowerCase()) return next();
+
+  res.set("Cache-Control", "public, max-age=3600");
+  return res.redirect(301, `${SITE}${req.originalUrl}`);
+});
 
 /** Slug: {item}-{unit} or {item}-{unit}-{own price}.
  *  The ids can themselves contain a hyphen (tre-ratikka), so instead of
@@ -165,7 +223,11 @@ app.get("/api/top", (req, res) => {
 
 app.get("/api/data", (req, res) => {
   res.set("Cache-Control", "public, max-age=300");
-  res.json(DATA);
+  /* `site` is the canonical address, so the browser can build share links
+     that always point at it. Without this the frontend can only use
+     location.origin, and a reader who arrived on an alternate hostname
+     would copy links pointing back at that alternate. */
+  res.json({ ...DATA, site: SITE });
 });
 
 /** Call this once fetch-data.mjs has run (cron / systemd timer). */

@@ -12,11 +12,13 @@ name: Deploy to production
 #   - node comes from nodenv; it resolves the version from a .node-version
 #     file at the release root (sibling of files/, not inside it) — "22"
 #     is what the current release uses
-#   - paljonkose.fi did not resolve from the server yet; the address that
-#     actually answers is https://paljonkose.kirbac.fi — set a `SITE_URL`
-#     repo variable (Settings → Secrets and variables → Actions →
-#     Variables) once the apex domain's DNS is confirmed live, to point
-#     the health check there instead
+#   - the canonical domain is https://paljonkose.fi. paljonkose.kirbac.fi
+#     still reaches the same app and is 301'd to the canonical host by
+#     server.mjs, so both keep working but only one is indexed
+#   - SITE_URL must be set for the app, or canonical/og:url/og:image fall
+#     back to http://localhost:PORT. It lives in files/.env, which
+#     server.mjs loads via process.loadEnvFile() and this workflow carries
+#     forward between releases
 #   - files/.bootstrap.cjs is a Plesk-generated Passenger startup shim,
 #     not tracked in git. The first automated deploy shipped a release
 #     without it and took the site down with "Web application could not
@@ -46,7 +48,7 @@ jobs:
     timeout-minutes: 15
     environment: production
     env:
-      HEALTH_URL: ${{ vars.SITE_URL || 'https://paljonkose.kirbac.fi' }}
+      HEALTH_URL: ${{ vars.SITE_URL || 'https://paljonkose.fi' }}
     steps:
       - uses: actions/checkout@v4
 

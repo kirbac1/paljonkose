@@ -77,6 +77,9 @@ export interface Unit {
 
 export interface Dataset {
   generated: string;
+  /** Canonical site URL, supplied by the server so share links never point
+   *  at whichever alternate hostname the reader happened to arrive on. */
+  site?: string;
   vakiluku: number;
   scopes: Record<string, Scope>;
   items: Item[];

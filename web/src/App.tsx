@@ -4,7 +4,7 @@ import { UI, label } from "./i18n";
 import { useData } from "./hooks/useData";
 import { useLang } from "./hooks/useLang";
 import { OWN_ID, bestUnitFor, calculate, comboPath, comparableItems } from "./lib/calc";
-import { eur } from "./lib/format";
+import { eur, num } from "./lib/format";
 import { Calculator } from "./components/Calculator";
 import { ScopeChips } from "./components/ScopeChips";
 import { OwnSum } from "./components/OwnSum";
@@ -77,9 +77,15 @@ export default function App() {
     // Every real calculation has its own, server-rendered page (same
     // figures, correct og:image) — share that, not the homepage's
     // generic address, which wouldn't say what the reader was just looking at.
+    //
+    // The origin comes from the server's canonical `site`, not from
+    // location.origin: the app answers on more than one hostname, and a
+    // reader who arrived on an alternate one would otherwise copy a link
+    // back to that alternate.
+    const origin = (data.site ?? window.location.origin).replace(/\/$/, "");
     const path = comboPath(calc, lang);
-    const url = path ? `${window.location.origin}${path}` : window.location.href;
-    const text = `${eur(calc.item.amount, lang)} = ${calc.count} ${
+    const url = path ? `${origin}${path}` : window.location.href;
+    const text = `${eur(calc.item.amount, lang)} = ${num(calc.count, lang)} ${
       label(calc.unit, lang)} — ${url}`;
     try {
       await navigator.clipboard.writeText(text);
@@ -88,7 +94,7 @@ export default function App() {
       setShareLabel(t.copyFailed);
     }
     window.setTimeout(() => setShareLabel(t.copy), 2000);
-  }, [calc, lang, t]);
+  }, [calc, lang, t, data.site]);
 
   const budget = all.find(i => i.id === "koko")?.amount ?? 91_300_000_000;
 
