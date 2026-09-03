@@ -1,10 +1,9 @@
 import { useCallback, useMemo, useState } from "react";
 import type { Item } from "./types";
-import { UI, label } from "./i18n";
+import { UI } from "./i18n";
 import { useData } from "./hooks/useData";
 import { useLang } from "./hooks/useLang";
 import { OWN_ID, bestUnitFor, calculate, comboPath, comparableItems } from "./lib/calc";
-import { eur, num } from "./lib/format";
 import { Calculator } from "./components/Calculator";
 import { ScopeChips } from "./components/ScopeChips";
 import { OwnSum } from "./components/OwnSum";
@@ -85,10 +84,13 @@ export default function App() {
     const origin = (data.site ?? window.location.origin).replace(/\/$/, "");
     const path = comboPath(calc, lang);
     const url = path ? `${origin}${path}` : window.location.href;
-    const text = `${eur(calc.item.amount, lang)} = ${num(calc.count, lang)} ${
-      label(calc.unit, lang)} — ${url}`;
+
+    // The clipboard gets the bare URL and nothing else. A sentence with the
+    // link buried at the end cannot be pasted into an address bar, and some
+    // apps decline to turn it into a link at all. The figures are already on
+    // the page being linked to, and in its share image.
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(url);
       setShareLabel(t.copied);
     } catch {
       setShareLabel(t.copyFailed);

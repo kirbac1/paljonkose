@@ -118,16 +118,12 @@ describe("App", () => {
   });
 });
 
-/* The share button has now been wrong twice: once linking to the homepage
-   instead of the calculation, once copying whichever hostname the reader
-   happened to be on. Both are silent failures — the button says "Copied ✓"
-   either way — so they are pinned here. */
+/* The share button has now been wrong four times: linking to the homepage
+   instead of the calculation; copying whichever hostname the reader happened
+   to be on; dumping an unformatted integer; and putting a whole sentence on
+   the clipboard so the result could not be pasted as a link. Every one of
+   them failed silently — the button says "Kopioitu ✓" regardless. */
 describe("share button", () => {
-  /** Click share and return what landed on the clipboard.
-   *
-   * userEvent installs its own clipboard stub during setup(), so rather than
-   * fighting it we let it win and read the value back out.
-   */
   async function copyShareText(): Promise<string> {
     const user = userEvent.setup();
     render(<App />);
@@ -135,14 +131,17 @@ describe("share button", () => {
     return navigator.clipboard.readText();
   }
 
-  it("links to the calculation's own page, not the homepage", async () => {
-    expect(await copyShareText()).toMatch(/\/p\/[a-z0-9-]+\//);
+  it("copies a bare URL and nothing else", async () => {
+    const copied = await copyShareText();
+
+    // Must survive being pasted straight into an address bar: no prose, no
+    // whitespace, parseable as a URL on its own.
+    expect(copied).not.toMatch(/\s/);
+    expect(() => new URL(copied)).not.toThrow();
+    expect(new URL(copied).protocol).toMatch(/^https?:$/);
   });
 
-  it("formats the count rather than dumping a raw integer", async () => {
-    const text = await copyShareText();
-    // fi-FI groups thousands, so a large count must not appear as bare digits.
-    // "22666666" is the regression; "22 666 666" is correct.
-    expect(text.replace(/https?:\/\/\S+/g, "")).not.toMatch(/\b\d{5,}\b/);
+  it("links to the calculation's own page, not the homepage", async () => {
+    expect(new URL(await copyShareText()).pathname).toMatch(/^\/p\/[a-z0-9-]+\/$/);
   });
 });
