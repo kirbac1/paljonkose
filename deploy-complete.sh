@@ -3,8 +3,9 @@
 
 set -e
 
-DEPLOY_USER="kirbac.fi_8idtpygek3v"
-DEPLOY_HOST="135.125.233.39"
+# Server details stay out of the repo; export them before running this.
+DEPLOY_USER="${DEPLOY_USER:?set DEPLOY_USER to the SSH user}"
+DEPLOY_HOST="${DEPLOY_HOST:?set DEPLOY_HOST to the server address}"
 DEPLOY_KEY="deploy_key"
 APP_ROOT="~/paljonkose"
 

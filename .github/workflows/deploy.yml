@@ -27,6 +27,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# The deploy authenticates to the server with its own SSH key, so the
+# GITHUB_TOKEN only ever needs to read the repo.
+permissions:
+  contents: read
+
 # Never let two deploys race — cancelling mid-rsync would leave a
 # half-written release, and two npm ci's on the same release would stomp
 # on each other.

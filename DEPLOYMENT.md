@@ -14,6 +14,14 @@ This project uses GitHub Actions to automatically deploy to your production serv
 
 ## 📋 Setup Steps
 
+The commands below refer to the server as `$DEPLOY_USER@$DEPLOY_HOST`. The
+address and username are deliberately not written down in this public repo —
+export them first, from the same values you put in the GitHub secrets:
+
+```bash
+export DEPLOY_HOST=... DEPLOY_USER=...
+```
+
 ### Step 1: Generate SSH Deployment Key
 
 On your **local machine**, generate a dedicated SSH key for GitHub Actions:
@@ -26,12 +34,16 @@ This creates two files:
 - `deploy_key` (private key - for GitHub)
 - `deploy_key.pub` (public key - for your server)
 
+> ⚠️ The private key must never be committed. `.gitignore` covers `deploy_key`,
+> but generate it outside the working tree if you can — an earlier version of
+> this repo did commit one, and a public repo's history keeps it forever.
+
 ### Step 2: Add Public Key to Server
 
 SSH into your production server and add the public key to authorize GitHub Actions:
 
 ```bash
-ssh kirbac.fi_8idtpygek3v@135.125.233.39
+ssh $DEPLOY_USER@$DEPLOY_HOST
 
 # On the server:
 mkdir -p ~/.ssh
@@ -48,7 +60,7 @@ chmod 700 ~/.ssh
 Get your server's SSH host key (needed to prevent man-in-the-middle attacks):
 
 ```bash
-ssh-keyscan -H 135.125.233.39 2>/dev/null
+ssh-keyscan -H "$DEPLOY_HOST" 2>/dev/null
 ```
 
 Copy the output - you'll need this in the next step.
@@ -60,8 +72,8 @@ Go to your GitHub repository → **Settings** → **Secrets and variables** → 
 | Secret Name | Value |
 |------------|-------|
 | `DEPLOY_SSH_KEY` | Contents of `deploy_key` (private key) |
-| `DEPLOY_HOST` | `135.125.233.39` |
-| `DEPLOY_USER` | `kirbac.fi_8idtpygek3v` |
+| `DEPLOY_HOST` | the server address |
+| `DEPLOY_USER` | the SSH user |
 | `DEPLOY_KNOWN_HOSTS` | Output from ssh-keyscan (optional but recommended) |
 
 ### Step 5: Set Up Server Directory Structure
@@ -92,7 +104,7 @@ PORT=3001 SITE_URL=https://your-domain.com node files/server.mjs
 Keep your app running even after you disconnect:
 
 ```bash
-ssh kirbac.fi_8idtpygek3v@135.125.233.39
+ssh $DEPLOY_USER@$DEPLOY_HOST
 
 # Start in a detachable session
 screen -S paljonkose
@@ -112,7 +124,7 @@ screen -r paljonkose
 Deploy the provided startup script:
 
 ```bash
-ssh kirbac.fi_8idtpygek3v@135.125.233.39
+ssh $DEPLOY_USER@$DEPLOY_HOST
 mkdir -p ~/bin
 # Then copy start-app.sh to ~/bin/start-app.sh via SCP or manually
 chmod +x ~/bin/start-app.sh
@@ -126,7 +138,7 @@ chmod +x ~/bin/start-app.sh
 For hands-off operation, run on startup via crontab:
 
 ```bash
-ssh kirbac.fi_8idtpygek3v@135.125.233.39
+ssh $DEPLOY_USER@$DEPLOY_HOST
 crontab -e
 
 # Add this line:
@@ -155,7 +167,7 @@ After your first commit to `main`:
 1. Check GitHub Actions: Go to repo → **Actions** tab → see the deploy workflow run
 2. Check deployed files on server:
    ```bash
-   ssh -i deploy_key kirbac.fi_8idtpygek3v@135.125.233.39
+   ssh -i deploy_key $DEPLOY_USER@$DEPLOY_HOST
    ls ~/paljonkose/releases/
    ls -la ~/paljonkose/current/
    ```
@@ -171,7 +183,7 @@ After your first commit to `main`:
 If something goes wrong, switch back to a previous release:
 
 ```bash
-ssh -i deploy_key kirbac.fi_8idtpygek3v@135.125.233.39
+ssh -i deploy_key $DEPLOY_USER@$DEPLOY_HOST
 
 # List available releases
 ls ~/paljonkose/releases/

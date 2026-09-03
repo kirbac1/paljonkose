@@ -8,6 +8,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Nothing here writes to the repo; checkout is all the token is for.
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true

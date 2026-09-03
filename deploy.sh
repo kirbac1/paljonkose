@@ -4,8 +4,10 @@
 set -euo pipefail
 
 REPO_URL="https://github.com/kirbac1/paljonkose"
-DEPLOY_HOST="135.125.233.39"
-DEPLOY_USER="kirbac.fi_8idtpygek3v"
+# Server details stay out of the repo; export them or keep them in an
+# untracked file you source before running this.
+DEPLOY_HOST="${DEPLOY_HOST:?set DEPLOY_HOST to the server address}"
+DEPLOY_USER="${DEPLOY_USER:?set DEPLOY_USER to the SSH user}"
 APP_ROOT="/srv/paljonkose"
 
 echo "📋 Paljonkose Deployment Helper"
@@ -29,8 +31,8 @@ case $choice in
     echo ""
     echo "Required secrets:"
     echo "  - DEPLOY_SSH_KEY (your private SSH key)"
-    echo "  - DEPLOY_HOST (135.125.233.39)"
-    echo "  - DEPLOY_USER (kirbac.fi_8idtpygek3v)"
+    echo "  - DEPLOY_HOST (the server address)"
+    echo "  - DEPLOY_USER (the SSH user)"
     echo "  - DEPLOY_KNOWN_HOSTS (optional but recommended)"
     ;;
   2)

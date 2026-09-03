@@ -29,7 +29,7 @@ Watch the deployment: `https://github.com/kirbac1/paljonkose/actions`
 After first deployment succeeds, SSH to your server:
 
 ```bash
-ssh -i deploy_key kirbac.fi_8idtpygek3v@135.125.233.39
+ssh -i deploy_key $DEPLOY_USER@$DEPLOY_HOST
 
 # Navigate to the current release
 cd ~/paljonkose/current
